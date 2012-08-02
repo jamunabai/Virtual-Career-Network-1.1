@@ -1,0 +1,389 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module for showing a step by step navigation
+ * in a block.  Used to direct the user systematically
+ * toward their "best fit" job.
+ */
+
+// function used to skip a step, used later in the code
+function skip_this($nextItem)
+  {
+  $_SESSION['skipped'][$nextItem]=1;
+  echo "<script type=\"text/javascript\">location.reload(true);</script>";
+  }
+
+
+/**
+ * Implementation of hook_block
+ */
+function hvcp_map_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "Where Do I Go From Here?" when you list blocks in admin mode
+    $blocks[0]['info']=t('Where Do I Go From Here?');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "Where Do I Go From Here?"
+    $blocks['subject']=t('Where Do I Go From Here?');
+
+    // get some globals we need...
+    global $user;
+    $base_url = base_path();
+    $base_url = substr_replace($base_url ,"",-1);
+
+    // next, set the form
+    $content .= "<a href=\"".base_path()."educationmatch\" style=\"outline:none; border:none;\">";
+    $content .= "<img height=\"38\" width=\"227\" style=\"margin-left:23px; margin-top:-9px;\" src=\"".base_path()."sites/all/modules/custom/vcn/hvcp_map/btn_match_education_to_careers.png\" title=\"Match Your Education to a Healthcare Career\" alt=\"Match Your Education to a Healthcare Career\">";
+    $content .= "</a><br /><br />";
+    $content .= "<a href=\"".base_path()."interest-profiler\" style=\"outline:none; border:none;\">";
+    $content .= "<img height=\"38\" width=\"227\" style=\"margin-left:23px;\" src=\"".base_path()."sites/all/modules/custom/vcn/hvcp_map/Match-your-interests-to-careers_caps_240.png\" title=\"Take a Short Quiz and Match Your Current Interests to a Healthcare Career\" alt=\"Take a Short Quiz and Match Your Current Interests to a Healthcare Career\">";
+    $content .= "</a><br /><br />";
+    $content .= "<a href=\"".$base_url."/jobseekers\" style=\"outline:none; border:none;\">";
+    $content .= "<img height=\"38\" width=\"227\" style=\"margin-left:23px\" src=\"".base_path()."sites/all/modules/custom/vcn/hvcp_map/gateway-to-careers.png\" title=\"Unlock your potential with an online Job Seekers Guide\" alt=\"Unlock your potential with an online Job Seekers Guide\">";    
+    $content .= "</a>";
+/***
+ * Code commented out for now.  Remove all slash/star blocks at the far-left beginning of the lines.
+ **
+    // array of completed steps
+    $completed_array=array();
+
+    // array of steps to do
+    $todo_array=array();
+
+    //extracting database info
+    $dbpull .= hvcp_get_db_url();
+    $tempArr1=explode("/",$dbpull);
+    $tempArr2=explode(":",$tempArr1[2]);
+    $dbuser=$tempArr2[0];
+    $tempArr3=explode("@",$tempArr2[1]);
+    $dbpass=$tempArr3[0];
+    $dbserver=$tempArr3[1].":3306";
+    unset($tempArr1,$tempArr2,$tempArr3);
+
+    //$content .= "database server is $dbserver <br />";
+
+    //For now, until we get the REST server set up, we'll just pull the data directly from the database
+    $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+      or die("Error making database connection: ".mysql_error());
+    $db=mysql_select_db('hvcp',$connection)
+      or die("Error selecting database: ".mysql_error());
+
+    /**
+     * the skipped section is for any steps that the user chooses to skip for now
+     */
+/*
+    // $_SESSION['skipped'] is for when a step is skipped
+    if(!isset($_SESSION['skipped'])) $_SESSION['skipped']=array();
+    $skipped=$_SESSION['skipped'];
+
+    // looking for new skipItem to add to skipped array
+    if(isset($_POST['skipItem']))
+      {
+      // First, we need to see if we need to reset the skipped array...
+      if($_POST['skipItem']=="RESET")
+        {
+        $skipped=array();
+        $_SESSION['skipped']=array();
+        }
+      else // there is something to add to the skipped array...
+        {
+        //$doneAlready is used to determine if this item has already been added to the skipped array
+        $doneAlready=0;
+        foreach($_SESSION['skipped'] as $skipItem=>$value)
+          {
+          if($skipItem==$_POST['skipItem']) $doneAlready=1;
+          }
+        if($doneAlready==0)
+          {
+          $skipped[$_POST['skipItem']]=1;
+          $_SESSION['skipped']=$skipped;
+          }
+        }
+      }
+
+    /**
+     * Get the VCN's CMA ID, which is the session ID, if the user isn't logged in.
+     * If the user is logged in, get it from the database
+     */
+/*
+    if($user->uid == 0)
+      {
+      $uid=session_id();
+      if($uid=="")
+        {
+        $uid=$_COOKIE[session_name()];
+        }
+      }
+    else $uid=$user->uid;
+    //$content .= "UID is $uid <br />";
+
+    $query="SELECT USER_ID
+            FROM   vcn_cma_user
+            WHERE  `USER_SESSION_ID`='$uid'";
+    $result=mysql_query($query)
+      or die("Error selecting USER_ID: ".mysql_error());
+    if($row=mysql_fetch_assoc($result))
+      {
+      extract($row);
+      //$content .= "USER_ID is $USER_ID<br />";
+      }
+    else
+      {
+      //$content .= "VCN USER_ID DOES NOT EXIST!!!<br />";
+      }
+
+    /**
+     * Here, we go through each step, and determine if it is done or not
+     */
+/*
+    // first, if user is logged in
+    if($user->uid==0)$todo_array[]="LOGIN";
+    else $completed_array[]="LOGIN";
+
+    // See if the user has finished the interest assessment
+    $query="SELECT count(QUESTION_ID) as qCount
+            FROM   vcn_cma_user_assessment
+            WHERE  USER_ID=\"$USER_ID\"
+            AND    QUESTION_ID <= 60";
+    $result=mysql_query($query)
+      or die("Error running query \"$query\". Error message is: ".mysql_error());
+    $row=mysql_fetch_assoc($result);
+    extract($row);
+    if($qCount < 60 && count($_SESSION['assessment_answers']) < 60)$todo_array[]="INTERESTS";
+    else $completed_array[]="INTERESTS";
+
+    // Next, see what completed items the user has in their Career Management Account
+    $query="SELECT ITEM_TYPE,ITEM_RANK,ITEM_ID
+            FROM   vcn_cma_user_notebook
+            WHERE  `USER_ID`='$USER_ID'";
+    //$content .= "query run is $query <br />";
+    $result=mysql_query($query)
+      or die("Select statement $query had errors: ".mysql_error());
+
+    // Add to the completed items array with these results
+    while($row=mysql_fetch_assoc($result))
+      {
+      extract($row);
+      // $testVal is used to determine if the extracted item is already in the completed array
+      $testVal=0;
+      foreach($completed_array as $completed_item)
+        {
+        if($completed_item==$ITEM_TYPE)$testVal=1;
+        }
+      if($testVal==0)$completed_array[]=$ITEM_TYPE;
+      // test for targeting...
+      if($ITEM_TYPE=="OCCUPATION" && $ITEM_RANK==1)
+        {
+        $completed_array[]="TARGET";
+        $item_id=$ITEM_ID;
+        }
+      }
+
+    /**
+     * Anything not in the $completed_array, should be in the todo_array.
+     * Login and Interest profiler were already assigned to the appropriate array,
+     * so we do not check them below.
+     */
+/*
+    $tempArr=array("OCCUPATION","TARGET","PROGRAM","CERTIFICATE","LICENSE");
+    foreach($tempArr as $temp_item)
+      {
+      // $add is used to determine if the item needs to be added to the todo array
+      $add=1;
+      foreach($completed_array as $completed_item)
+        {
+        if($completed_item==$temp_item) $add=0;
+        }
+      if($add==1)$todo_array[]=$temp_item;
+      }
+
+    // $step helps us identify what needs to be displayed as the next step
+    $step = 0;
+
+    // Add css file
+    drupal_add_css("sites/all/modules/custom/vcn/hvcp_map/css/hvcp_map.css");
+
+    // <DIV> that holds everything
+    $content .= "<div class=\"vcn_navigation\">";
+
+    /**
+     * This section is for the current step and what has been done already
+     */
+/*
+    // Start of the visible content block
+    $content .= "<div class=\"NavTitle\">Where Do I Go From Here?</div>";
+
+    /**
+     * $testOrder is the correct order of how to guide the user
+     */
+/*
+    $testOrder=array("LOGIN","OCCUPATION","INTERESTS","TARGET","PROGRAM","CERTIFICATE","LICENSE");
+
+    // if the user has done everything, then display that all steps are completed
+    if(count($todo_array)==0)
+      {
+      $content .= '<p class="center">All steps are completed.</p>';
+      }
+
+    // Otherwise, determine what's the next step
+    else // count($todo_array) != 0
+      {
+      // test flag is used to determine if the item is the next in the To Do list
+      $testFlag=0;
+      // testing each item in the correct test order...
+      foreach($testOrder as $testItem)
+        {
+        // testing against each item of the $todo_array
+        foreach($todo_array as $todo_item)
+          {
+          /**
+           * If an item hasn't already been flagged as the next item and matches something
+           * in the todo array, then set it as the next step and set the flag as done.
+           * Also, test to see if the item is skipped or not, if it is, move on to the next.
+           */
+/*
+          if($todo_item==$testItem && $testFlag==0 && !isset($_SESSION['skipped'][$todo_item]))
+            {
+            $nextItem = $testItem;
+            // setting testFlag to 1 causes the above test to go false, effectively setting
+            // the current item to to be the next step...
+            $testFlag = 1;
+            }
+          } // end foreach($todo_array as $todo_item)
+        } // end foreach($testOrder as $testItem)
+      $content .= '<p>We recommend that you next do the following: </p>';
+
+      // set a keyed array to tell the user what to do next
+      $whatNextArray=array
+        (
+        "LOGIN"=>array("link"=>"$base_url/user","text"=>"Set up an account and/or Log in."),
+        "OCCUPATION"=>array("link"=>"$base_url/explorecareers","text"=>"Take a look at what careers are out there and save at least one to your Career Management Account."),
+        "INTERESTS"=>array("link"=>"$base_url/interest-profiler","text"=>"See how your interests match careers."),
+        "TARGET"=>array("link"=>"$base_url/cma/notebook/careers","text"=>"Target one of your career selections for further research."),
+        "PROGRAM"=>array("link"=>"$base_url/find-learning/results/programs/onetcode/$item_id","text"=>"See what programs match your targeted career and save at least one to your Career Management Account."),
+        "CERTIFICATE"=>array("link"=>"$base_url/find-learning/results/certifications/onetcode/$item_id","text"=>"Record what certificates you are interested in into your Career Management Account."),
+        "LICENSE"=>array("link"=>"$base_url/find-learning/results/licenses/onetcode/$item_id","text"=>"Record what licenses you are interested in into your Career Management Account."),
+        );
+      $content .= '<p>'.l($whatNextArray[$nextItem]['text'],$whatNextArray[$nextItem]['link']).'</p>';
+      } // end else count($todo_array) != 0
+
+    /** Skip and Un-skip links(buttons) **/
+
+    // This is the mechanism that allows us to skip a step
+/*
+    $content .= "<form method=\"post\">";
+    $content .= "<input type=\"hidden\" name=\"skipItem\" value=\"$nextItem\" />";
+    $content .= "<input type=\"submit\" class=\"skipItem\" value=\"(Skip this step)\" />";
+    $content .= "</form>";
+
+    // This is the mechanism that allows us to clear skipped steps
+    $content .= "<form method=\"post\">";
+    $content .= "<input type=\"hidden\" name=\"skipItem\" value=\"RESET\" />";
+    $content .= "<input type=\"submit\" class=\"skipItemRight\" value=\"(Undo Skips)\" />";
+    $content .= "</form><br /><br />";
+
+    /**
+     * This next section is for the link that opens a javascript window, showing what
+     * the user has completed.
+     */
+/*
+    // $appPath is the full path and name of the script to be opened in a new window.
+    $appPath=$base_url.'/'.drupal_get_path('module','hvcp_map')."/completed_steps.php";
+
+    // $completedItems helps us to determine if anything is done and how many items are completed.
+    $completedItems=count($completed_array);
+
+    // passParams is for the parameters that will be passed on the url
+    $passParams="";
+
+    // Here, we check what Items are completed, then use them to build the list of parameters
+    // to pass on the url...
+    for($i=0;$i<=($completedItems-1);$i++)
+      {
+      // test for the first item, which uses a question mark...
+      if($i==0 && $completedItems>0)
+        {
+        $passParams .= "?".$completed_array[$i]."=1";
+        }
+      // all other parameters start with an ampersand
+      elseif($i<=$completedItems-1)
+        {
+        $passParams .= "&".$completed_array[$i]."=1";
+        }
+      else
+        {
+        // Do nothing
+        }
+      }
+
+    // adding the parameters onto the end of the link to display what's been done...
+    $paramPath=$appPath.$passParams;
+
+    // Displaying the actual link(button) that enables the popup window
+    $content .= "<form method=\"post\">";
+    $content .= "<div class=\"NavButtonDiv\">";
+    $content .= "<button class=\"NavButton\" onclick=\"window.open('$paramPath','_blank','menubar=no,width=400px,titlebar=no,resizable=yes')\">What Have I Done Already?</button>";
+    $content .= "</div>";
+    $content .= "</form>";
+
+
+    /**
+     * This section is a "look ahead" into the step beyond the current step
+     */
+/*
+    $content .= "<div class=\"NavTitle\">After This Step, What's Next?</div>";
+
+    // First, see if there will be a next step...
+    $futureStepsCount=count($todo_array) - 1 - count($skipped);
+
+    if($futureStepsCount==-1)
+      {
+      $content .= '<p class="center">All steps are completed</p>';
+      }
+    elseif($futureStepsCount==0)
+      {
+      $content .= '<p class="center">No other steps beyond the current one.</p>';
+      }
+    else // $futureStepsCount >= 1
+      {
+      $tag=0;
+      foreach($testOrder as $testItem)
+        {
+        // if item is in $skipped array, ignore it
+        if($skipped[$testItem]==1)
+          {
+          // do nothing
+          }
+        else // process it
+          {
+          foreach($todo_array as $todo_item)
+            {
+            if($todo_item==$testItem)$tag++;
+            if($tag==2)
+              {
+              $content .= '<p class="center">' . l($whatNextArray[$testItem]['text'],$whatNextArray[$testItem]['link']) . '</p>';
+              $tag++;
+              }
+            } // end foreach($todo_array as $todo_item)
+          } // end else process it
+        }// end foreach($testOrder as $testItem)
+      } // end else $futureStepsCount >= 1
+
+    // closing the <div class="vcn_navigation"> block
+    $content .= "</div>";
+
+    //Closing temporary database connection
+    mysql_close($connection);
+*/
+    $blocks['content']=$content;
+    return $blocks;
+    break;
+
+    } //end switch($op)
+  } // end function hvcp_map_block

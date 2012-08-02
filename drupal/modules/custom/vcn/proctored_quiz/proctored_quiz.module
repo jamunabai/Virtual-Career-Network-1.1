@@ -1,0 +1,286 @@
+<?php 
+/**
+proctored quiz based on standard quiz module
+**/
+
+function proctored_quiz_nodeapi(&$node, $op, $teaser, $page) {
+  //print "OP IS " . $op . " TYPE IS " . $node->type . "<br />";
+  if (($node->type=="quiz") || ($node->type=="multichoice")){
+    //print "TYPE QUIZ " . $op . "<br />";
+     switch ($op) {
+       case 'view':
+	      $url_params = $_GET['q'];
+		  $paramsplit = split("/",$url_params);
+		  if (count($paramsplit)==5) { 
+			 $test_id = intval($paramsplit[1]);
+			 $student_id = intval($paramsplit[2]);
+			 $test_session_code = $paramsplit[3];
+			 $test_start = $paramsplit[4];
+		     if (($test_start="start") &&
+			     (!empty($student_id)) && ($student_id > 0) && 
+				 (!empty($test_session_code)) && ($test_session_code!="") && 
+			     (!empty($test_id)) && ($test_id > 0)) { 
+				 
+  				   // test start page -- reset the session and find new values
+				   unset($_SESSION['student_name']);
+				   unset($_SESSION['student_id']);
+			       unset($_SESSION['test_name']);
+				   unset($_SESSION['test_id']);
+				   unset($_SESSION['test_session_code']);
+              
+			       //print "STUDENT ID is " . $student_id;
+				   $_SESSION['student_id'] = array($student_id);
+				   $result = db_query("select name from users where uid = " . $student_id);
+			       while ($row = db_fetch_array($result)) {		           
+                      $student_name = $row['name'];
+		           }  
+				   $_SESSION['student_name'] = array($student_name);
+				   $_SESSION['test_id'] = array($test_id);
+				   $result2 = db_query("select title from node where nid = " . $test_id);
+			       while ($row = db_fetch_array($result2)) {		           
+                      $test_name = $row['title'];
+                   } 
+				   $_SESSION['test_name'] = array($test_name);
+				   $_SESSION['test_session_code'] = array($test_session_code);
+			 }
+          } else {
+	         //$student_name = $_SESSION['student_name'][0];
+			 //$test_name = $_SESSION['test_name'][0];
+	      }
+
+		  /*
+	      if (empty($student_name)) {
+		     $node->content['body']['#value'] = "Invalid student";
+		  } else if (empty($test_name)) {
+		     $node->content['body']['#value'] = "Invalid test";
+	      } else {
+			 $node->content['body']['#value'] = "<div id=\"studentinfo\"><b><br />Student: " . $student_name . "</b><br /><br /></div>" . $node->content['body']['#value'];
+          }
+		  */
+		  break;
+     }
+  }
+}
+
+function show_proctor_sessions() {
+   global $user;
+   $proctor_id = $user->uid;
+   $query = "select n.title session_title, ts.field_student_name_value, qn.nid, qn.title test_title, ts.field_student_uid " .
+            " from node n, content_type_test_session ts, node qn where n.nid = ts.nid and ts.field_test_nid = qn.nid" .
+			" and n.type = 'test_session' and n.status = 1 and n.uid = " . $proctor_id .
+			" and qn.status = 1 " .
+            " order by n.created asc";
+   //print $query . "<br />";
+   $result = db_query($query);
+   while ($row = db_fetch_array($result)) {		           
+         $student_name = $row['field_student_name_value'];
+		 $student_uid = $row['field_student_uid'];
+		 $test_name = $row['test_title'];
+		 $test_nid = $row['nid'];
+		 print "<a href=\"node/" . $test_nid . "/" . $student_uid . "/start\">" . $student_name . ": " . $test_name  . "</a><br />";
+   }
+}
+
+function add_proctored_test_session($test_session_code, $proctor_id, $student_id, $student_name, $test_id, $test_name, $test_date, $test_start_time, $test_end_time) {
+
+  $node = new StdClass();
+  $node->type = 'test_session';
+  $node->title = $test_name . "/" . $student_name . "/" . $test_date . ":" . $test_start_time;
+  $node->field_session_code[0]['value'] = $test_session_code;
+  $node->field_student[0]['uid'] = $student_id;
+  $node->field_student_name[0]['value'] = $student_name;
+  $node->field_test[0]['nid'] = $test_id;  
+  $node->field_test_date[0]['value'] = $test_date;
+  $node->field_test_start_time[0]['value'] = $test_start_time;  
+  $node->field_test_end_time[0]['value'] = $test_end_time;
+  $node->field_validated[0]['value'] = 0;
+  node_submit($node);
+  node_save($node);
+  content_insert($node);
+}
+
+function proctored_test_process() {
+   $score = $_SESSION['test_score'][0];
+   $student_name = $_SESSION['student_name'][0];
+   $test_name = $_SESSION['test_name'][0];
+   $student_id = $_SESSION['student_id'][0];
+   $test_id = $_SESSION['test_id'][0];
+   $test_session_code = $_SESSION['test_session_code'][0];
+   if (!empty($test_session_code) && ($test_session_code!=""))  {
+   
+   
+	  $querypf = "select * from drupal.quiz_node_properties where nid='$test_id' order by vid desc";
+	  $resultpf = db_query($querypf);
+	  
+	    $credits = '';
+		
+		while ($rowpf = db_fetch_array($resultpf)) {
+			$passfail =  $rowpf['pass_rate'];
+			
+			$queryc = "select * from hvcp.vcn_course where drupal_test_id = '$test_id'";
+			$resultc = db_query($queryc);
+			
+			
+			while ($rowc = db_fetch_array($resultc)) {
+				if ($score>=$passfail)
+					$credits = $rowc['TOTAL_CREDITS'];
+			}
+
+			break;
+
+		}
+		
+		if ($score>=$passfail)
+			$passfail='p';
+		else
+			$passfail='f';
+   
+
+      // update score in SQL
+      $insert_query = "update content_type_test_session set field_test_score_value = '" . $score . "', field_pass_fail_value = '".$passfail."', field_credits_value = '".$credits."' where field_test_nid = " . $test_id . " and field_student_uid = " . $student_id . " and field_session_code_value = '" . $test_session_code."'";
+
+		
+      $insert_result = db_query($insert_query);
+      print "<br />Thank you. Test results for the following session have been saved:<br /><br />";
+      print "<b>Test: " . $test_name . "</b><br />";
+      print "<b>Student: " . $student_name . "</b><br />";
+      print "<b>Session Code: " . $test_session_code . "</b><br />";
+
+      // send email to proctor
+   
+      $proctorname = "";
+      $officelocation = "";
+      $date = "";
+      $time = "";   
+      $query = "select op.address,op.city,op.state,op.zipcode,pts.time_slot_date, pts.start_time, p.email, p.proctor_name, op.office_name, 
+                           u.first_name, u.last_name, u.email_address, du.mail 
+                    from hvcp.vcn_test_session ts, hvcp.vcn_proctor_time_slot pts, hvcp.vcn_proctor p, 
+                           hvcp.vcn_office_partners op, hvcp.vcn_cma_user u, drupal.users du
+                    where ts.test_session_id = '" . $test_session_code . "'
+                    and ts.time_slot_id = pts.time_slot_id
+                    and ts.proctor_id = p.proctor_id
+                    and p.office_id = op.office_id
+                    and ts.test_taker_id = u.user_session_id 
+					and du.uid = ts.test_taker_id";
+      $result = db_query($query);
+      while ($row = db_fetch_array($result)) {
+          $proctorname = $row['proctor_name'];
+          $officelocation = $row['address']." ".trim($row['city']).", ".$row['state']." ".$row['zipcode'];
+          $date = $row['time_slot_date'];
+          $time = $row['start_time'];
+          $testtaker_firstname = $row['first_name'];
+          $testtaker_lastname = $row['last_name'];
+          $testtaker_email = $row['mail'];
+		  $proctoremail = $row['email'];
+      }
+
+	  /*
+      $body="Dear ".$proctorname.",<br/><br/>
+                A test taker has taken the following test with you. The score and other information related to the test session is provided below.
+                <br/><br/>
+                Office Location: ".$officelocation."<br/>
+                Date and Time: ".$date." ".$time."<br/>
+                Test Session Code: ".$test_session_code."<br/>
+                Test Taker Username: ".$student_name."<br/>
+                Test Taker Name: ".$testtaker_firstname." ".$testtaker_lastname."<br/>
+                Test Taker Email: ".$testtaker_email."<br/>
+                Course Name: ".$test_name."<br/>
+                Score: " . $score . "<br /><br />
+
+                Thanks,<br/><br/>
+                The VCN Team";	  
+
+       $language = "";
+       $params = array('subject' => t('VCN Test Results'),
+                              'body' => t($body),
+                             );
+     
+       $email = $proctoremail;
+
+       if (strlen($email) > 0) {
+           drupal_provider_mail('training', 'mykey', $email, $language, $params, $from = NULL, $send = TRUE);       
+       }
+	   
+	   */
+	   
+		$dearuser = $testtaker_firstname." ".$testtaker_lastname;
+		if (strlen($dearuser)<3)
+			$dearuser = $student_name;	   
+	   
+	   if ($passfail=='p') {
+		  $body="Dear ".$dearuser.",<br/><br/>
+					Congratulations! You have successfully completed the test. Your score and credit information is updated in your CMA and you may access that anytime. Following are the details. 
+					<br/><br/>
+					Test Taker ID: ".$student_name."<br/>		
+					Course Name: ".$test_name."<br/>
+					Test Score: " . $score . "<br />
+					ACE Credit Recommendation: " . $credits . "<br />
+					Office Location: ".$officelocation."<br/>
+					Date and Time: ".vcn_reformat_date($date)." ".$time."<br/><br/>
+
+					Thanks,<br/><br/>
+					The VCN Team";	 	   
+	   } else {
+
+
+		  $body="Dear ".$dearuser.",<br/><br/>
+				Sorry to inform you that your test scores were not high enough for you to get any ACE credit. Please try again. Following are the details. 
+				<br/><br/>
+				Test Taker ID: ".$student_name."<br/>		
+				Course Name: ".$test_name."<br/>
+				Test Score: " . $score . "<br />
+				Office Location: ".$officelocation."<br/>
+				Date and Time: ".vcn_reformat_date($date)." ".$time."<br/><br/>
+
+				Thanks,<br/><br/>
+				The VCN Team";	 
+	   
+	   }
+	   
+	$language = "";
+	   
+       $params = array('subject' => t('VCN Test Results'),
+                              'body' => t($body),
+                             );
+							 
+       $email = $testtaker_email;
+
+       if (strlen($email) > 0) {
+           drupal_provider_mail('training', 'mykey', $email, $language, $params, $from = NULL, $send = TRUE);       
+       }	   
+	   
+		global $user;
+		
+		if ($user->uid) {
+			require_once(drupal_get_path('module', 'user') . '/user.pages.inc');
+			user_logout();
+		}
+	
+   } else {
+      print "<br />Invalid test data<br />";
+   }
+}
+
+// determine if the current page/user combination indicates a proctor secured page
+
+function proctor_secured_page($curr_user,$curr_uri) {
+   $proctor_secured = false;
+   if ((!empty($curr_user)) && (!empty($curr_uri))) {
+      if (in_array('proctor', array_values($curr_user->roles))) { 
+         // user is proctor, determine if this is a node of type test or multichoice
+         $split_uri = split("\/",$curr_uri);
+         if ($split_uri[2]=="node") {
+            $nid = $split_uri[3];
+	        $node = node_load($nid);
+	        if (!empty($node)) {
+	           if (($node->type=="test") ||
+		           ($node->type=="quiz") ||
+			       ($node->type=="multichoice")) {
+			       $proctor_secured = true;
+	           }
+	        }
+         }
+      }
+   }
+   return $proctor_secured;
+}

@@ -1,0 +1,129 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module for showing e-Transcripts
+ */
+
+/**
+ * Implementation of hook_block
+ */
+function e_transcript_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "e-Transcript" when you list blocks in admin mode
+    $blocks[0]['info']=t('e-Transcript');
+    return $blocks;
+    break;
+
+    case "view":
+    //code to fill $content with data here...
+
+    $base_url = base_path();
+
+    if(!function_exists('connectIt'))
+    {
+    function connectIt()
+      {
+      //extracting database
+      $dbpull .= hvcp_get_db_url();
+      $tempArr1=explode("/",$dbpull);
+      $tempArr2=explode(":",$tempArr1[2]);
+      $dbuser=$tempArr2[0];
+      $tempArr3=explode("@",$tempArr2[1]);
+      $dbpass=$tempArr3[0];
+      $dbserver=$tempArr3[1].":3306";
+      unset($tempArr1,$tempArr2,$tempArr3);
+
+      //For now, until we get the REST server set up, we'll just pull the data directly from the database
+      $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+        or die("Error making database connection: ".mysql_error());
+      $db=mysql_select_db('hvcp',$connection)
+        or die("Error selecting database: ".mysql_error());
+      return($connection);
+      }
+    }
+
+    /**
+     * This next section gets the CMA User ID...
+     */
+    global $user;
+    if($user->uid!=0) $userID=$user->uid;
+    else
+      {
+      $userID=session_id();
+      if($userID=="")
+        {
+        $userID=$_COOKIE[session_name()];
+        }
+      }
+    $select="SELECT USER_ID FROM vcn_cma_user WHERE USER_SESSION_ID=\"$userID\"";
+    $connection=connectIt();
+    $result=mysql_query($select)
+      or die("Error getting USER_ID from vcm_cma_user: ".mysql_error());
+    mysql_close($connection);
+    $row=mysql_fetch_assoc($result);
+    extract($row);
+
+    $path=$base_url."/e-transcript";
+    $myfile=$base_url. "learning-inventory-output";
+    $myfile2=$base_url."learning-inventory-output?c=1";
+
+    drupal_add_css("sites/all/modules/custom/vcn/pla_main/css/pla_supplemental.css");
+
+    /**
+     * section for tabbed interface
+     */
+    include(drupal_get_path('module','pla_main')."/tabs.inc.php");
+    $content .= "<div class=\"container-div\">";
+    /** end tabbed interface href="http://$_SERVER['SERVER_NAME'].base_path().user/register/ **/
+	if($user->uid){
+		$registerlink = "";
+	}else{
+		$registerlink = "If you have not yet established your Career Management Account, <a href=\"https://".$_SERVER['SERVER_NAME'].base_path()."user/register\">click here</a> to do so.";
+	}
+    $content .= "
+      <div class=\"fullScreen\">
+      <h3>My Learning Inventory</h3>
+		<p>
+		After you have entered information about all of your prior learning, the VCN will generate a personal <i>Learning Inventory</i>. Your learning inventory summarizes prior learning that might be applied to your intended degree program. If you have created a Career Management Account, your profile will automatically appear at the top of your <i>Learning Inventory</i>. $registerlink
+		</p>
+		<p>
+		After you choose a college and degree program, schedule a meeting with an advisor and print the summary of your <i>Learning Inventory</i> to share with him or her. The <i>Learning Inventory</i> will help you and your advisor develop a degree plan, showing how your prior learning meets specific requirements and what courses you have left to complete.
+		</p>
+		<p>
+		Remember that this inventory is an estimate of potential academic credit. Each college determines whether (and how) your prior learning will be applied to a specific degree program.
+		</p>";
+    
+    $content .= "
+      <p>
+      <center>
+      <form method=\"POST\" action=\"$myfile\" target=\"_blank\">
+      <input type=\"hidden\" name=\"cma\" value=\"$USER_ID\" />
+      <input type=\"hidden\" name=\"drupalID\" value=\"".$user->uid."\" />
+	  <br>";
+if($user->uid){	  
+    $content .= "	  
+	  <input type=\"checkbox\" name=\"cmadoccheck\" value=\"Yes\" />Check this box to save this document in your CMA Documents
+      <br><br>";
+	}
+    $content .= "	  
+      <input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/view-my-learning-inventory.png\" onclick=\"this.form.action='$myfile';\" alt=\"Click Here to View Your Summary\" title=\"Click Here to View Your Summary\" />
+      <br><br>
+      <input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/view-my-cover-letter.png\" onclick=\"this.form.action='$myfile2';\" alt=\"Click Here to View Your Cover Letter\" title=\"Click Here to View Your Cover Letter\" />
+      </form>
+      </center>
+      </p>";
+    
+    $content .= "<p><b>Hint:</b> Remember that each college determines how your prior learning might apply to a specific degree program.";
+	$content .= "</div> <!-- end div container-div -->";
+	$content .= "</div><!-- end div leftSide -->";
+
+    $blocks['content']=$content;
+    return $blocks;
+    break;
+
+    } //end switch($op)
+  } // end function e_transcript_block

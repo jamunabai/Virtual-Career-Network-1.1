@@ -1,0 +1,701 @@
+<?php
+// $Id:$
+
+/**
+ * @file
+ * Module for getting started tutorial pathway
+ *
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+function vcn_getting_started_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Get Started Landing Page');
+      $blocks[1]['info'] = t('VCN Get Started Step One');
+      $blocks[2]['info'] = t('VCN Get Started Step Two');
+      $blocks[3]['info'] = t('VCN Get Started Step Three');
+      $blocks[4]['info'] = t('VCN Get Started Step Four');
+      //$blocks[5]['info'] = t('VCN Get Started Step Five');
+      $blocks[5]['info'] = t('VCN Get Started Complete');
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta)
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Get Started'),
+         			'content' => _vcn_getting_started_steps(),
+         		);
+       		break;
+       		case 1: // step1
+         		$block = array(
+          			'subject' => t('Get Started Step One'),
+          			'content' => _vcn_getting_started_steps(),
+        		);
+       		break;
+      		case 2: // step2
+         		$block = array(
+          		'subject' => t('Get Started Step Two'),
+          		'content' => _vcn_getting_started_steps(),
+        	);
+      		case 3: //step3
+         		$block = array(
+          			'subject' => t('Get Started Step Three'),
+          			'content' =>  _vcn_getting_started_steps(),
+        		);
+       		break;
+      		case 4: //step4
+         		$block = array(
+          			'subject' => t('Get Started Step Four'),
+          			'content' =>  _vcn_getting_started_steps(),
+        		);
+        	break;
+        	case 5: // step5
+          		$block = array(
+          			'subject' => t('Get Started Step Five'),
+          			'content' =>  _vcn_getting_started_steps(),
+        		);
+          	break;
+        	case 6: // finished
+          		$block = array(
+          			'subject' => t('Get Started Finished'),
+          			'content' =>  _vcn_getting_started_steps(),
+        		);
+          	break;
+			case 7: //Start new step
+				$block = array(
+					'subject' => t('Get Started Start'),
+          			'content' =>  _vcn_getting_started_steps(),
+				);
+			break;
+          	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+
+
+/**
+ * Implementation of menu().
+ */
+function vcn_getting_started_menu() {
+	$items = array();
+
+  	$items['getting-started'] = array(
+		//'title' => 'Step 1: Get Started',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+
+ 	$items['getting-started/step-one'] = array(
+		//'title' => 'Step 1: Get Started',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+   	$items['getting-started/step-two'] = array(
+		//'title' => 'Step 2: Explore Careers',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+ 	$items['getting-started/step-three'] = array(
+		//'title' => 'Step 3: Find Learning',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	$items['getting-started/step-four'] = array(
+		//'title' => 'Step 4: Preparation and Application',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	$items['getting-started/step-five'] = array(
+		//'title' => 'Step 5: Earn College Credit',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	$items['getting-started/finished'] = array(
+		//'title' => 'Completed',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+
+	$items['getting-started/start'] = array(
+		//'title' => 'Start',
+		'page callback' => '_vcn_getting_started_steps',
+		'page arguments' => array(),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+
+    /* AJAX PAGES -- these pages take a module name and */
+    $items['getting-started/ajax'] = array(
+		'page callback' => '_vcn_ajax_call',
+ 	   	'title' => 'AJAX CALL NO TITLE',
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_getting_started_theme( ) {
+  	return array (
+  		'vcn_getting_started_steps' => array ( 'template'=>'templates/vcn_getting_started_steps', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 		'vcn_getting_started_activity' => array ( 'template'=>'templates/common/vcn_getting_started_activity', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 		'vcn_getting_started_main_content' => array ( 'template'=>'templates/common/vcn_getting_started_main_content', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 		'vcn_getting_started_main_note' => array ( 'template'=>'templates/common/vcn_getting_started_main_note', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_getting_started_main_detail' => array ( 'template'=>'templates/common/vcn_getting_started_main_detail', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_getting_started_sidebar_detail' => array ( 'template'=>'templates/common/vcn_getting_started_sidebar_detail', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_getting_started_sidebar_status' => array ( 'template'=>'templates/common/vcn_getting_started_sidebar_status', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+
+   	);
+}
+
+
+function _vcn_ajax_call() {
+	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+
+ 	$includes = drupal_get_path('module','vcn_getting_started').'/includes';
+ 	require_once($includes . '/vcn_getting_started_common.inc');
+
+ 	$training_path = drupal_get_path('module','vcn_getting_started');
+ 	drupal_add_css($training_path.'/css/vcn_getting_started.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_getting_started.js');
+
+   	// get the step and activity default to step 1 activity 1
+ 	$args = arg();
+
+   	// hard coded but needs to be automated to verify step and activity with
+   	// session or cma (not for ajax)
+    // $step     = (isset($args[1]) AND $args[1] ) ? $args[1] : 'step-one';
+   	// $activity = ( isset($args[2]) AND $args[2] ) ? $args[2] : 1;
+ 	$errors = $content = $data = array();
+
+ 	// only do this if not passed in ie through ajax call etc
+	// Get _POST vars
+	vcn_get_vars_post($vars, $_POST);
+
+
+ 	// Get _GET vars which override $_POST
+    //	vcn_get_vars_get($vars, $_GET);
+
+ 	// Get url vars which override $_POST AND $_GET
+	vcn_get_vars_arg($vars, $args);
+
+	// step should come from args and not be overridden by post or get
+	// step can however be overriden by cma, so set before that.
+ 	//$vars['current_step']    = $step;
+ 	//$vars['current_activity'] = $activity;
+
+	// Set additional vars (cma etc)
+ 	vcn_get_vars_set($vars, 'getting_started');
+
+ 	// common data functions
+ 	$data = vcn_getting_started_static_data($vars['current_step'], $data, $vars);
+
+
+	// Send to step function with pass by reference so functions can make step/activity specific changes
+	$method = '_vcn_getting_started_'. preg_replace('/-/','_',$vars['current_step']);
+	$rval = false;
+
+	// if there is a function for this step and activity -- call it!
+	if (function_exists($method))
+		$rval =	$method($vars['current_step'], $vars['current_activity'], $errors, $vars, $content, $data);
+
+ 	// common content functions performed separately from step processing
+ 	$content['gs_main_content']   = theme( 'vcn_getting_started_main_content', $errors, $vars, $content, $data );
+ 	$content['gs_main_note']      = theme( 'vcn_getting_started_main_note', $errors, $vars, $content, $data );
+ 	$content['gs_main_detail']    = theme( 'vcn_getting_started_main_detail', $errors, $vars, $content, $data );
+	$content['gs_sidebar_status'] = theme( 'vcn_getting_started_sidebar_status', $errors, $vars, $content, $data );
+   	$content['gs_sidebar_detail'] = theme( 'vcn_getting_started_sidebar_detail', $errors, $vars, $content, $data );
+
+   	echo json_encode($content) ;
+   	/* " <br /><br />TIME : " . date("H:i:s", mktime()) . " => " . date("H:i:s", mktime()); */
+}
+
+/*
+ * This represents a get from the url (posts are processed by ajax call above)
+ */
+function _vcn_getting_started_steps(  ) {
+	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+
+ 	$includes = drupal_get_path('module','vcn_getting_started').'/includes';
+ 	require_once($includes . '/vcn_getting_started_common.inc');
+
+ 	$training_path = drupal_get_path('module','vcn_getting_started');
+ 	drupal_add_css($training_path.'/css/vcn_getting_started.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_getting_started.js');
+
+   	// get the step and activity default to step 1 activity 1
+ 	$args = arg();
+
+   	// hard coded but needs to be automated to verify step and activity with
+   	// session or cma
+   	$step     = (isset($args[1]) AND $args[1]) ? $args[1] : 'step-one';
+   	$activity = (isset($args[2]) AND $args[2]) ? $args[2] : 1;
+ 	$errors = $content = $data = array();
+
+  	// Get _POST vars
+	vcn_get_vars_post($vars, $_POST);
+
+ 	// Get _GET vars which override $_POST
+ 	vcn_get_vars_get($vars, $_GET);
+
+ 	// Get url vars which override $_POST AND $_GET
+	vcn_get_vars_arg($vars, $args);
+
+	// step should come from args and not be overrode by post or get
+	// step can however be overriden by cma, so set before that.
+	$vars['current_step']    = $step;
+ 	$vars['current_activity'] = $activity;
+
+	// Set additional vars (cma etc)
+ 	vcn_get_vars_set($vars, 'getting_started');
+
+ 	// common data functions
+ 	$data = vcn_getting_started_static_data($step, $data, $vars);
+
+	// Send to step function with pass by reference so functions can make step/activity specific changes
+	$method = '_vcn_getting_started_'. preg_replace('/-/','_',$step);
+	$rval = false;
+
+	// if there is a function for this step and activity -- call it!
+	if (function_exists($method))
+		$rval =	$method($step, $activity, $errors, $vars, $content, $data);
+
+ 	// common content functions performed separately from step processing
+  	$content['gs_activity']       = theme( 'vcn_getting_started_activity', $errors, $vars, $content, $data );
+ 	$content['gs_main_note']      = theme( 'vcn_getting_started_main_note', $errors, $vars, $content, $data );
+ 	$content['gs_main_content']   = theme( 'vcn_getting_started_main_content', $errors, $vars, $content, $data );
+ 	$content['gs_main_detail']    = theme( 'vcn_getting_started_main_detail', $errors, $vars, $content, $data );
+	$content['gs_sidebar_status'] = theme( 'vcn_getting_started_sidebar_status', $errors, $vars, $content, $data );
+   	$content['gs_sidebar_detail'] = theme( 'vcn_getting_started_sidebar_detail', $errors, $vars, $content, $data );
+
+	// send pieces to template
+ 	if ($rval)
+ 		return theme( 'vcn_getting_started_steps', $errors, $vars, $content, $data );
+  	else
+ 		return theme( 'vcn_getting_started_steps', $errors, $vars, $content, $data );
+}
+
+function _vcn_get_getting_started_training_grid($variables = false ) {
+
+	if (!$variables) return false;
+
+ 	$includes  = drupal_get_path('module','vcn') .'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+
+ 	$training_path = drupal_get_path('module','vcn');
+ 	drupal_add_css($training_path.'/css/vcn.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn.js');
+
+ 	$errors = $content = $data = false;
+ 	$vars = $variables;
+
+  	// get the type
+ 	$args   = arg();
+ 	$type = $vars['type'];
+
+	$valid = vcn_get_valid($type);
+   	$valid_all = array_merge(vcn_get_valid('programs'),
+  	                         vcn_get_valid('certifications'),
+  	                         vcn_get_valid('licenses'),
+  	                         vcn_get_valid('courses'),
+  	                         vcn_get_valid('vhs')
+  	                         );
+
+
+
+	// Process if no errors
+	if (!$vars['onetcode'] AND in_array($vars['type'], array('programs','certifications','licenses' ) )) {
+			$errors[] = 'Select an career';
+	}
+	else {
+
+
+     	if (!$vars['zip'] AND $vars['type'] == 'programs') {
+			$errors[] = 'Enter a location ZIP Code to find training near you!';
+	 	}
+		if (!$vars['stfips'] AND $vars['type'] == 'licenses') {
+			$errors[] = 'Enter a state to find training near you!';
+	 	}
+
+		$vars['special']='gs';
+
+  		// get the counts
+	 	$result = vcn_get_data ($errors, $vars, $valid_all, 'trainingsvc','training','count');
+
+
+  		$vars['occupation_title']     = (string) $result->occupation->title;
+  	 	$vars['count_programs']       = (string) $result->programscount ? (string) $result->programscount : 0;
+   		$vars['count_certifications'] = (string) $result->certificationscount? (string) $result->certificationscount : 0;
+  	 	$vars['count_licenses']       = (string) $result->licensescount ? (string) $result->licensescount : 0;
+  	 	$vars['count_courses']        = (string) $result->coursescount ? (string) $result->coursescount : 0;
+ 	 	$vars['count_vhs']            = (string) $result->vhscount ? (string) $result->vhscount : 0;
+
+  		if (!(array)$result->occupation AND in_array($type, array( 'programs','certifications','licenses') ) )
+  		{
+  			$vars['onetcode'] = '';
+  			$errors[] = 'Please select a valid career';
+  		}
+  		else
+  		{
+	  	 	// set specific vars
+	  		$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+	  		$limit     = 5;
+	  		$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+	  		$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+
+	  	 	// get the data
+		 	$result = vcn_get_data ($errors,$vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction );
+	 		$data = $result->$type;
+
+    	}
+ 	}
+
+  	return $data;
+}
+
+function get_license_count_manual($onetcode, $zipcode) {
+
+
+	$rest = new vcnRest;
+
+	$rest->setSecret('');
+	$rest->setBaseurl(getBase());
+	$rest->setService('trainingsvc');
+	$rest->setModule('training');
+	$rest->setAction('count');
+	$rest->setRequestKey('onetcode',$onetcode);
+	$rest->setRequestKey('zip',$zipcode);
+
+
+	// standard filters
+	$rest->setRequestKey('apikey','apikey');
+	$rest->setRequestKey('format','xml');
+
+	$rest->setMethod('post');
+
+	$content = $rest->call();
+
+	$content = new SimpleXMLElement($content);
+
+	$content = $content->data;
+
+	return $content->licensescount;
+
+}
+
+function _vcn_getting_started_step_two ($step, $activity, $errors, &$vars, &$content, &$data) {
+	if(empty($vars['zip'])){
+	$vars['navigation_error'] = _vcn_navigation_required('choose-zip');
+	}
+}
+
+function _vcn_getting_started_step_three ($step, $activity, $errors, &$vars, &$content, &$data)
+{
+
+	//Verify whether the zip code is entered or not 
+	if(empty($vars['zip'])){
+	$vars['navigation_error'] = _vcn_navigation_required('choose-zip');
+	}
+  	// verify occupation
+	elseif (! array_key_exists('target_occupation-title',$vars) OR ! $vars['target_occupation-title'])
+	{
+  		$vars['navigation_error'] = _vcn_navigation_required('target_occupation');
+  	}
+ 	$vars['onetcode']   = $vars['target_onetcode'];
+ 	$vars['program_id'] = $vars['target_program_id'];
+	$vars['cipcode']    = $vars['target_program_cipcode'];
+
+	// verify zip
+	if (! array_key_exists('zip',$vars) OR ! $vars['zip'] ) { $vars['zip'] = $vars['cma']->zipcode;}
+	if (! array_key_exists('distance',$vars) OR ! $vars['distance'] ) { $vars['distance'] = 5; }
+
+	switch ($activity)
+	{
+		case '2': //licenses
+			// Get stfips
+			//$states_array = array('01'=>'Alabama','02'=>'Alaska','04'=>'Arizona','05'=>'Arkansas','06'=>'California','08'=>'Colorado','09'=>'Connecticut','10'=>'Delaware','11'=>'District of Columbia','12'=>'Florida','13'=>'Georgia','15'=>'Hawaii','16'=>'Idaho','17'=>'Illinois','18'=>'Indiana','19'=>'Iowa','20'=>'Kansas','21'=>'Kentucky','22'=>'Louisiana','23'=>'Maine','24'=>'Maryland','25'=>'Massachusetts','26'=>'Michigan','27'=>'Minnesota','28'=>'Mississippi','29'=>'Missouri','30'=>'Montana','31'=>'Nebraska','32'=>'Nevada','33'=>'New Hampshire','34'=>'New Jersey','35'=>'New Mexico','36'=>'New York','37'=>'North Carolina','38'=>'North Dakota','39'=>'Ohio','40'=>'Oklahoma','41'=>'Oregon','42'=>'Pennsylvania','44'=>'Rhode Island','45'=>'South Carolina','46'=>'South Dakota','47'=>'Tennessee','48'=>'Texas','49'=>'Utah','50'=>'Vermont','51'=>'Virginia','53'=>'Washington','54'=>'West Virginia','55'=>'Wisconsin','56'=>'Wyoming','60'=>'American Samoa','66'=>'Guam','69'=>'Northern Mariana Islands','72'=>'Puerto Rico','78'=>'Virgin Islands');
+			//$vars['stfips'] = (array_key_exists('state',$vars) AND $vars['state']) ?  $states_array($vars['state']) : '26';
+
+			$vars['type']   = 'licenses';
+ 			// Get the licenses list
+			$data['licenses'] = _vcn_get_getting_started_training_grid($vars);
+
+			$data['licensecount'] = get_license_count_manual($vars['onetcode'],$vars['zip']);
+
+			if ($data['licensecount']<1) {
+				unset($data['licenses']);
+				$vars['target_licensename'] = 'No license targeted';
+			}
+ 		break;
+		case '3': // medical and legal requirements
+			//Verify whether the zip code is entered or not 
+			if(empty($vars['zip'])){
+			$vars['navigation_error'] = _vcn_navigation_required('choose-zip');
+			}
+		  	// verify occupation
+    		elseif (! array_key_exists('target_program_id',$vars) OR ! $vars['target_program_id'] )
+			{
+		  		$vars['navigation_error'] = _vcn_navigation_required('target_program');
+		  	}
+
+    		// Get the program information for application
+  			$valid = array('program_id'=>'key', 'cipcode'=>'key');
+			$ivars['program_id']  = $vars['target_program_id'];
+			$ivars['cipcode']     = $vars['target_program_cipcode'];
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','detail','10',$offset,$order,$direction );
+
+    		$data['programs']    = $result->programs;
+ 	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['legalrequirementsmet']) OR !$vars['GETTINGSTARTED']['legalrequirementsmet']) {$vars['legalrequirementsmet'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['medicalrequirementsmet']) OR !$vars['GETTINGSTARTED']['medicalrequirementsmet']) {$vars['medicalrequirementsmet'] = 'Yes'; }
+
+  		break;
+ 		case '4':
+ 			// get the typical training if not set
+
+ 			$result = vcn_get_occupations(false, $vars, true,'list-short');
+ 	 		if ($result) { 
+			
+				$vars['tawlevel'] = $result[$vars['onetcode']]['awlevel'];
+				$vars['tawlevelname'] = $result[$vars['onetcode']]['education'];
+				
+				$vars['mawlevel'] = $result[$vars['onetcode']]['minawlevel'];
+				$vars['mawlevelname'] = $result[$vars['onetcode']]['mineducation'];				
+				
+			}
+
+
+			
+		
+			$valid = vcn_get_valid('programs');
+			
+			$valid['education_level'] = 'valid';
+			$vars['education_level'] = strlen($vars['awlevel'])>0 ? $vars['awlevel'] : $vars['tawlevel'];	
+	
+			unset($vars['awlevel']);
+			
+			if ($vars['education_level']<=2)
+				$vars['education_level']=3;
+			
+ 			$ivars= $vars;
+ 			$ivars['program_id'] = '';
+ 			$ivars['cipcode'] = '';
+			$ivars['type']       = 'programs';
+	 		$ivars['distance'] = '1000';
+			$ivars['limit'] = '100';
+	 		if ($ivars['awlevel'] == 'all') {$ivars['awlevel'] = false;}
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','list',10,0);
+
+			if (!isset($result->programs)) {
+				$ivars['distance'] = '10000';
+				$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','list',10,0);
+			}
+
+
+
+ 			$data['programs']   = $result->programs;
+ 		break;
+		case '5':
+
+			$vars['type']   = 'certifications';
+			$data['certifications'] = _vcn_get_getting_started_training_grid($vars);
+ 		break;
+		case '6':
+					// Get the program information for application
+  			$valid = array('program_id'=>'key');
+  			$ivars['program_id'] = $vars['program_id'];
+  			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','detail',10,0);
+
+    		$data['programs']    = $result->programs;
+ 			$data['fa_array'] = array (
+				  '1' => array('href'=>'http://www.fafsa.ed.gov/','title'=>'Free Application for Federal Student Aid (FAFSA)', 'description'=>'This link takes you to the Department of Education\'s website where you can fill out and submit this application form online.'),
+				  '2' => array('href'=>'http://www.acinet.org/scholarshipsearch/ScholarshipCategory.asp?searchtype=category&nodeid=22','title'=>'Career One Stop Scholarship Database', 'description'=>'This link takes you to the scholarship search screen where you may search a database of thousands of available scholarships.'),
+				  '3' => array('href'=>'http://www.studentaid.ed.gov/','title'=>'Students.gov', 'description'=>'This link takes you to the financial aid information section of a government-run website focusing exclusively on the interests and needs of students.'),
+ 				  '4' => array('href'=>'http://www.petersons.com/college-search/scholarship-search.aspx','title'=>'Peterson\'s College Search', 'description'=>'This link takes you to the Peterson\'s database of featured colleges and universities which includes more than over a million scholarships, grants, and awards worth $7.69 billion.'),
+ 				  '5' => array('href'=>'http://edu.military.com/gibill/?ESRC=ggl_edu_gi_spec.kw&np=1&nipkw=gi%20bill','title'=>'Military.com', 'description'=>'This link takes you to a website that can help you find millions of dollars in scholarships and grants available exclusively for those persons in or coming out of the military service.'),
+ 				  '6' => array('href'=>'http://explorehealthcareers.org/en/issues/news/Article/257/Accreditation_Matters_Part_I','title'=>'Accreditation Matters: (Part I) September 19, 2011', 'description'=>'This link takes you to a website that can show you how to be a smart consumer of academic programs in Health Care.'),
+   				  '7' => array('href'=>'http://explorehealthcareers.org/en/issues/news/Article/258/How_to_Finance_Your_Health_Sciences_Education','title'=>'How to Finance Your Health Sciences Education September 19, 2011', 'description'=>'This link takes you to a website that can show you how to finance your Health Sciences education.'),
+  				);
+		break;
+ 		default:
+	}
+	return true;
+}
+
+function _vcn_getting_started_step_four ($step, $activity, $errors, &$vars, &$content, &$data)
+{
+ 	//Verify whether the zip code is entered or not 
+	if(empty($vars['zip'])){
+	$vars['navigation_error'] = _vcn_navigation_required('choose-zip');
+	}
+ 	// verify occupation
+	elseif (! array_key_exists('target_occupation-title',$vars) OR ! $vars['target_occupation-title'] )
+	{
+  		$vars['navigation_error'] = _vcn_navigation_required('target_occupation');
+  	}
+  	elseif (empty($vars['target_program_id']))
+  	{
+	$vars['navigation_error'] = _vcn_navigation_required('target-program');
+	}
+	
+	$vars['onetcode']   = $vars['target_onetcode'];
+ 	$vars['program_id'] = $vars['target_program_id'];
+	$vars['cipcode']    = $vars['target_program_cipcode'];
+
+	// verify zip
+	if (! array_key_exists('zip',$vars) OR ! $vars['zip'] ) { $vars['zip'] = $vars['cma']->zipcode;}
+	if (! array_key_exists('distance',$vars) OR ! $vars['distance'] ) { $vars['distance'] = 5; }
+
+  	switch ($activity)
+	{
+		case '2': //vhs
+			// Get stfips
+			$states_array = array('01'=>'Alabama','02'=>'Alaska','04'=>'Arizona','05'=>'Arkansas','06'=>'California','08'=>'Colorado','09'=>'Connecticut','10'=>'Delaware','11'=>'District of Columbia','12'=>'Florida','13'=>'Georgia','15'=>'Hawaii','16'=>'Idaho','17'=>'Illinois','18'=>'Indiana','19'=>'Iowa','20'=>'Kansas','21'=>'Kentucky','22'=>'Louisiana','23'=>'Maine','24'=>'Maryland','25'=>'Massachusetts','26'=>'Michigan','27'=>'Minnesota','28'=>'Mississippi','29'=>'Missouri','30'=>'Montana','31'=>'Nebraska','32'=>'Nevada','33'=>'New Hampshire','34'=>'New Jersey','35'=>'New Mexico','36'=>'New York','37'=>'North Carolina','38'=>'North Dakota','39'=>'Ohio','40'=>'Oklahoma','41'=>'Oregon','42'=>'Pennsylvania','44'=>'Rhode Island','45'=>'South Carolina','46'=>'South Dakota','47'=>'Tennessee','48'=>'Texas','49'=>'Utah','50'=>'Vermont','51'=>'Virginia','53'=>'Washington','54'=>'West Virginia','55'=>'Wisconsin','56'=>'Wyoming','60'=>'American Samoa','66'=>'Guam','69'=>'Northern Mariana Islands','72'=>'Puerto Rico','78'=>'Virgin Islands');
+			$vars['type']   = 'vhs';
+			$vars['stabbr'] = (array_key_exists('state',$vars) AND $vars['state']) ?  $vars['state'] : '';
+
+	 		// Get the licenses list
+			$data['vhs'] = _vcn_get_getting_started_training_grid($vars);
+	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+
+    	break;
+ 		case '3': // tests
+    		// Get the program information for application
+  			$valid = array('program_id'=>'key', 'cipcode'=>'key');
+			$ivars['program_id']  = $vars['target_program_id'];
+			$ivars['cipcode']     = $vars['target_program_cipcode'];
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','detail','10',$offset,$order,$direction );
+			$data['programs']    = $result->programs;
+
+  	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['legalrequirementsmet']) OR !$vars['GETTINGSTARTED']['legalrequirementsmet']) {$vars['legalrequirementsmet'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['medicalrequirementsmet']) OR !$vars['GETTINGSTARTED']['medicalrequirementsmet']) {$vars['medicalrequirementsmet'] = 'Yes'; }
+	 		if (!isset($vars['GETTINGSTARTED']['testscores']) OR !$vars['GETTINGSTARTED']['testscores']) {$vars['testscores'] = 'Yes'; }
+ 		break;
+ 		case '4':
+    		// Get the program information for application
+  			$valid = array('program_id'=>'key', 'cipcode'=>'key');
+			$ivars['program_id']  = $vars['target_program_id'];
+			$ivars['cipcode']     = $vars['target_program_cipcode'];
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','detail','10',$offset,$order,$direction );
+			$data['programs']    = $result->programs;
+
+  	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['legalrequirementsmet']) OR !$vars['GETTINGSTARTED']['legalrequirementsmet']) {$vars['legalrequirementsmet'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['medicalrequirementsmet']) OR !$vars['GETTINGSTARTED']['medicalrequirementsmet']) {$vars['medicalrequirementsmet'] = 'Yes'; }
+	 		if (!isset($vars['GETTINGSTARTED']['testscores']) OR !$vars['GETTINGSTARTED']['testscores']) {$vars['testscores'] = 'Yes'; }
+ 			if (!isset($vars['GETTINGSTARTED']['prequisitecourses']) OR !$vars['GETTINGSTARTED']['prequisitecourses']) {$vars['prequisitecourses'] = 'No'; }
+
+		break;
+		case '5':
+    		// Get the program information for application
+    		$valid = array('course_type'=>'valid');
+		 	$ivars['course_type'] = 2;
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','courses','list','10',$offset,$order,$direction );
+			$data['courses']     = $result->courses;
+
+	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['legalrequirementsmet']) OR !$vars['GETTINGSTARTED']['legalrequirementsmet']) {$vars['legalrequirementsmet'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['medicalrequirementsmet']) OR !$vars['GETTINGSTARTED']['medicalrequirementsmet']) {$vars['medicalrequirementsmet'] = 'Yes'; }
+	 		if (!isset($vars['GETTINGSTARTED']['testscores']) OR !$vars['GETTINGSTARTED']['testscores']) {$vars['testscores'] = 'Yes'; }
+ 			if (!isset($vars['GETTINGSTARTED']['prequisitecourses']) OR !$vars['GETTINGSTARTED']['prequisitecourses']) {$vars['prequisitecourses'] = 'No'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['refreshercourses']) OR !$vars['GETTINGSTARTED']['refreshercourses']) {$vars['refreshercourses'] = 'No'; }
+    		break;
+		case '6':
+    		// Get the program information for application
+  			$valid = array('program_id'=>'key', 'cipcode'=>'key');
+			$ivars['program_id']  = $vars['target_program_id'];
+			$ivars['cipcode']     = $vars['target_program_cipcode'];
+			$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc','programs','detail','10',$offset,$order,$direction );
+			$data['programs']    = $result->programs;
+
+ 	 		if (!isset($vars['GETTINGSTARTED']['hsgrad']) OR !$vars['GETTINGSTARTED']['hsgrad']) {$vars['hsgrad'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['legalrequirementsmet']) OR !$vars['GETTINGSTARTED']['legalrequirementsmet']) {$vars['legalrequirementsmet'] = 'Yes'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['medicalrequirementsmet']) OR !$vars['GETTINGSTARTED']['medicalrequirementsmet']) {$vars['medicalrequirementsmet'] = 'Yes'; }
+	 		if (!isset($vars['GETTINGSTARTED']['testscores']) OR !$vars['GETTINGSTARTED']['testscores']) {$vars['testscores'] = 'Yes'; }
+ 			if (!isset($vars['GETTINGSTARTED']['prequisitecourses']) OR !$vars['GETTINGSTARTED']['prequisitecourses']) {$vars['prequisitecourses'] = 'No'; }
+ 	 		if (!isset($vars['GETTINGSTARTED']['refreshercourses']) OR !$vars['GETTINGSTARTED']['refreshercourses']) {$vars['refreshercourses'] = 'No'; }
+		break;
+		default:
+	}
+
+	return true;
+
+}
+
+function _vcn_getting_started_step_five($step, $activity, $errors, &$vars, &$content, &$data) {
+	 	//Verify whether the zip code is entered or not 
+	//echo 'zipcode post'.$_POST['zipcodes5a3'].' -- zipcode var'.$vars['zip'];	
+	if(empty($vars['zip']) && !isset($_POST['zipcodes5a2']) && !isset($_POST['zipcodes5a3'])){
+	$vars['navigation_error'] = _vcn_navigation_required('choose-zip');
+	}
+ 	// verify occupation
+	elseif (! array_key_exists('target_occupation-title',$vars) OR ! $vars['target_occupation-title'] )
+	{
+  		$vars['navigation_error'] = _vcn_navigation_required('target_occupation');
+  	}
+  	// verify program
+  	elseif (empty($vars['target_program_id']))
+  	{
+	$vars['navigation_error'] = _vcn_navigation_required('target-program');
+	}
+	
+}
+
+/*
+ function _vcn_getting_started_step_one ($step, $activity, $errors, &$vars, &$content, &$data) {}
+ function _vcn_getting_started_step_three($step, $activity, $errors, &$vars, &$content, &$data) {}
+ function _vcn_getting_started_step_five($step, $activity, $errors, &$vars, &$content, &$data) {}
+
+ */
+function _vcn_navigation_required($nav) {
+	$error = false;
+
+	switch ($nav)
+	{
+		case 'target_occupation' :
+			$error  = '<p>You must target a career in Step 2 Activity 2 before proceeding to this step.</p>';
+			$error .= '<p><a href="'.base_path().'getting-started/step-two/2" alt="Target Career" title="Target Career">Click here</a> to return to Step 2 Activity 2</p>';
+		break;
+		case 'target-program' :
+			$error  = '<p>You must target a program in Step 3 Activity 4 before proceeding to this activity.</p>';
+			$error .= '<p><a href="'.base_path().'getting-started/step-three/4" alt="target program" title="target program">Click here</a> to return to Step 3 Activity 4</p>';
+		break;
+		case 'choose-zip' :
+			$error  = '<p>You must choose a location in Step 1 Activity 3 before proceeding to this activity.</p>';
+			$error .= '<p><a href="'.base_path().'getting-started/step-one/3" alt="Choose Location" title="Choose Location">Click here</a> to return to Step 1 Activity 3</p>';
+		break;
+		default:
+	}
+	return $error;
+}
+
+

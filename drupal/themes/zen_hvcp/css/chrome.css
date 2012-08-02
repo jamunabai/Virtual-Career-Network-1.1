@@ -1,0 +1,86 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* $Id: ie.css,v 1.2.2.1 2010/01/20 20:11:52 johnalbin Exp $ */
+
+/**
+ * @file
+ * CSS targeted specifically for Internet Explorer for Windows.
+ *
+ * Any CSS in this file will apply to all versions of IE. You can target
+ * specific versions of IE by using conditional comments. See your sub-theme's
+ * .info file for an easy way to use them.
+ *
+ * While building your theme, you should be aware that IE limits Drupal to 31
+ * stylesheets total. The work-around for the bug is to enable CSS aggregation
+ * under: admin / settings / performance.
+ */
+
+
+/*
+ * Tabs
+ */
+
+ul.primary li a,
+ul.primary li a .tab,
+ul.secondary li a,
+ul.secondary li a .tab {
+  cursor: pointer;
+}
+
+/*
+ * Drupal nodes
+ */
+
+.node-unpublished .node-inner>* {
+  position: relative; /* Otherwise these elements will appear below the "Unpublished" text. */
+}
+
+/*
+ * Drupal admin tables
+ */
+tr.even th,
+tr.even td,
+tr.odd th,
+tr.odd td {
+  border-bottom: 1px solid #ccc; /* IE doesn't display borders on table rows */
+}
+
+/*
+ * Markup free clearing
+ */
+.clearfix {
+  zoom: 1;
+}
+
+/*
+ * Header
+ */
+ 
+#vcn-header-navbar { margin:25px 15px 0 0px; }
+/* Copyright */
+
+p.copyright-text { clear:none; float:left; margin: 20px 0 0 15px; width:540px;}
+/*
+ * Training
+ */
+#training-search-container { padding-bottom: 10px; }
+
+.in-my-neighborhood { display:inline-block; padding:23px 125px; }
+.training-detail-right.gray { margin-top: 0px; }
+
+#step-1-zipcode-inner {position: relative; padding-top: 1px;}
+#step-1-zipcode-inner table {margin-top: 12px;}
+
+.fl-input {width:212px; padding:4px 5px; border:1px solid #000;}

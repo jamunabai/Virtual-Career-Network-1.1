@@ -1,0 +1,442 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module for showing the Placement Exams form in a block.
+ */
+
+if(!function_exists('connectIt'))
+{
+function connectIt()
+  {
+  //extracting database
+  $dbpull .= hvcp_get_db_url();
+  $tempArr1=explode("/",$dbpull);
+  $tempArr2=explode(":",$tempArr1[2]);
+  $dbuser=$tempArr2[0];
+  $tempArr3=explode("@",$tempArr2[1]);
+  $dbpass=$tempArr3[0];
+  $dbserver=$tempArr3[1].":3306";
+  unset($tempArr1,$tempArr2,$tempArr3);
+
+  //For now, until we get the REST server set up, we'll just pull the data directly from the database
+  $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+    or die("Error making database connection: ".mysql_error());
+  $db=mysql_select_db('hvcp',$connection)
+    or die("Error selecting database: ".mysql_error());
+  return($connection);
+  }
+}
+
+if(!function_exists('connectIt2'))
+{
+function connectIt2()
+  {
+  $connection=mysql_connect('localhost','root','');
+  $db=mysql_select_db('hvcp',$connection);
+  return($connection);
+  }
+}
+
+/**
+ * Implementation of hook_block
+ */
+function placement_tests_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "Placement Exams" when you list blocks in admin mode
+    $blocks[0]['info']=t('Placement Exams');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "Placement Exams"
+    $blocks['subject']=t('Placement Exams');
+
+    /**
+     * Section for tabbed interface
+     */
+    drupal_add_css("sites/all/modules/custom/vcn/pla_main/css/pla_supplemental.css");
+    include(drupal_get_path('module','pla_main')."/tabs.inc.php");
+    $content .= "<div class=\"container-div\">";
+    /** end tabbed interface **/
+
+    $content .="<div class=\"leftSide\">";
+    
+    if (!isset($_GET['ace_id'])) {
+	    $content .= "<h3>College Credit for National Exams</h3>
+      	  <p>Many colleges and universities recognize and accept national examinations to meet college course requirements. 
+      	  These exams include ";
+	    
+	    $content .= vcn_build_link_window_opener('http://clep.collegeboard.org/students', 'CLEP', false) . ', ';
+	    $content .= vcn_build_link_window_opener('http://www.getcollegecredit.com', 'DSST', false) . ' (also known as DANTES), ';
+	    $content .= vcn_build_link_window_opener('http://www.excelsior.edu/ecapps/exams/creditByExam.jsf?gw=1', 'Excelsior', false);
+	    
+	    $content .= ", and others.  
+	      Some colleges also accept Advanced Placement (AP) exams (normally taken in high school) for college credit.   
+	      </p>
+	      ";
+    } else {
+    	$content .= "<h3>College Credit for National Exams Details</h3>";
+    }
+    
+    /**
+     * This next section gets the CMA User ID...
+     */
+    global $user;
+    if($user->uid!=0) $userID=$user->uid;
+    else
+      {
+      $userID=session_id();
+      if($userID=="")
+        {
+        $userID=$_COOKIE[session_name()];
+        }
+      }
+    $select="SELECT USER_ID FROM vcn_cma_user WHERE USER_SESSION_ID=\"$userID\"";
+    $connection=connectIt();
+    $result=mysql_query($select)
+      or die("Error getting USER_ID from vcm_cma_user: ".mysql_error());
+    mysql_close($connection);
+    $row=mysql_fetch_assoc($result);
+    extract($row);
+    /**
+     * end section that gets CMA User ID
+     */
+
+    // get the last course for the user in the database
+    $select="SELECT MAX(USER_COURSE_ID) AS DB_LAST_COURSE FROM vcn_cma_user_course WHERE USER_ID=\"$USER_ID\" AND MILITARY_YN=\"E\"";
+    $connection=connectIt();
+    $result=mysql_query($select)
+      or die("Error selecting last user course".mysql_error());
+    mysql_close($connection);
+    if($row=mysql_fetch_assoc($result)) extract($row);
+    else $DB_LAST_COURSE="";
+
+    // set the last extracted courses
+    if($DB_LAST_COURSE!="")
+      {
+      $select="SELECT COURSE_CODE FROM vcn_cma_user_course WHERE USER_COURSE_ID=\"$DB_LAST_COURSE\"";
+      $connection=connectIt();
+      $result=mysql_query($select)
+        or die("Error selecting info from last record: ".mysql_error);
+      mysql_close($connection);
+      $row=mysql_fetch_assoc($result);
+      extract($row);
+      }
+    else
+      {
+      $COURSE_CODE="";
+      }
+
+    if($_POST['save']=="save")
+      {
+      $ace_id=$_POST['ace_id'];
+      $start_date=$_POST['start_date'];
+      $end_date=$_POST['end_date'];
+      if($COURSE_CODE != $ace_id."|".$start_date."|".$end_date)
+        {
+        $insert="INSERT INTO vcn_cma_user_course (USER_ID,COURSE_CODE,MILITARY_YN) VALUES (\"$USER_ID\",\"".$ace_id."|".$start_date."|".$end_date."\",\"E\")";
+        $connection=connectIt();
+        $result=mysql_query($insert) or die("Error selecting last military course id: ".mysql_error());
+        mysql_close($connection);
+        }
+      }
+
+    //global $base_url;
+    $base_url = base_path();
+
+    /**
+     * section that deletes a posted request
+     */
+    if(isset($_POST['USER_COURSE_ID']) && $_POST['function']=="delete")
+      {
+      $USER_COURSE_ID=$_POST['USER_COURSE_ID'];
+      $del="DELETE FROM vcn_cma_user_course WHERE USER_COURSE_ID=\"$USER_COURSE_ID\"";
+      $connection=connectIt();
+      $results=mysql_query($del) or die("error removing record from table: ".mysql_error());
+      mysql_close($connection);
+      }
+    /**
+     * end section that deletes Posted request
+     */
+
+
+    if(!isset($_GET['ace_id'])){
+    $content .= "<p>To see if any national exams that you have taken have ACE credit recommendations, look up the information below.</p>";
+
+    $content .= "<form method=\"POST\" action=\"placement-exams#results\">";
+    $content .= "<p>Select testing organization: <br />";
+    $content .= "<label>\r\n";
+    $content .= "<select name=\"company\">\r\n";
+
+    // get the list of companies to refine the search
+    $select="SELECT * FROM vcn_ace_national_course_company where ace_type=\"exam\" ORDER BY company_name";
+    $localConnection=connectIt();
+    $localResults=mysql_query($select) or die("Error running query: ".mysql_error());
+    mysql_close($localConnection);
+
+    while($row=mysql_fetch_assoc($localResults))
+      {
+      extract($row);
+      if(!isset($company_name)) $company_name="Unknown Company - $ace_code";
+      if(urldecode($_REQUEST['company'])=="$ace_code")
+        $content .= "<option value=\"$ace_code\" selected>$company_name</option>\r\n";
+      else
+        $content .= "<option value=\"$ace_code\">$company_name</option>\r\n";
+      }
+
+    $content .= "</select></label></p>\r\n";
+    $content .= "<p><label for=\"searchVal\">Enter key words and/or phrases to search on or leave blank to see all exams:</label><br />";
+    $content .= "<input type=\"text\" name=\"searchVal\" id=\"searchVal\" value=\"".$_POST['searchVal']."\" size=50/></p>";
+    
+    $content .= "<p>Each college requires official transcripts for examination results. You must meet the college's 
+    			   requirement for a passing score in order to transfer it into a degree program. For more information on ordering a transcript for a national exam, ";
+    
+    $content .= vcn_build_link_window_opener('http://www.acenet.edu/AM/Template.cfm?Section=College_Services&Template=/CM/HTMLDisplay.cfm&ContentID=26938', 'click here', false) . '.';
+    
+	$content .= "<br/></p>";
+    
+    $content .= "<input type=\"image\" src=\"$base_url/sites/all/modules/custom/vcn/occupations/ocupations_search/search.png\" value=\"Search\" alt=\"Search\" title=\"Search\" /></p>";
+    $content .= "</form>";
+
+    /**
+     * Section added to delete already selected courses
+     */
+    $query="SELECT USER_COURSE_ID,COURSE_CODE from vcn_cma_user_course WHERE USER_ID=\"$USER_ID\" AND MILITARY_YN=\"E\"";
+    $connection=connectIt();
+    $result=mysql_query($query) or die("error selecting national exams: ".mysql_error());
+    mysql_close($connection);
+    $lineCount=mysql_num_rows($result);
+    $testCount=0;
+    if($lineCount>0)
+      {
+      $content .= "<p><b>The following national exams have been saved:</b></p>";
+      while($row=mysql_fetch_assoc($result))
+        {
+        extract($row);
+        $tempArr=explode("|",$COURSE_CODE);
+        $tmpAceID=$tempArr[0];
+        $tmpStartDate=$tempArr[1];
+        $tmpEndDate=$tempArr[2];
+        $connection2=connectIt();
+        $select2="SELECT first_title FROM vcn_ace_national_course WHERE ace_id=\"$tmpAceID\" AND start_date=\"$tmpStartDate\" AND end_date=\"$tmpEndDate\"";
+        $result2=mysql_query($select2) or die("error extracting national exam credits: ".mysql_error());
+        mysql_close($connection2);
+        while($row2=mysql_fetch_assoc($result2))
+          {
+          extract($row2);
+          if($testCount%2==0)
+            {
+            $content .= "<div class=\"line1\">";
+            }
+          else
+            {
+            $content .= "<div class=\"line2\">";
+            }
+          $content .= "<div class=\"StepFiveDivStack\">\r\n
+                  <form method=\"POST\" action=\"$base_url/placement-exams\">\r\n";
+          $content .= "<div class=\"StepFiveDivColumn1\">\r\n
+                  <a href=\"$path?view=y&ace_id=$tmpAceID&start_date=$tmpStartDate&end_date=$tmpEndDate&company=Exam\">$first_title</a>\r\n
+                </div>\r\n
+                <div class=\"StepFiveDivColumn2\">\r\n
+                  <input type=\"hidden\" name=\"USER_COURSE_ID\" value=\"$USER_COURSE_ID\" />\r\n
+                  <input type=\"hidden\" name=\"function\" value=\"delete\" />\r\n
+                </div>\r\n
+                <div class=\"StepFiveDivColumn3\">\r\n
+                  <input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/delete.png\" alt=\"Remove this item from your saved list\" title=\"Remove this item from your saved list\">\r\n
+                </div>\r\n";
+          $content .= "<br /></form></div></div>\r\n";
+          $testCount++;
+          }
+        }
+      }
+    /**
+     * End section to delete selected courses
+     */
+
+
+    if(isset($_POST['searchVal']))
+      {
+      $company=$_POST['company'];
+      $connection=connectIt();
+      $branch=mysql_real_escape_string($_POST['branch'],$connection);
+      $searchVal=mysql_real_escape_string(html_entity_decode($_POST['searchVal']),$connection);
+      $searchValArray=explode(" ",$searchVal);
+      if(count($searchValArray)==1)
+        {
+        $select="SELECT *
+                 FROM   vcn_ace_national_course
+                 WHERE  ace_id LIKE \"%$company%\"
+                 AND    branch = \"Exam\"
+                 AND    (first_title LIKE \"%$searchVal%\"
+                 OR     second_title LIKE \"%$searchVal%\")
+                 ";
+        }
+      elseif(count($searchValArray)==0)
+        {
+        $select="";
+        }
+      else // count($searchValArray
+        {
+        $company=$_POST['company'];
+        $select="SELECT *
+                 FROM   vcn_ace_national_course
+                 WHERE  ace_id LIKE \"%$company%\"
+                 AND    branch = \"Exam\"
+                 ";
+        foreach($searchValArray as $searchItem)
+          {
+          $select .= "AND    (first_title LIKE \"%$searchItem%\"
+                      OR     second_title LIKE \"%$searchItem%\")
+                      ";
+          }
+        }
+
+
+      if($select!="") $results=mysql_query($select)
+        or die("Error running select statement $select: ".mysql_error());
+      mysql_close($connection);
+
+      $lineCount=mysql_num_rows($results);
+      $content .= "<a name=\"results\"></a>";
+      if($lineCount > 0)
+        {
+        $content .= "<p>Based upon your search parameters, we suggest the following possible matches:</p><ul>";
+        }
+      else
+        {
+        $content .= '<p><strong style="color:red;">No results found. Please try altering your search.</strong></p><ul>';
+        }
+
+      while($row=mysql_fetch_assoc($results))
+        {
+        extract($row);
+        if($end_date=="999999") $endDate="Present";
+        else $endDate=substr($end_date,4,2)."/".substr($end_date,0,4);
+        $startDate=substr($start_date,4,2)."/".substr($start_date,0,4);
+        $urlBranch=urlencode($branch);
+        $content .= "<li class=\"extra-space\"><a href=\"$base_url/placement-exams?ace_id=$ace_id&start_date=$start_date&end_date=$end_date&company=$urlBranch\">$first_title (Course taken between $startDate and $endDate)</a></li>";
+        }
+      $content .= "</ul>";
+      }
+    }
+
+    if(isset($_GET['ace_id']) && !isset($_POST['searchVal']))
+      {
+      $ace_id=$_GET['ace_id'];
+      $start_date=$_GET['start_date'];
+      $end_date=$_GET['end_date'];
+      $select1="SELECT *
+                FROM   vcn_ace_national_course
+                WHERE  ace_id=\"$ace_id\"
+                AND    start_date=\"$start_date\"
+                AND    end_date=\"$end_date\"
+                AND    branch = \"Exam\"";
+    /*
+      $select2="SELECT *
+                FROM   vcn_ace_military_course
+                WHERE  ace_id=\"$ace_id\"
+                AND    start_date=\"$start_date\"
+                AND    end_date=\"$end_date\"";
+    */
+      $select3="SELECT *
+                FROM   vcn_ace_national_exam_credit
+                WHERE  ace_id=\"$ace_id\"
+                AND    start_date=\"$start_date\"
+                AND    end_date=\"$end_date\"";
+    /*
+      $select4="SELECT *
+                FROM   vcn_ace_national_course_credit_span
+                WHERE  ace_id=\"$ace_id\"
+                AND    start_date=\"$start_date\"
+                AND    end_date=\"$end_date\"";
+    */
+      $connection=connectIt();
+      $results1=mysql_query($select1)
+        or die("Error running $select1: ".mysql_error());
+      //$results2=mysql_query($select2)
+      //  or die("Error running $select2: ".mysql_error());
+      $results3=mysql_query($select3)
+        or die("Error running $select3: ".mysql_error());
+      //$results4=mysql_query($select4)
+      //  or die("Error running $select4: ".mysql_error());
+      mysql_close($connection);
+
+      $row1=mysql_fetch_assoc($results1);
+      extract($row1);
+      /*
+      $militaryCourses="";
+      while($row2=mysql_fetch_assoc($results2))
+        {
+        extract($row2);
+        $militaryCourses .="$course_id, ";
+        }
+      $militaryCourses = trim($militaryCourses);
+      if(strlen($militaryCourses)>0)
+        $militaryCourses=substr($militaryCourses,0,-1);
+      */
+
+      $content .= "<div class=\"line2\">";
+      $content .= "<p>ACE ID: <b>$ace_id</b></p>";
+      $content .= "<p>Primary Title: <b>$first_title</b></p>";
+      if($second_title!="" && $second_title!=NULL)
+        $content .= "<p>Secondary Title: <b>$second_title</b></p>";
+      if($objective!="" && $objective!=Null)
+        $content .= "<p>Objective: $objective</p>";
+      if($instruction!="" && $instruction !=NULL)
+        $content .= "<p>Instruction: $instruction</p>";
+      if($ref_sequence!="" && $ref_sequence!=NULL)
+        {
+        $refDate=substr($ref_date,4,2)."/".substr($ref_date,0,4);
+        $content .= "Course reference is $ref_sequence $refDate see $ref_ace_id";
+        }
+      if($results3!=NULL)
+        {
+        $courseCreditDetails="";
+        while($row3=mysql_fetch_assoc($results3))
+          {
+          extract($row3);
+          $courseCreditDetails .= "<p>$credit_info</p>";
+          }
+        $content .= "<p>Course Hours:";
+        $content .= "$courseCreditDetails</p>";
+        } // end if($results3!=NULL)
+      elseif($credit_info!="" && $credit_info!=NULL)
+      $content .= "<p>Additional Course Hour Information: $credit_info</p>";
+      $content .= "</div>";
+
+      $content .= "<div>";
+      $content .= "<form method=\"POST\" action=\"$base_url/placement-exams\">";
+      $content .= "<br />";
+      $content .= "<input type=\"hidden\" name=\"ace_id\" value=\"$ace_id\" />";
+      $content .= "<input type=\"hidden\" name=\"start_date\" value=\"$start_date\" />";
+      $content .= "<input type=\"hidden\" name=\"end_date\" value=\"$end_date\" />";
+      $content .= "<input type=\"hidden\" name=\"military_yn\" value=\"E\" />";
+      $content .= "<input type=\"hidden\" id=\"save\" name=\"save\" value=\"save\" />";
+      
+      if (!isset($_GET['view']) || strlen($_GET['view']) == 0) {
+      	$content .= "<input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/save-to-my-learning-inventory.png\" alt=\"Save\" title=\"Save\"/>";
+      }
+      
+      $content .= "&#160;&#160;";
+      $content .= "<input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/search_again.jpg\" onclick=\"document.getElementById('save').value='';\" name=\"searchAgain\" value=\"searchAgain\" alt=\"search again\" title=\"Search Again\"/>";
+      $content .= "</form>";
+      $content .= "</div>";
+
+  } // end if(isset($_GET['ace_id']) && !isset($_POST['searchVal']))
+
+    
+
+	$content .= "<p><b>Hint:</b> Remember that each college determines how your prior learning might apply to a specific degree program.";
+	$content .= "</div> <!-- end div container-div -->";
+	$content .= "</div><!-- end div leftSide -->";
+	
+    $blocks['content']=$content;
+    return $blocks;
+    break;
+
+    } //end switch($op)
+  } // end function placement_tests_block

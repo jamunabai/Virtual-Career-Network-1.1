@@ -1,0 +1,151 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* $Id: ie.css,v 1.2.2.1 2010/01/20 20:11:52 johnalbin Exp $ */
+
+/**
+ * @file
+ * CSS targeted specifically for Internet Explorer for Windows.
+ *
+ * Any CSS in this file will apply to all versions of IE. You can target
+ * specific versions of IE by using conditional comments. See your sub-theme's
+ * .info file for an easy way to use them.
+ *
+ * While building your theme, you should be aware that IE limits Drupal to 31
+ * stylesheets total. The work-around for the bug is to enable CSS aggregation
+ * under: admin / settings / performance.
+ */
+
+#prev {margin-top:5px;} 
+#pager-table {margin-top:3px; } 
+ 
+#toolbar-links  { width: 310px; }
+
+#step-1-jobs-1 ul,
+#step-1-jobs-2 ul {list-style: disc inside;}
+
+#step-1-jobs-1 ul li.first,
+#step-1-jobs-2 ul li.first {clear: both;}
+
+#step-1-zipcode-inner {padding-top: 12px;}
+/* HEADER */
+.logo { display:inline-block; }
+ul.vcn-gs-activity li.selected .vcn-gs-activity-arrow { display:inline; z-index:20; }
+.vcn-gs-activity-num {display:inline; }
+/*.vcn-gs-activity-button {display:inline;border:1px solid black;}*/
+#vcn-gs-activities {}
+
+ul.vcn-gs-activity li.selected .vcn-gs-activity-arrow { margin-left: -24px; }
+ul.vcn-gs-activity li { float: none; }
+
+#vcn-gs-btn-skip { padding:25px 33px; }
+#vcn-gs-btn-back { padding:25px 33px; }
+#vcn-gs-btn-next { padding:23px 33px; }
+    
+/* FOOTER */
+#vcn-footer { padding-top:15px; padding-left:5px; padding-right:5px; padding-bottom:25px;}
+.facebook  {display:inline-block; }
+.twitter {display:inline-block;  }  
+.linked-in {display:inline-block;  }
+.tellus {display:inline-block; padding-left: 84px; padding-right: 97px; }
+#copyright { width:100%;}
+#copyright p.copyright-text { clear:none; float:left; margin: 20px 0 0 15px; width:540px;}
+#vcn-footer-connect {margin-left:-10px;}
+
+/* TRAINING */
+.save-to-notebook.large { display:inline-block; padding:12px 60px; padding-right: 24px; }
+.target-to-notebook.large { display:inline-block; padding:12px 60px; padding-right: 112px; }
+
+.imgC1 { 
+position: absolute; 
+	margin-top: -138px; 
+	left: 75px; 
+	z-index: 3; 
+} 
+
+.imgC5 { 
+position: absolute; 
+	margin-top: -138px; 
+	left: 540px; 
+	z-index: 3; 
+} 
+
+.imgC4 { 
+position: absolute; 
+	margin-top: -142px; 
+	left: 306px; 
+	z-index: 3; 
+} 
+.imgC3 { 
+position: absolute; 
+	margin-top: -142px; 
+	left: 305px; 
+	z-index: 3; 
+} 
+
+.seemore21 {
+	margin-top:10px;
+	padding-bottom:0px;
+}
+.seemore22 {
+	margin-top:-10px;
+	padding-bottom:10px;
+}
+
+#findworkright {
+margin-left:25px;
+}
+
+#sellcma {
+
+margin-left:711px; 
+width:232px; 
+margin-top:-1150px;
+
+}
+
+.resources-header-cma {
+
+margin-right:-10px;
+
+}
+#copyright {
+	width: 85%;
+}
+
+#go-button-grid {
+float:left; 
+margin-left:273px;
+margin-top:-22px;
+}
+
+.pursuitul {
+
+margin-left:0px;
+
+}
+.videoli {
+
+margin-left:10px;
+
+}
+
+
+#explore-search-jobtitle {
+
+ margin-top:-22px; margin-left:282px; height:19px;
+
+}
+
+select.fl-input {width:205px; padding:4px 5px; border:1px solid #000;}

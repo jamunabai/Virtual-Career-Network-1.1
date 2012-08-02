@@ -1,0 +1,51 @@
+
+SOFTWARE REQUIREMENTS
+
+The VCN distribution is intended to be used in conjunction with Drupal 6 and Doctrine 1, and assumes expertise in both systems.  The "drupal" distribution should be installed within Drupal 6, and has been tested and deployed with Drupal 6.25, available here:
+
+http://drupal.org/node/1461656 
+
+The theme installation requires the Zen theme, available at Drupal.org.  The included custom theme "zen_hvcp" is a sub-theme of Zen.
+
+The following contrib modules, also available at Drupal.org, are used.  (Some of these modules, like memcached, are optional, and can be disabled.) 
+
+advagg
+ahah_helper
+autoload
+clients
+ctools
+custom
+devel
+email_registration
+imagemenu
+imce
+imce_mkdir
+imce_wysiwyg
+jqp
+jquery_update
+js_injector
+login_destination
+logintoboggan
+memcache
+messages_alter
+mnet
+multichoice
+panels
+subpath_alias
+quiz
+url_alter
+views_slideshow
+views_slideshow_ddblock
+wysiwyg
+
+The "rest" distribution requires Doctrine, and has been tested against Doctrine 1.1, which is available here:
+
+http://www.doctrine-project.org/blog/doctrine-1-1-released.html
+
+Other open source packages that may be required by components of this code include:
+
+phpsniff
+http://phpsniff.sourceforge.net/
+
+TCPDF
+http://www.tcpdf.org/

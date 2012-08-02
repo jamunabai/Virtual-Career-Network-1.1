@@ -1,0 +1,110 @@
+<?php
+// $Id:$
+	
+/**
+ * Implementation of hook_block().
+ */
+function front_page_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('Front Page');
+	  $blocks[1]['info'] = t('Provider Front Page');
+      
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Front Page'), 
+         			'content' => _front_page_main(),
+         		);
+				
+       		break;
+			case 1: 
+         		$block = array(
+   					'subject' => t('Provider Front Page'), 
+         			'content' => _front_page_provider_main(),
+         		);
+				
+       		break;			
+			case 2: 
+         		$block = array(
+   					'subject' => t('Provider Login Page'), 
+         			'content' => _front_page_provider_login(),
+         		);
+       		break;					
+        	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+ 
+ 
+
+/**
+ * Implementation of menu().
+ */
+function front_page_menu() {
+	$items = array();
+	
+  	/* HOME PAGE */
+	$items[''] = array(
+		'title' => 'Front Page', 
+		'page callback' => '_front_page_main',
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  		
+  	/* PROVIDER HOME PAGE */
+	$items['provider'] = array(
+		'title' => 'Provider Home Page', 
+		'page callback' => '_front_page_provider_main',
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);		
+	
+  	/* PROVIDER LOGIN PAGE */
+	$items['providerlogin'] = array(
+		'title' => 'Provider Home Page', 
+		'page callback' => '_front_page_provider_login',
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);		
+	
+  	
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function front_page_theme( ) { 
+ 		
+  	return array (
+  		'front_page_main' => array ( 'template'=>'templates/front_page_main', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'front_page_provider_main' => array ( 'template'=>'templates/front_page_provider_main', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'front_page_provider_login' => array ( 'template'=>'templates/front_page_provider_login', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+
+ 	);
+}
+
+
+function _front_page_main() {
+
+  	return theme('front_page_main', $errors, $vars, $content, $data);
+}
+
+function _front_page_provider_main() {
+
+  	return theme('front_page_provider_main', $errors, $vars, $content, $data);
+}
+ 
+function _front_page_provider_login() {
+
+  	return theme('front_page_provider_login', $errors, $vars, $content, $data);
+} 

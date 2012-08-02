@@ -1,0 +1,287 @@
+<?php
+// $Id:$
+	
+/**
+ * @file
+ * Module for fetching search data from the VCN Training data source.
+ * This module provides the filters for training and course searches.
+ *
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+function vcn_online_courses_block($op='list', $delta=0, $edit=array()) {
+switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Online Courses');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _vcn_get_online_courses();
+      return $block;
+      break;
+  }
+}
+
+
+/**
+ * Implementation of menu().
+ */
+function vcn_online_courses_menu() {
+	$items = array();
+	
+	$items['online-courses'] = array(
+		'title' => 'Take a Course Online',
+		'page callback' => '_vcn_get_online_courses',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+
+  	);
+	$items['online-courses/list'] = array(
+		'title' => 'VCN Online Courses',
+		'page callback' => '_vcn_get_online_courses_grid',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  	);
+	$items['online-courses/course-grid'] = array(
+		'page callback' => '_vcn_update_online_courses_grid',
+ 	   	'title' => 'update courses grid', 
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+	$items['online-courses/take-online'] = array(
+		'title' => 'Take a Course Online',
+		'page callback' => '_vcn_take_online_courses',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  	); 	
+	
+	$items['online-courses/non-credit-courses'] = array(
+		'title' => 'Non-Credit Refresher Courses',
+		'page callback' => '_vcn_non_credit_courses',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  	); 
+
+	$items['online-courses/for-credit-courses'] = array(
+		'title' => 'For Credit Courses',
+		'page callback' => '_vcn_for_credit_courses',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  	); 
+	
+	$items['online-courses/hit'] = array(
+		'title' => 'Healthcare Information Technology (HIT) Instructional Program',
+		'page callback' => '_vcn_hit',
+		'page arguments' => array('1'),
+		'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  	); 	
+  	
+   	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_online_courses_theme( ) {
+  	return array (
+  		'vcn_online_courses' => array ( 'template'=>'templates/online_courses', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  		'vcn_online_courses_grid' => array ( 'template'=>'templates/online_courses_grid','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  		'vcn_online_courses_grid_update' => array ( 'template'=>'templates/online_courses_grid_update', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  		'vcn_take_online_courses' => array ( 'template'=>'templates/take_online_courses','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_non_credit_courses' => array ( 'template'=>'templates/non_credit_courses','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_for_credit_courses' => array ( 'template'=>'templates/for_credit_courses','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_hit' => array ( 'template'=>'templates/hit','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 	);
+}
+ 
+ 
+
+//pulls in moodle course
+ function _vcn_get_online_courses() {
+ //	$includes  = drupal_get_path('module','vcn_online_courses') .'/includes';
+ // require_once($includes . '/vcn_online_courses_common.inc');
+
+ //	$online_courses_path = drupal_get_path('module','vcn_online_courses');
+ //	drupal_add_css($online_courses_path.'/css/vcn_online_courses.css', 'module','all');
+ 
+ 	$errors = $content = $data = false;
+        
+  	return theme('vcn_online_courses', $errors, $vars, $content, $data);
+}
+
+
+ function _vcn_get_online_courses_grid () {
+	$includes  = drupal_get_path('module','vcn_online_courses') .'/includes';
+	require_once($includes . '/vcn_online_courses_common.inc');
+
+	$online_courses_path = drupal_get_path('module','vcn_online_courses');
+ 	drupal_add_css($online_courses_path.'/css/vcn_online_courses.css', 'module','all');
+ 
+ 	$errors = $content = $data = false;
+ 	
+  	// get the type
+ 	$args   = arg();
+ 	$type   = 'courses';
+	
+ 	$valid = vcn_online_courses_get_valid();
+   	
+ 	// Get _POST vars
+ 	vcn_online_courses_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_online_courses_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_online_courses_vars_arg($vars, $args);
+ 
+  	// Set additional vars
+ 	vcn_online_courses_vars_set($vars, $type);  	
+ 	
+  	// set specific vars
+	$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+	$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+	$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+	$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+	$vars['pg'] = $pg =  1;
+ 
+	// set page vars  	 	
+	if ($count > 0 ) $total_pgs = ceil($count / $limit );
+	if ($pg > $total_pgs) { $pg = $vars['total_pgs']; }
+	if ($pg < 1) {$pg = 1; }
+	$offset = ($pg * $limit) - ($limit);
+
+	// get the data
+ 	$result = vcn_online_courses_get_data ($errors,$vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+	$data = $result->$type; 
+ 
+  	$content['pagination']  = include($includes . '/pagination.inc');
+  	
+  	return theme('vcn_online_courses_grid', $errors, $vars, $content, $data);
+}
+   
+   
+ function _vcn_take_online_courses () {
+	$includes  = drupal_get_path('module','vcn_online_courses') .'/includes';
+	require_once($includes . '/vcn_online_courses_common.inc');
+
+	$online_courses_path = drupal_get_path('module','vcn_online_courses');
+ 	drupal_add_css($online_courses_path.'/css/vcn_online_courses.css', 'module','all');
+ 
+ 	$errors = $content = $data = false;
+ 	
+ 	
+  	// get the type
+ 	$args   = arg();
+ 	$type   = 'courses';
+	
+ 	$valid = vcn_online_courses_get_valid();
+   	
+ 	// Get _POST vars
+ 	vcn_online_courses_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_online_courses_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_online_courses_vars_arg($vars, $args);
+ 
+  	// Set additional vars
+ 	vcn_online_courses_vars_set($vars, $type);  	
+ 	
+  	// set specific vars
+	$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+	$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+	$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+	$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+	$vars['pg'] = $pg =  1;
+ 
+	// set page vars  	 	
+	if ($count > 0 ) $total_pgs = ceil($count / $limit );
+	if ($pg > $total_pgs) { $pg = $vars['total_pgs']; }
+	if ($pg < 1) {$pg = 1; }
+	$offset = ($pg * $limit) - ($limit);
+
+	// get the data
+ 	$result = vcn_online_courses_get_data ($errors,$vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+	$data = $result->$type; 
+ 
+  	$content['pagination']  = include($includes . '/pagination.inc');
+  	
+  	return theme('vcn_take_online_courses', $errors, $vars, $content, $data);
+}   
+  
+ function _vcn_get_online_courses_update () {
+	$includes  = drupal_get_path('module','vcn_online_courses') .'/includes';
+	require_once($includes . '/vcn_online_courses_common.inc');
+
+	$online_courses_path = drupal_get_path('module','vcn_online_courses');
+ 	drupal_add_css($online_courses_path.'/css/vcn_online_courses.css', 'module','all');
+ 
+ 	$errors = $content = $data = false;
+        
+	// get the type
+ 	$args   = arg();
+ 	$type   = 'courses';
+  	
+ 	$valid = vcn_online_courses_get_valid();
+   		 	
+  	// Get _POST vars
+ 	vcn_training_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_training_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_training_vars_arg($vars, $args);
+
+  	// Set additional vars
+ 	vcn_training_vars_set($vars, $type);
+  	 	   
+	// get the counts
+  	// set specific vars
+  	$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+  	$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+  	$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+  	$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+  	$pg        = ( array_key_exists('pg_'.$type, $vars) AND $vars['pg_'.$type] ) ? $vars['pg_'.$type] : 1;
+ 
+   
+  	// set page vars  	 	
+  	if ($count > 0 ) $total_pgs = ceil($count / $limit );
+  	if ($pg > $total_pgs) { $pg =$total_pgs; }
+	if ($pg < 1) {$pg = 1; }
+	$offset = ($pg * $limit) - ($limit);
+   
+  	// get the data
+	$result = vcn_online_courses_get_data ($errors, $vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+ 	$data = $result->$type;
+
+ 	$content['pagination']  = include($includes . '/pagination.inc');
+          
+  	return theme('vcn_online_courses_grid_update', $errors, $vars, $content, $data);
+}  
+
+ function _vcn_non_credit_courses() {
+        
+  	return theme('vcn_non_credit_courses', $errors, $vars, $content, $data);
+}
+
+ function _vcn_for_credit_courses() {
+        
+  	return theme('vcn_for_credit_courses', $errors, $vars, $content, $data);
+}
+
+ function _vcn_hit() {
+        
+  	return theme('vcn_hit', $errors, $vars, $content, $data);
+}

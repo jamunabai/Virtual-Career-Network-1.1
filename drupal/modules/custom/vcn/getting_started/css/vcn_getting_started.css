@@ -1,0 +1,401 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+@CHARSET "ISO-8859-1";
+
+h1.title {color:#A71E29; font-family: arial;  font-size: 20px; font-weight: bold; padding:0 0 5px 30px;}
+
+a { cursor:pointer; text-decoration: underline; }
+
+/*.green-bullet  {list-style-type:none; float:left; padding:0;}
+.green-bullet {clear:both; float:left; height:10px; width:960px}*/
+
+
+#leftcolumn { width: 30%; /*border: 1px solid red;*/ float: left}
+#rightcolumn { width: 57%; /*border: 1px solid red;*/ float: right; margin-top:-20px;}
+
+.tooltip {
+	/*border-bottom: 1px dotted #000000;*/ color: #000000; outline: none;
+	cursor: help; text-decoration: none;
+	position: relative;
+}
+.tooltip span {
+	margin-left: -999em;
+	position: absolute;
+}
+.tooltip:hover span {
+	border-radius: 5px 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; 
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.1); -webkit-box-shadow: 5px 5px rgba(0, 0, 0, 0.1); -moz-box-shadow: 5px 5px rgba(0, 0, 0, 0.1);
+	font-family: Calibri, Tahoma, Geneva, sans-serif;
+	position: absolute; left: 1em; top: 2em; z-index: 99;
+	margin-left: 0; width: 500px;
+}
+.tooltip:hover img {
+	border: 0; margin: -10px 0 0 -55px;
+	float: left; position: absolute;
+}
+.tooltip:hover em {
+	font-family: Candara, Tahoma, Geneva, sans-serif; font-size: 1.2em; font-weight: bold;
+	display: block; padding: 0.2em 0 0.6em 0;
+}
+.classic { padding: 0.8em 1em; }
+.custom { padding: 0.5em 0.8em 0.8em 2em; }
+* html a:hover { background: transparent; }
+.classic {background: white; border: 1px solid #AB0534; }
+.critical { background: #FFCCAA; border: 1px solid #FF3334;	}
+.help { background: #9FDAEE; border: 1px solid #2BB0D7;	}
+.info { background: #9FDAEE; border: 1px solid #2BB0D7;	}
+.warning { background: #FFFFAA; border: 1px solid #FFAD33; }
+
+.green-bullet
+{
+padding-left: 20px;	
+list-style-type:none;	
+background-image: url(../images/green_check_mark.jpg);
+background-repeat: no-repeat;
+background-position: 0 .5em;
+}
+
+.xouter{
+width:90%;
+margin-left:5%;
+/*border:1px solid #000;*/
+}
+.xleftcol
+{
+float: left;
+width: 34%;
+margin-left: -25px;
+/*background-color:#809900;*/
+}
+.xmiddlecol
+{
+float: left;
+width: 33%;
+margin-left: 10px;	
+/*background-color:#eff2df;*/
+}
+.xrightcol
+{
+float:left;
+width: 33%;
+margin-left: 4px;	
+/*background-color:#d2da9c;*/
+}
+
+.smiley-face
+{
+	
+list-style-type:none;	
+background-image: url(../images/smiley-face.jpg) ;
+background-position: bottom;
+background-repeat: no-repeat;
+}
+
+.cmacontainer {
+	font-size:14px;
+}
+
+.snapshot {
+	font-size:12px;
+	float:right;
+	padding-left:10px;
+}
+
+/* for Factoid */
+.intro {
+	padding-left:16px;
+	padding-right:10px;
+}
+
+
+/* COMMON STYLES */
+.red { color:#A71E29; }
+.black { color:#000; }
+.hpadding { padding:0 20px 0 0; }
+.hbpadding { padding:0 20px 0 10px; }
+.vcn-gs-heading { font-size:18px; color:#A71E29; font-weight:bold;padding:10px 0; float:left; width:100%; margin-left: 10px;}
+.vcn-gs-heading-green { font-size:16px; color:#189AB0; font-weight:bold;}
+.vcn-start-pwidth{width:380px;}
+.vcn-gs-heading-summary { font-size:18px; color:#A71E29; font-weight:bold; padding:10px 0; float:left; width:100%; margin-left: -2px;}
+/* start : class added by kunal */
+.vcn-gs-my-heading { font-size:18px; color:#A71E29; font-weight:bold;padding:5px; float:left; width:50%; }
+/* ended : class added by kunal */
+.vcn-gs-heading-main { font-size:18px; color:#A71E29; font-weight:bold;padding:10px 0; float:left; width:100%; }
+/*google maps */
+.vcn-gs-heading-map { font-size:18px; color:#A71E29; font-weight:bold;padding:10px 0; float:left; position:absolute; margin-left: 8px; margin-top: -46px; }
+.vcn-gs-heading-black { font-size:18px; color:#777777; font-weight:bold;padding:10px 0; float:left; width:100%; }
+.indent { padding:10px 0 0 30px;}
+.center { text-align: center; }
+p.center { margin-top: 20px; }
+.inline { width:auto; }
+/*.vcn-gs-activity-num { background:#fff; border:1px solid #555; float:left; font-weight:bold; height:15px; margin:8px 5px 0 9px; width:15px; text-align:center; color:#000000;}*/
+.vcn-gs-activity-num { float:left; font-weight:bold; height:0px; margin:8px 5px 0 9px; width:0px; text-align:center; color:#e8e8e8; opacity:0.1; filter:alpha(opacity=10);}
+.vcn-gs-activity-button { background: url(../images/bg_activity.png) 0 0 no-repeat; font-size:11px; float:left; font-weight:bold; height:60px; padding:17px 15px 0 11px; width:79px; text-align:center;  }
+.target-to-notebook.right { float:right; }
+
+/* REGIONS */
+#vcn-gs-container-top { background: url(../images/getting_started_container_top.png) no-repeat; clear:both; float:left; height:10px; width:100%; margin-top:10px;}
+#vcn-gs-container { background: url(../images/getting_started_container.png) -1px 0 repeat-y; clear:both; float:left;  padding:0 20px; width:100%; font-family:arial;}
+#vcn-gs-container-bot { background: url(../images/getting_started_container_bot.png) no-repeat; clear:both; float:left; height:17px; width:100%;}
+
+#vcn-gs-content-top { background: #000 url(../images/getting_started_content_top.jpg) no-repeat; clear:both; float:left; height:8px; width:640px;}
+#vcn-gs-content { background: url(../images/getting_started_content.jpg) 0px 0 repeat-y; clear:both; float:left; width:640px;}
+#vcn-gs-content-bot { background: url(../images/getting_started_content_bot.jpg) no-repeat; clear:both; float:left; height:17px; width:640px;}
+
+#vcn-gs-container-content { float:left; width:612px; margin-right:25px; }
+#vcn-gs-container-sidebar { float:left; width:252px; font-size:14px; padding-left:20px;}
+
+
+/* CONTENT */
+/*Go button into the blue box*/
+#vcn-gs-content table { margin-top:15px; width:100%; border:2px solid #000;font-size:12px; }
+#vcn-gs-content thead { background:#e8e8e8; }
+#vcn-gs-content th,
+#vcn-gs-content td { padding:5px; }
+#vcn-gs-content tr { border:1px solid #000; }
+#vcn-gs-content tr.odd { background:#fff;}
+
+/* CONTENT - ACTIVITY*/
+#vcn-gs-activities { width:145px; float:left;}
+ul.vcn-gs-activity { list-style:none; float:left; padding:7px; margin-left:-14px;}
+ul.vcn-gs-activity li { clear:both; float:left; margin-top:5px;}
+ul.vcn-gs-activity li.selected { clear:both; float:left; margin-top:5px; color:#ffffff;}
+
+li.vcn-gs-activity-row.selected .vcn-gs-activity-num { text-decoration:underline; } 
+li.vcn-gs-activity-row.selected .vcn-gs-activity-button  { background: url(../images/bg_activity_selected.png) 0 0 no-repeat; }
+li.vcn-gs-activity-row.off .vcn-gs-activity-button  { background: url(../images/bg_activity_off.png) 0 0 no-repeat; }
+
+.vcn-gs-activity-arrow { display:none;}
+ul.vcn-gs-activity li.selected .vcn-gs-activity-arrow {
+    background: url("../images/getting_started_activity_arrow.png") no-repeat scroll right 0 transparent;
+    display: block;
+    float: right;
+    height: 42px;
+    margin-left: 97px;
+    margin-top: 28px;
+    position: absolute;
+    width: 37px;
+}
+
+/* CONTENT - MAIN */
+#vcn-gs-main {width:435px; border-left:none;float:left;  padding:0 10px 10px 16px; font-size:14px; line-height:18px;}
+#vcn-gs-main ul { list-style:none;  }  
+#vcn-gs-main-content {clear:both; float:left; padding:0; width:100%; font-size:14px; line-height:20px;  }
+#vcn-gs-main-note {clear:both; float:left; width:100%; font-size:14px; line-height:18px; }
+#vcn-gs-main-detail {clear:both; float:left; width:100%; font-size:14px; line-height:18px;  }
+.vcn-gs-intro { font-size: 18px; line-height: 21px; width:900px;}
+.vcn-gs-intro-tag { font-size:16px; color:#777;margin:6px 0 15px; }
+
+
+/* CONTENT - NAVIGATION */
+#vcn-gs-navigation { clear:both; float:left; margin:15px 0 0; padding:15px 126px; width:100%;}
+#vcn-gs-skip,
+#vcn-gs-start-over { float:left; width:145px; text-align:center;}
+#vcn-gs-back-next { float:left; width:495px; text-align:center; }
+#vcn-gs-btn-skip { background: url("../images/btn_next_skip_back.jpg") no-repeat scroll 0px -238px; float:right; left:298px; padding:18px 33px; position:relative; z-index:100; cursor:pointer; }
+#vcn-gs-btn-start-over { background: url("../images/btn_start_over.png") no-repeat scroll 0px 0px; float:left; margin:-16px 0 0 12px; padding:31px 45px; cursor:pointer; }
+#vcn-gs-btn-back { background: #fff url("../images/prev.png") no-repeat; float:left; width:54px; height:25px; cursor:pointer; }
+#vcn-gs-btn-next { background: #fff url("../images/next.png") no-repeat; float:right; width:54px; height:25px; cursor:pointer; }
+#vcn-gs-btn-back.off { background: #fff url("../images/prev_grey.png") no-repeat; width:54px; height:25px; }
+#vcn-gs-btn-next.off { background: #fff url("../images/next_grey.png") no-repeat; width:54px; height:25px; }
+/*start : class added to another btn.*/
+
+#vcn-gs-btn-ano-back { background: #fff url("../images/prev.png") no-repeat; float:left; cursor:pointer; width:54px; height:25px; }
+#vcn-gs-btn-ano-next { background: #fff url("../images/next.png") no-repeat; float:right; cursor:pointer; width:54px; height:25px; }
+#vcn-gs-btn-ano-back.off { background: #fff url("../images/prev_grey.png") no-repeat; width:54px; height:25px; }
+#vcn-gs-btn-ano-next.off { background: #fff url("../images/next_grey.png") no-repeat; width:54px; height:25px; }
+
+
+/*ended : class added to another btn*/
+
+background: url(../images/getting_started_container_top.png) no-repeat;
+/* SIDEBAR */
+#vcn-gs-sidebar-detail,
+#vcn-gs-sidebar-status {padding:0 10px 5px; min-height:20px; width:0px;}
+#vcn-gs-sidebar-status .vcn-gs-target {margin-bottom:3px; margin-left:10px; margin-right:10px;}
+#vcn-gs-sidebar-status .vcn-gs-target span {font-weight:bold; }
+#vcn-gs-sidebar-detail p,
+#vcn-gs-sidebar-status p {clear:left; font-size:14px;}
+
+.vcn-gs-sidebar-block-top { background: url(../images/getting_started_sidebar_block_top.png) 0 0 no-repeat; clear:both; float:left; height:8px; width:103%;}
+.vcn-gs-sidebar-block { background: url(../images/getting_started_sidebar_block.png) 0 0 repeat-y; clear:both; float:left; width:103%; }
+.vcn-gs-sidebar-block-bot { background: url(../images/getting_started_sidebar_block_bot.png) 0px -4px no-repeat; clear:both; float:left; height:8px; margin:0 0 20px 0; width:103%;}
+
+/* SIDEBAR - DETAIL */
+
+
+/* SIDEBAR - STATUS */
+#vcn-gs-recommendation { }
+#vcn-gs-recommendation-score {background: url(../images/score_5.jpg) 0px 0px no-repeat; height:33px; margin-left:5px; width:228px;}
+
+#vcn-gs-recommendation.step-one #vcn-gs-recommendation-score {background: url(../images/score_5.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.step-two #vcn-gs-recommendation-score {background: url(../images/score_20.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.step-three #vcn-gs-recommendation-score {background: url(../images/score_40.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.step-four #vcn-gs-recommendation-score {background: url(../images/score_60.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.step-five #vcn-gs-recommendation-score {background: url(../images/score_80.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.finished #vcn-gs-recommendation-score {background: url(../images/score_100.jpg) 0px 0px no-repeat; }
+
+
+/* STEP ONE SPECIFIC CSS */
+#video-link { clear:both; height:210px; position: relative; }
+.imgA1 { left: 22px; position: absolute; top: 0;  z-index: 1;}
+.imgB1 { left: 140px;  margin-top: 90px;  position: absolute; z-index: 3; }
+
+#step-1-zipcode
+{
+    background: url(../images/box_zip_code2.jpg) 0px 0px no-repeat;
+    height: 90px;
+}
+#step-1-zipcode table {margin: 12px 4px;}
+#step-1-zipcode table td {padding-left: 5px; color: white; font-size: 18px; font-weight: bold;}
+#step-1-zipcode table td input {font-weight: normal; font-size: 22px; padding 6px; width: 148px;}
+#step-1-email table td {padding-left: 5px; font-size: 18px; font-weight: bold;}
+#step-1-email table td input {font-weight: normal;}
+
+#step-one-activity-3-correct {font-size: 22px; display: none; text-align: center; margin-top: -80px;}
+#step-one-activity-3-incorrect {font-size: 21px; display: none; text-align: center; margin-top: -80px;}
+
+#page1{font-size: 16px;}
+#page2{font-size: 16px;}
+#page3{font-size: 16px;}
+#page4{font-size: 16px;}
+#page5{font-size: 16px;}
+
+
+/* REDMINE #2800
+#step-1-actvity-1-main-content p,
+#step-1-actvity-2-main-content p,
+#step-1-actvity-3-main-content p,
+#step-1-actvity-4-main-content p {font-size: 16px;}
+#step-1-actvity-1-main-content p.font-14 {font-size: 14px;}
+*/
+#step-1-actvity-3-main-content ul li {/* font-size: 16px; */ line-height: 24px;}
+
+#step-1-actvity-3-main-content ul li a {text-decoration: underline; cursor: pointer;}
+
+#step-1-map-2,
+#step-1-jobs-2,
+#step-1-actvity-3-sidebar-content-jobs,
+#step-1-actvity-3-sidebar-content-quiz,
+#step-1-actvity-3-sidebar-content-video,
+#step-1-actvity-3-sidebar-content-pursuit {display: none; margin-left: 15px;}
+
+#step-1-actvity-1-main-content .watch-video{ margin-left: 15px;},
+#step-1-actvity-1-sidebar-content .vcn-gs-heading{ margin-left: 15px;},
+#step-1-actvity-2-sidebar-content .vcn-gs-heading{ margin-left: 15px;},
+#step-1-actvity-3-sidebar-content .vcn-gs-heading{ margin-left: 15px;},
+#step-1-actvity-4-sidebar-content .vcn-gs-heading{ margin-left: 15px;},
+#step-1-actvity-1-main-content .vcn-gs-heading-main {font-size: 18px; font-weight: bold;}
+/* REDMINE #2800
+#step-1-actvity-3-sidebar-content p,
+#step-1-actvity-4-sidebar-content p {font-size: 16px;}
+*/
+#step-1-actvity-3-sidebar-content ul li {font-size: 14px; line-height: 32px; margin-left: 15px;}
+
+#step-1-actvity-3-sidebar-content{margin-left: 15px;},
+#step-1-actvity-4-sidebar-content {height: 375px; width: 240px; margin-left: 15px;}
+
+#step-1-actvity-1-status-content .vcn-gs-heading{margin-left: 15px;},
+#step-1-actvity-2-status-content .vcn-gs-heading {font-size: 14px; font-weight: bold;}
+
+#step-1-actvity-1-status-content #vcn-gs-recommendation,
+#step-1-actvity-2-status-content #vcn-gs-recommendation {padding: 0px 0px;}
+
+#step-1-jobs-1 ul li,
+#step-1-jobs-2 ul li {line-height: 20px;}
+
+#step-1-jobs-1,
+#step-1-jobs-2,
+#vcn-gs-recommendation p {font-size: 12px; }
+
+#vcn-gs-recommendation.activity-1 #vcn-gs-recommendation-score {background: url(../images/score_5.jpg) 0px 0px no-repeat; }
+#vcn-gs-step-1-activity-1-status-content{margin-left:15px;}
+#vcn-gs-recommendation.activity-2 #vcn-gs-recommendation-score {background: url(../images/score_20.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.activity-3 #vcn-gs-recommendation-score {background: url(../images/score_40.jpg) 0px 0px no-repeat; }
+#vcn-gs-recommendation.activity-4 #vcn-gs-recommendation-score {background: url(../images/score_60.jpg) 0px 0px no-repeat; }
+
+#vcn-gs-recommendation.activity-3,
+#vcn-gs-recommendation.activity-4 {border-top: none; }
+
+/* TODO ADDED BY GINA */
+#vcn-gs-content #step-1-zipcode table,
+#vcn-gs-content #step-1-email  table,
+#vcn-gs-content #step-1-zipcode table tr,
+#vcn-gs-content #step-1-email  table tr	{ border:none; }
+#step-1-map-1, #step-1-map-2 {text-align:center; }
+#step-1-actvity-1-status-content .vcn-gs-heading,
+#step-1-actvity-2-status-content .vcn-gs-heading {padding-top:0;}
+
+/*css for the google map*/
+#vcn-gs-map-canvas {height:260px; margin-left:7px; width:250px; margin-top:32px;}
+#job_listing {/*border-style:solid; border-color:red;*/ margin-left:10px;}
+
+
+/* STEP TWO SPECIFIC CSS */
+
+/* STEP THREE/FOUR SPECIFIC CSS */
+.license-detail.off,
+.certification-detail.off,
+.program-detail.off,
+.financial-aid-detail.off,
+.vhs-detail.off,
+.courses-detail.off,
+.tests-detail.off,		
+#vcn-gs-content table.off {display:none;}
+#vcn-gs-content table.borderless { border:none;}
+#vcn-gs-content table.borderless tr { border:none;}
+#vcn-gs-test-answer.off {display:none;}
+
+/* STEP FOUR SPECIFIC CSS */
+/* STEP FIVE SPECIFIC CSS */
+div.progress-container 
+  {
+  border: 1px solid #bbb; 
+  width: 100px; 
+  margin: 2px 5px 2px 0; 
+  padding: 1px; 
+  float: left; 
+  background: white;
+  }
+
+div.progress-container > div 
+  {
+  background-color: #D70500; 
+  height: 12px;
+  }
+
+div.StepFiveDivColumn1
+  {
+  float: left;
+  width: 90%
+  }
+
+div.StepFiveDivColumn2
+  {
+  float:left;
+  }
+
+div.StepFiveDivColumn3
+  {
+  float: right; 
+  margin-top: -5px;
+  }
+
+div.StepFiveDivStack
+  {
+  width: 100%;
+  margin-bottom: 17px;
+  margin-top: 17px;
+  }

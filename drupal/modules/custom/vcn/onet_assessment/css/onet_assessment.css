@@ -1,0 +1,225 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.oNetAssessment
+  {
+  background-color:#DDDDDD;
+  width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 5px;
+  border-style: solid;
+  border-width: 6px;
+  border-color: #A61E28;
+  }
+
+.pageNumText
+  {
+  float: right;
+  margin-top:5px;
+  margin-right: 5px;
+  }
+
+table
+  {
+  width: 100%;
+  }
+
+table td 
+  {   
+  border-right:solid 2px #DDDDDD; 
+  } 
+
+table td:first-child 
+  {   
+  border-right:0; 
+  } 
+
+td.oNetColor1
+  {
+  background-color:#B8D9C3;
+  }
+  
+td.oNetColor2
+  {
+  background-color:#A3BFAC;
+  }
+  
+td.oNetColor3
+  {
+  background-color:#E5BED3;
+  }
+  
+td.oNetColor4
+  {
+  background-color:#C9A7BA;
+  }
+  
+td.oNetColor5
+  {
+  background-color:#FCFCB3;
+  }
+  
+td.oNetColor6
+  {
+  background-color:#E2E2A3;
+  }
+  
+td.oNetColor7
+  {
+  background-color:#C6B8D9;
+  }
+  
+td.oNetColor8
+  {
+  background-color:#AFA3BF;
+  }
+  
+td.oNetColor9
+  {
+  background-color:#F2D3B5;
+  }
+  
+td.oNetColor10
+  {
+  background-color:#D6BCA2;
+  }
+  
+td.oNetColor11
+  {
+  background-color:#BFDAED;
+  }
+  
+td.oNetColor12
+  {
+  background-color:#A9C1D1;
+  }
+  
+.buttonBar 
+  {   
+  float:left;   
+  width:100%; 
+  } 
+
+.buttonBar .previous 
+  {   
+  float:left;
+  font-size: 0; 
+  line-height: 0;
+  } 
+  
+.buttonBar .next 
+  {
+  float:right;
+  font-size: 0; 
+  line-height: 0;
+  } 
+  
+#navPrevious
+  {
+  background: url('../images/btn_previous.jpg') no-repeat center bottom;
+  border: 0 none;
+  height: 40px;
+  width: 156px;
+  margin-left: -1px;
+  padding-top: 0px;
+  overflow: auto;
+  text-indent: -1000px;
+  cursor: pointer;
+  float: left;
+  position: relative;
+  left: -11px;
+  top: 1px;
+  font-size: 0;
+  line-height: 0;
+  }
+
+#navNext
+  {
+  background: url('../images/btn_next.jpg') no-repeat center bottom;
+  border: 0 none;
+  height: 40px;
+  width: 100px;
+  margin-left: -1px;
+  padding-top: 0px;
+  overflow: auto;
+  text-indent: -1000px;
+  cursor: pointer;
+  float: right;
+  position: relative;
+  right: -5px;
+  top: 1px;
+  font-size: 0; 
+  line-height: 0;
+  }
+
+#navFinish
+  {
+  background: url('../images/btn_finish.jpg') no-repeat center bottom;
+  border: 0 none;
+  height: 40px;
+  width: 120px;
+  margin-left: -1px;
+  padding-top: 0px;
+  overflow: auto;
+  text-indent: -1000px;
+  cursor: pointer;
+  float: Right;
+  position: relative;
+  right: -5px;
+  top: 1px;
+  font-size: 0; 
+  line-height: 0;
+  }
+
+#navJobs
+  {
+  background: url('../images/btn_display_careers.jpg') no-repeat center bottom;
+  border: 0 none;
+  height: 40px;
+  width: 244px;
+  margin-left: -1px;
+  padding-top: 0px;
+  overflow: auto;
+  text-indent: -1000px;
+  cursor: pointer;
+  float: Right;
+  position: relative;
+  right: -6px;
+  top: 2px;
+  font-size: 0; 
+  line-height: 0;
+  }
+
+.topGraphic
+  {
+  margin-left: 22px;
+  width: 177px;
+  }
+  
+div.progress-container 
+  {
+  border: 1px solid #bbb; 
+  width: 100px; 
+  margin: 2px 5px 2px 0; 
+  padding: 1px; 
+  float: left; 
+  background: white;
+  }
+
+div.progress-container > div 
+  {
+  background-color: #D70500; 
+  height: 12px;
+  }

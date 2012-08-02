@@ -1,0 +1,114 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.vcn-table.find-learning th,
+.vcn-table.ff-resources th { background:#189AB0; border:1px solid #666; color:#fff;padding: 15px;}
+.vcn-table.ff-resources-right th { background:#A71E28; border:1px solid #666; color:#fff;padding: 15px;}
+.vcn-table.find-learning td { background:#CCE9ED; border:1px solid #666; padding: 10px 15px; }
+.vcn-table.find-learning-right td { background:#F2D8D8; border:1px solid #666; padding: 10px 15px; }
+.vcn-table.find-learning td.right { background:none;}
+.vcn-table.ff-resources td  { background:#fff;}
+
+#fl-licenselink,#fl-certificationlink,#fl-programlink { float:right;}
+a.fl-select {background: transparent url(../images/btn_select_blue.png) no-repeat; display:inline; float:left; padding:20px 42px; outline:0; margin:0px 10px 0px 68px;}
+a.fl-links1.off, a.fl-links2.off { display:none; }
+label.fl-label {width:75px; margin-right:-7px; float:left;}
+input.fl-input { border:1px solid #000;padding:5px; }
+select.fl-input {width:212px; padding:4px 5px; border:1px solid #000;}
+#training-header {margin-bottom:15px;}
+#training-search-container {margin-top:10px;}
+
+/* SPECIAL RESOURCES */
+ul.vcn-resources {width:100%; margin:0px; padding:0 5px 0 10px; }
+ul.vcn-resources li { padding:0 10px 10px 10px; }
+ 
+
+/* TRAINING DETAIL */
+.training-detail-left { float:left; width:375px; padding:5px; }
+.training-detail-right { background:none; float:left; width:250px; margin: 0 0 0 10px; padding:10px; }
+.training-detail-right.gray { background:#ccc; margin-top:20px;}
+.training-detail-right p { border-bottom:1px solid #666; padding-bottom:5px; }
+#training-detail-details { clear:both;  }
+ 
+/* PANEL PANEL 
+.panel-2col.panel-col-first { float: left; width: 70%; margin-right:3%; }
+.panel-2col.panel-col-last { float: left; width: 27%;}
+.panel-col-last .panel-pane { border:1px solid #777; float:left; font-size:12px; padding:5px 10px; margin:10px 0 15px; width:92%;}
+.panel-col-last h2 { font-size:12px;}
+.hvcp-side-panel {background:pink;margin:0 10px; border:1px solid #777; float:left; padding:0 10px;}
+.pane-content { float:left;}
+*/
+/* SIDEBAR BLOCKS */
+.panel-pane .vcn_navigation { border:none; }
+
+/* SEARCH */
+.fhc { float:left; padding:10px; margin-right:15px; height:25px;}
+.fhc.gray { background:#999;}
+.hightlight {font-color: green; }
+#training-search-container {width:97%;}
+#suggestions { background-color: #FFFFFF;  border: 1px solid #558BE3; color: #000; font-family: Arial,Helvetica,sans-serif; font-size: 11px;margin:25px 0px; padding: 0; position: absolute; min-width:200px; max-width: 300px; zindex:10;  }
+#suggestions ul {list-style:none; padding:0; margin-top:0; margin-bottom:0;}
+#suggestions ul li { padding:5px;}
+#suggestions ul li:hover { background:#D5E2FF; }
+ 
+/* TRAINING SEARCH */
+#training-search-container { clear:both; float:left; margin-bottom:20px; padding:0px; width:100%; border:1px dotted #000;  }
+#training-search-container.certifications,
+#training-search-container.courses { border:none; margin-bottom:0; }
+#training-search { margin:5px 10px 10px; width:100%; float:left;}
+.training-search-label { font-size:12px; font-weight:bold; margin:0 10px 0 0 ;}
+p.training-search-label { font-weight:bold; margin:5px 10px 0 0 ;}
+.training-filters { float:left; margin-right:5px; }
+
+/* SIDEBAR */
+  
+/* TRAINING */
+tr.even { background:#E5E5E5; }
+tr.odd { background:none; }
+td { font-size:12px; padding:5px; vertical-align:top; }
+td.lastorlinks {width:150px;}
+
+
+
+
+/* TRAINING FIND */
+.lp-training, .lp-training li { width:100%; }
+.arrow-boxes { float:right; background:none; margin-left:20px; font-size:90%; line-height:130%; width:300px; }
+.arrow-box { border: 1px solid #999999; margin: 10px 10px 0 0; padding: 5px; float:right; width:260px; }
+.arrow-box.first { margin: 0px 10px 0 0;}
+.arrow-link { background:url(../images/arrow_link.jpg) 0 3px no-repeat; padding: 2px 0 2px 25px;}
+.lp-training li {border-bottom:1px dotted #777; padding:10px 0; float:left; clear:both;}
+.lp-training .num {background: #000; color:#fff; float:left; text-align:center; padding-top:3px; height:17px; width:20px;}
+.lp-training .description {background:none; float:left; line-height:140%; margin-left:15px; width:300px; }
+
+/*
+.lp-training .num {background:pink;float:left;}
+.lp-training .description  {clear:left;background:pink;margin-left:10px;}
+.arrow-boxes {background:red; margin:0;float:left;clear:left;}
+*/
+/* TRAINING GRID */
+#training-grid { font-size:13.3333px; float:left;width:960px;}
+#training-grid label { width: 260px; }
+ 
+#training-grid th { background:#189AB0; border:1px solid #fff; height:50px; color:#fff; border-right:1px solid #fff; padding:5px; text-decoration:none; }
+ 
+
+.grid-school { font-weight:bold; }
+#training-grid th.sortable { background: #189AB0 url("../images/sortable.jpg") no-repeat right 50%; cursor:pointer; }
+#training-grid th.sortableDesc { background: #189AB0 url("../images/desc.jpg") no-repeat right 10px; cursor:pointer; color:#fff; }
+#training-grid th.sortableAsc { background: #189AB0 url("../images/asc.jpg") no-repeat right 10px; cursor:pointer; color:#fff; }
+#training-grid-data {width:960px;}
+
+
+ 

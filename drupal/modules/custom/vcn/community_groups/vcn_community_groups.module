@@ -1,0 +1,69 @@
+<?php
+// $Id:$
+	
+/**
+ * Implementation of hook_block().
+ */
+function vcn_community_groups_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('Community Groups');
+
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Community Groups'), 
+         			'content' => _vcn_community_groups_main(),
+         		);
+       		break;
+			
+        	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+ 
+ 
+
+/**
+ * Implementation of menu().
+ */
+function vcn_community_groups_menu() {
+	$items = array();
+	
+  	/* FIND */
+	$items['community/groups'] = array(
+		'title' => 'Community Groups', 
+		'page callback' => '_vcn_community_groups_main',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+	
+	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_community_groups_theme( ) { 
+ 		
+  	return array (
+  		'vcn_community_groups_main' => array ( 'template'=>'templates/vcn_community_groups_main', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+	);
+}
+ 
+
+
+function _vcn_community_groups_main($type) { 	 
+  	return theme('vcn_community_groups_main', $errors, $vars, $content, $data);
+ }
+ 
+?>

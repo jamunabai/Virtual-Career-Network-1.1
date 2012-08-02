@@ -1,0 +1,476 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* 
+    Document   : vcn_header
+    Created on : Jan 13, 2011, 1:53:29 PM
+    Author     : hills
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+/*
+#header 
+  { 
+  height: 150px; 
+  }
+*/
+
+#vcn-header 
+  { 
+  clear:both; 
+  float:left; 
+  height: 150px; 
+  margin:5px 0;
+  width:100%; 
+  }
+
+#vcn-logo-block 
+  { 
+  float:left; 
+  height:60px; 
+  margin:0; 
+  width:250px; 
+  }
+
+#vcn-logo-block.front 
+  { 
+  float:left; 
+  margin:0; 
+  width:250px; 
+  }
+
+#vcn-logo-block.front .logo 
+  { 
+  background: transparent url(../../../../../../sites/default/files/images/vcn_logo.png) 0px 0px no-repeat; 
+  float:left; 
+  width: 250px;
+  margin-top: -4px;
+  } 
+
+.logo  
+  { 
+  background: transparent url(../../../../../../sites/default/files/images/vcn_logo.png) 0px 0px no-repeat; 
+  float:left; 
+  padding:56px 80px;
+  } 
+  
+#vcn-logo-block-provider.front .logo 
+  { 
+  background: transparent url(../../../../../../sites/default/files/images/vcn_logo_provider.png) 0px 0px no-repeat; 
+  float:left; 
+  width: 300px;
+  height:30px;
+  margin-top: -4px;
+  margin-bottom: -95px;
+  } 
+
+.logo-block
+  { 
+  background: transparent url(../../../../../../sites/default/files/images/logo_open-source.png) 0px 0px no-repeat; 
+  float:left; 
+  height:71px; 
+  margin:0; 
+  width:444px; 
+  }  
+
+#vcn-header-links 
+  { 
+  align: center; 
+  height:30px; 
+  margin-top:15px; 
+  padding:0; 
+  }
+  
+#vcn-header-links.front 
+  { 
+  align: center; 
+  height:37px; 
+  margin-top: 7px;
+  padding:0; 
+  background: url('images/nav_bg_no_line.jpg');
+  }
+
+#vcn-header-links-end 
+  { 
+  background: transparent url(images/nav_right.jpg) 0 0 no-repeat; 
+  float:left; 
+  height:30px; 
+  margin:0; 
+  padding:0; 
+  height:37px; 
+  width:11px; 
+  }
+
+#center-float
+  {
+  margin-left: auto;
+  margin-right: auto;
+  }
+
+.menu-spacer
+  {
+  float: left;
+  //background: transparent url('images/nav_bg_no_line.jpg') 0 0 repeat;
+  width: 13%;
+  height: 37px;
+  }
+
+  
+#vcn-header-links li a { color:#fff; float:left; font-family:verdana; font-size:11px; font-weight:bold; margin:0; padding:10px 0 0; height:27px; text-decoration:none; text-outline:none; }
+#vcn-header-links ul, 
+#vcn-help-links ul { list-style-type:none; list-style-image:none; margin:0; padding:0; }
+ 
+#vcn-header-links li  { background: transparent url(images/nav_bg_off.jpg) 0 0px no-repeat; float:left; height:37px; list-style:none; padding:0 10px; text-align:center;}
+#vcn-header-links li.active-trail { background: transparent url(images/nav_bg_on.jpg) 0 0px no-repeat; }
+
+#vcn-primary-links,
+#vcn-secondary-links {float:left; margin:0;padding:0; }
+#vcn-primary-links li.first {background-position:-3px 0; padding-left:51px;}
+#vcn-header-links.front #vcn-primary-links li.first {background-position:-3px 0; padding-left:18px;}
+#vcn-secondary-links li.last  {background: transparent url(images/nav_bg_loff.jpg) 0 0px no-repeat; }
+#vcn-secondary-links li.last.active-trail  {background: transparent url(images/nav_bg_lon.jpg) 0 0px no-repeat;  }
+#vcn-primary-links .menu .menu li {position:absolute; margin-top:38px;margin-left:0;z-index:20; padding:0 10px;}
+
+#vcn-header-navbar { float:right; margin:25px 3px 0 0; }
+#vcn-help-links,
+#vcn-search-block { float:left; }
+#vcn-help-links li { float:left; margin-right:10px;}
+#vcn-header-search-image { background: #fff url(images/icon_mag.jpg) 0 0px no-repeat; height:28px; width:31px; float:left; margin:7px 0 0 0; border-left:1px solid #000; border-top:2px solid #000; border-bottom:1px solid #000; border-right:none; }
+#vcn-header-search-input { float:left; height:28px; margin:7px 5px 0 0px; padding:0 5px; border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; border-right:2px solid #000; }
+#vcn-header-search-go { float:left; margin-top:3px;}
+
+#vcn-header-user-name { float: right; font-family: verdana; font-size: 15px; font-weight: bold; margin-right: 30px;}
+/*
+ 
+
+
+#help-links-inner  {
+  margin-right: 3px;
+  position: relative;
+}
+
+#help-links img {
+  height: 30px;
+}
+
+#header-font-size {
+  float: left;
+}
+
+#header-help {
+  float: left;
+}
+
+#header-video {
+  float: left;
+  margin-right: 3px;
+}
+
+ 
+#vcn-primary-links li {
+  padding: 4px 5px;
+  border-right: #adaeb2 solid 1px;
+  height: 24px;
+  width: auto;
+  float: right;
+  line-height: 23px;
+  font-size: 12px;
+  margin: 0;
+}
+
+#vcn-primary-links ul {
+  padding: 0;
+}
+
+#vcn-search-block  {
+  float: right;
+  height: 33px;
+}
+
+#vcn-search-block-inner  {
+  background: transparent url(/drupal/sites/all/themes/zen_hvcp/images/nav_bar_center2.jpg) repeat-x;
+  height: 27px;
+  width: 200px;
+  padding-top: 6px;
+  margin-right: 6px;
+  position: relative;
+}
+
+#header-search-form {
+
+}
+
+#search-input  {
+  float: right;
+  height: 23px;
+  width: 194px;
+  margin-right: -35px;
+}
+
+#search-submit  {
+  float: right;
+}
+
+#search-submit img {
+  height: 23px;
+  width: 32px;
+  padding-right: 6px;
+}
+
+#vcn-header-toolbar  {
+  clear: both;
+  margin: 0;
+  padding: 0;
+}
+
+#vcn-header-toolbar-inner  {
+  position: relative;
+}
+
+#toolbar-links  {
+  height: 35px;
+  float: right;
+  margin: 0;
+  padding: 0;
+}
+
+#toolbar-links-inner  {
+  height: 30px;
+  width: auto;
+  margin-top: -48px;
+  margin-right: 10px;
+  padding: 5px;
+  border: #adaeb2 1px solid;
+		-moz-border-radius-topleft:     .5em;
+		-moz-border-radius-topright:    .5em;
+		-moz-border-radius-bottomright: .5em;
+		-moz-border-radius-bottomleft:  .5em;
+}
+
+#toolbar-links-inner ul {
+  margin: 0;
+  padding: 0;
+  width: auto;
+}
+
+#toolbar-links img {
+  height: 30px;
+}
+
+#header-email {
+  
+}
+
+#header-print {
+
+}
+
+#header-share {
+
+}
+
+#header-saved {
+  display: inline-block;
+  padding-top: 4px;
+}
+
+*/
+
+/**
+ * Additions for the new Header
+ */
+
+.progressBarLeftEndCap
+  {
+  background-image: url('images/endcap_gray.png');
+  background-repeat: no-repeat;
+  float: left;
+  height: 40px
+  }
+
+.progressBarLeftEndCapSelected
+  {
+  background-image: url('images/endcap_blue.png');
+  background-repeat: no-repeat;
+  float: left;
+  height: 40px;
+  }
+
+.progressBarSelectedItem
+  {
+  background-image: url('images/line_blue.png');
+  float: left;
+  height: 38px;
+  padding-top: 2px;
+  }
+
+.progressBarNonselectedItem
+  {
+  background-image: url('images/line_gray.png');
+  float: left;
+  height: 38px;
+  padding-top: 2px;
+  }
+  
+.progressBarCurrentItem
+  {
+  background-image: url('images/background_green.png');
+  float: left;
+  height: 38px;
+  padding-top: 2px;
+  }
+  
+.verticalCenterText
+  {
+  font-size: small;
+  height: 40px;
+  padding-top: 10px;
+  }
+
+.progressBarTopText
+  {
+  color: black;
+  font-size: small;
+  text-align: center;
+  }
+  
+.middleText
+  {
+  color: white;
+  height: 30px;
+  font-size: 11px;
+  line-height: 11px;
+  font-weight: bold;
+  margin-right: 5px;
+  text-align: center;
+  text-decoration: none;
+  display:table-cell; 
+  vertical-align:middle;
+  }
+
+  
+.progressBarBottomText
+  {
+  color: white;
+  font-size: 11px;
+  width: 75px;
+  line-height: 11px;
+  font-weight: bold;
+  margin-right: 5px;
+  text-align: center;
+  }
+  
+.progressBarSelectedToNonselected
+  {
+  background-image: url('images/blue_to_gray.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarSelectedToSelected
+  {
+  background-image: url('images/blue_to_blue.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarSelectedToCurrent
+  {
+  background-image: url('images/blue_to_green.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarCurrentToSelected
+  {
+  background-image: url('images/green_to_blue.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarCurrentToNonselected
+  {
+  background-image: url('images/green_to_grey.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarNonselectedToNonselected
+  {
+  background-image: url('images/gray_to_gray.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarNonselectedToSelected
+  {
+  background-image: url('images/gray_to_blue.png');
+  float: left;
+  height: 40px;
+  width: 39px;
+  }
+
+.progressBarRightEndCapNonselected
+  {
+  background-image: url('images/arrowhead_gray.png');
+  float: left;
+  height: 40px;
+  width: 29px;
+  }
+
+.progressBarRightEndCapSelected
+  {
+  background-image: url('images/arrowhead_blue.png');
+  float: left;
+  height: 40px;
+  width: 29px;
+  }
+
+.progressBarRightEndCapCurrent
+  {
+  background-image: url('images/endcap_green.png');
+  float: left;
+  height: 40px;
+  width: 28px;
+  }
+
+.progressBarContainer
+  {
+  margin-top: 60px;
+  height: 40px;
+  width: 960px;
+  padding-left: -100px;
+  }
+
+.exploreButton
+  {
+  float: right;
+  }
+  
+.homeButton
+  {
+  float: left;
+  }

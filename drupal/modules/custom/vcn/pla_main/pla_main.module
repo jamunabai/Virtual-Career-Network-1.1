@@ -1,0 +1,100 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module that displays Prior Learning Assessment(PLA) landing page.
+ */
+
+/**
+ * Implementation of hook_block
+ */
+function pla_main_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "PLA Landing Page" when you list blocks in admin mode
+    $blocks[0]['info']=t('PLA Landing Page');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "Prior Learning Assessment"
+    $blocks['subject']=t('Prior Learning Assessment');
+
+    $content .= "<br />";
+	
+	/**
+     * Section for tabbed interface
+     */
+    include(drupal_get_path('module','pla_main')."/tabs.inc.php");
+    $content .= "<div class=\"container-div\">";
+    /** end tabbed interface **/
+	
+	//global $base_url;
+    $base_url = base_path(); 
+	
+	// Add css file
+	drupal_add_css("sites/all/modules/custom/vcn/pla_main/css/pla_supplemental.css");
+	
+	
+	//content
+	$content .= "<div class=\"container-div leftSide\">
+	<h3>Get Started</h3>
+	<p>
+	You might already be well on your way toward earning a degree or certification! There are several ways to earn college credit
+	for what you already know. It's called \"prior learning assessment\", or PLA, and it can help shorten the amount
+	of time it takes for you to earn a degree and save you money. For more information
+	about PLA, ";
+	
+	$content .= vcn_build_link_window_opener('/careerladder/Resourcespdfs/PLA_Factsheet.pdf', 'click here', false, false) . '.';
+	
+	$content .= "Many colleges and universities award credit for prior military training, national exams, and professional training that have been evaluated by the American Council on Education (ACE) for college credit. In addition, college courses you have
+	already completed might also be eligible for credit at your new college or university. The function of this page is to help you 
+	identify and document that learning.</p> 
+	
+	<p>To begin the prior learning assessment process, click on one of the above tabs -- college courses, military training, professional training, national exams - and enter the information requested. After you have completed entering all the information about your prior learning under the tab, move to the next tab. When you have completed your entries under all relevant tabs, click on the My Learning Inventory tab.
+	</p>
+
+	<p>
+	You may also want to prepare a portfolio as part of your PLA process by writing about
+	your learning, which is then evaluated by a college faculty member for potential college credit. ";
+	
+	$content .= vcn_build_link_window_opener('http://www.learningcounts.org/students/Pages/default.aspx', 'LearningCounts.org', false) . ', ';
+	
+	$content .= "developed and operated by the Council for Adult and Experiential Learning (CAEL), provides the online tools you need to learn and prepare your portfolio in just 8 weeks. To learn more about CAEL, ";
+	
+	$content .= vcn_build_link_window_opener('http://www.cael.org/What-We-Do', 'click here', false) . '.';
+	
+	$content .= "</p>
+	<p>
+	To apply for credit for prior learning, you often need to meet with an academic advisor. The 
+	college's admissions office can help you find the right person to meet with. The result of 
+	completing this process will be a personalized Learning Inventory.  Completing your personalized 
+	Learning Inventory can help you gather the information you need to bring along when you meet with 
+	that advisor. To see what a completed Learning Inventory looks like, ";
+	
+	$content .= vcn_build_link_window_opener(base_path().'sites/all/modules/custom/vcn/pla_main/Learning_Inventory.pdf', 'click here', false, false) . '.';
+	
+	$content .= "</p>
+	<p>
+	This tool was developed for the VCN with the help of the American Council of Education (ACE), a leader in the PLA field.  
+	To learn more <br/>about ACE, ";
+	
+	$content .= vcn_build_link_window_opener('/careerladder/Resourcespdfs/ACE_Fact_Sheet.pdf', 'click here', false, false) . '.';
+	
+	$content .= "</p>";
+	
+	$content .= "<p><b>Hint:</b> Remember that each college determines how your prior learning might apply to a specific degree program.";
+	$content .= "</div> <!-- end div container-div -->";
+	$content .= "</div><!-- end div leftSide -->";
+	
+	$blocks['content'] = $content;
+    return $blocks;
+
+    break;
+
+    } //end switch($op)
+  } // end function pla_main_block
+  
+  

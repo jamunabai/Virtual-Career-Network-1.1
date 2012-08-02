@@ -1,0 +1,98 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module for showing a simple "Get Started" block
+ */
+
+/**
+ * Implementation of hook_block
+ */
+function get_started_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "VCN Get Started" when you list blocks in admin mode
+    $blocks[0]['info']=t('VCN Get Started');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "Get Started"
+    $blocks['subject']=t('Get Started');
+
+    // Building the block content...
+
+    // Link to the css file
+    //$content .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"".drupal_get_path('module','get_started')."/css/get_started.css\" />";
+    drupal_add_css("sites/all/modules/custom/vcn/get_started/css/get_started.css");
+
+    // Create the entire block div
+    $content .= "<div class=\"GetStarted\">";
+
+    // Add a title
+    $content .= "<div class=\"GetStartedTitle\">HOW TO USE THIS SITE</div>";
+
+    global $base_url;
+
+    // First div is for the left hand "Get Started" item
+    $content .= "<div class=\"StartItemLeft\">
+                   <div class=\"StartItemNumber\">
+                     1
+                   </div>
+                   <div class=\"StartItemTitle\">
+                     Target a career
+                   </div>
+                   <div class=\"StartItemText\">
+                     <a href=\"$base_url/explorecareers\">Explore careers</a> and <a href=\"$base_url/interest-profiler\">tell us about your interest, education and skills</a>.  We'll help you target a career that is a good match for you.
+                   </div>
+                 </div>";
+
+    // Insert a right arrow point
+    $content .= "<div class=\"leftPointer\"><img src=\"".drupal_get_path('module','get_started')."/images/arrow.jpg\" alt=\"then we do: \" height=\"73px\"></div>";
+
+    // Next div is for the middle item
+    $content .= "<div class=\"StartItemMiddle\">
+                   <div class=\"StartItemNumber\">
+                     2
+                   </div>
+                   <div class=\"StartItemTitle\">
+                     Get training
+                   </div>
+                   <div class=\"StartItemText\">
+                     <a href=\"$base_url/training\">Find learning options</a> near you that match your career goals and education needs.  There's even free training available on this site!
+                   </div>
+                 </div>";
+
+    // Insert a right arrow point
+    $content .= "<div class=\"leftPointer\"><img src=\"".drupal_get_path('module','get_started')."/images/arrow.jpg\" alt=\"then we do: \" height=\"73px\"></div>";
+
+    // Last div is for right hand item
+    $content .= "<div class=\"StartItemRight\">
+                   <div class=\"StartItemNumber\">
+                     3
+                   </div>
+                   <div class=\"StartItemTitle\">
+                     Find jobs
+                   </div>
+                   <div class=\"StartItemText\">
+                     Once you are ready, <a href=\"#\">search and apply for jobs</a> in your area or around the country.
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                   </div>
+                 </div>";
+
+    // Close the entire block div
+    $content .= "</div>";
+
+    // Set the blocks content to $content
+    $blocks['content']=$content;
+    // Return the data to the user...
+    return $blocks;
+    break;
+
+    } //end switch($op)
+  } // end function get_started_block

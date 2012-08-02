@@ -1,0 +1,871 @@
+<?php
+// $Id$
+
+    // script for lightbox popup
+    $topup_js = drupal_get_path('module','occupations_detail') . "/javascripts/top_up-min.js";
+    drupal_add_js($topup_js);
+/**
+ * @file
+ * Module for showing the O*Net Assessment block.  This assessment is a 60 question
+ * quiz, that matches the person's interests to the jobs that seem to best fit them.
+ */
+
+/**
+ * load the php sniffer routine, to detect browser information
+ * for more info, look at http://phpsniff.sourceforge.net/
+ **/
+require_once('phpsniff/phpSniff.class.php');
+require_once('phpsniff/phpTimer.class.php');
+$timer =& new phpTimer();
+$timer->start('client1');
+$sniffer_settings = array('check_cookies'=>$GET_VARS['cc'],
+                          'default_language'=>$GET_VARS['dl'],
+                          'allow_masquerading'=>$GET_VARS['am']);
+$client =& new phpSniff($GET_VARS['UA'],$sniffer_settings);
+$timer->stop('client1');
+
+if($client->property('browser')=="ie")
+  {
+  $_SESSION['clientx']="ie";
+  //echo "CLIENT X is $clientx";
+  }
+
+/**
+ * Internal function to implement REST call
+ */
+
+
+function get_details($onetcode) {
+
+  $cp = dirname(dirname(drupal_get_path('module','occupations_detail')));
+
+  require_once($cp . '/vcn.rest.inc');
+
+	$rest = new vcnRest;
+
+	$rest->setSecret('');
+	$rest->setBaseurl(getBase());
+	$rest->setService('occupationsvc');
+	$rest->setModule('occupation');
+	$rest->setAction('list');
+	$rest->setRequestKey('tnt','on');
+	$rest->setRequestKey('skills','on');
+	$rest->setRequestKey('onetcode',$onetcode);
+
+	// standard filters
+	$rest->setRequestKey('apikey','apikey');
+	$rest->setRequestKey('format','xml');
+
+  $rest->setMethod('post');
+
+  $content = $rest->call();
+
+  $content = new SimpleXMLElement($content);
+
+  $content = $content->data;
+
+   return $content;
+
+  }
+
+  function goodImplode($data, $max, $type) {
+
+	$count=0;
+
+	foreach ($data as $value) {
+		$count+=1;
+		if ($count<=$max) {
+				if ($type=="br")
+					$output .= $value."<br/>";
+				else
+					$output .= $value.", ";
+		}
+	}
+
+	$output[strlen($output)-2]=' ';
+
+	return $output;
+
+
+}
+
+function getTraining($training) {
+
+	$pieces = explode(" - ", $training);
+	$training = $pieces[0];
+
+	$pieces = explode(" (", $training);
+	$training = $pieces[0];
+
+	return $training;
+
+}
+
+function _REST_call ($API_URL, $method='GET', $keyed_data_array=array())
+  {
+  $method=strtoupper($method);
+  if($method=='POST' || $method=='DELETE' || $method=='PUT')
+    {
+    // These 2 arrays fix odd characters that don't encode correctly when passing stream information
+    // in the POST, PUT and DELETE requests. Used by str_replace().  Note that each search array item has a
+    // corresponding replace item in the same position in the replace array.  Use this for adding additional
+    // characters or strings that mess things up...
+    $search_array=array('&amp;','%2527s');
+    $replace_array=array('&','%27s');
+
+    // this builds the data stream to be sent...
+    $opts = array(
+      'http' => array
+        (
+        'method'  => "$method",
+        'header'  => 'Content-type: application/x-www-form-urlencoded',
+        // the next line had to have a lot of altering, as the http_build_query() function mangles
+        // both the keys and the data.  str_replace() fixes the keys and urldecode() fixes the data
+        'content' => urldecode(str_replace($search_array,$replace_array,http_build_query($keyed_data_array))),
+        'ignore_errors' => true
+        )
+      ); // end $opts
+    //stream encode the data
+    $context  = stream_context_create($opts);
+    //push the data via POST/DELETE/PUT to the API site...
+    $data = file_get_contents("$API_URL", false, $context);
+    }
+  // GET method is a lot easier...
+  elseif($method=='GET')
+    {
+    // This assumes $API_URL has all GET data appended to it.
+    $data=file_get_contents($API_URL);
+    }
+  // anything other than GET, POST, DELETE, or PUT is an invalid method
+  else $data="ERROR: Wrong HTTP method selected";
+  // Return retrieved data
+  
+
+  return $data;
+  }
+
+
+/**
+ * Implementation of hook_block
+ */
+function onet_assessment_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "VCN O*Net Assessment" when you list blocks in admin mode
+    $blocks[0]['info']=t('VCN O*Net Assessment');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "Get Started"
+    $blocks['subject']=t('O*Net Assessment');
+    global $user;
+
+    /*building the content...*/
+    // The $API_URL_1 variable is where the RESTful API exists to GET assessment questions
+    $API_URL_1="";
+
+    //extracting database
+    $dbpull .= hvcp_get_db_url();
+    $tempArr1=explode("/",$dbpull);
+    $tempArr2=explode(":",$tempArr1[2]);
+    $dbuser=$tempArr2[0];
+    $tempArr3=explode("@",$tempArr2[1]);
+    $dbpass=$tempArr3[0];
+    $dbserver=$tempArr3[1].":3306";
+    unset($tempArr1,$tempArr2,$tempArr3);
+
+    //For now, until we get the REST server set up, we'll just pull the data directly from the database
+    $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+      or die("Error making database connection: ".mysql_error());
+    $db=mysql_select_db('hvcp',$connection)
+      or die("Error selecting database: ".mysql_error());
+
+
+    // Here, we are loading up the questions for the assessment
+    $query="SELECT   *
+            FROM     vcn_cma_question
+            WHERE    QUESTION_ID <= 60
+            ORDER BY QUESTION_ID";
+    $result=mysql_query($query)
+      or die("Error running query: ".mysql_error());
+    $oNetQuestionArray=array();
+    while($row=mysql_fetch_assoc($result))
+      {
+      extract($row);
+      $oNetQuestionArray[$QUESTION_ID]=$QUESTION_TEXT;
+      }
+
+    // Because the VCN user ID is different that Drupal's ID, we have to get the correct
+    // VCN ID, first...
+    if($user->uid != 0)
+      {
+      $query="Select USER_ID FROM vcn_cma_user WHERE USER_SESSION_ID=\"".$user->uid."\"";
+      $result=mysql_query($query)
+        or die("error getting VCN ID:".msyql_error());
+      $row=mysql_fetch_assoc($result);
+      extract($row);
+      }
+    if($USER_ID=="")
+      {
+      $insert="INSERT into vcn_cma_user (USER_SESSION_ID) values (\"".$user->uid."\")";
+      $result=mysql_query($insert)
+        or die("Error inserting into vcn_cma_user table: ".mysql_error());
+      $query="Select USER_ID FROM vcn_cma_user WHERE USER_SESSION_ID=\"".$user->uid."\"";
+      $result=mysql_query($query)
+        or die("error getting VCN ID:".msyql_error());
+      $row=mysql_fetch_assoc($result);
+      extract($row);
+      }
+
+    // This next section, we see if there are questions that are already answered...
+    // First we check to see if the user is logged in.  If so, query the vcn_cma_user_assessment table.
+    if($user->uid != 0)
+      {
+      $query2="SELECT   *
+               FROM     vcn_cma_user_assessment
+               WHERE    USER_ID=\"$USER_ID\"
+               ORDER BY QUESTION_ID";
+      $result2=mysql_query($query2)
+        or die("Error running query: ".mysql_error());
+      while($row=mysql_fetch_assoc($result2))
+        {
+        extract($row);
+        //if there are no existing session answers, fill them in with values from the database
+        if($_SESSION['assessment_answers'][$QUESTION_ID]=="")$_SESSION['assessment_answers'][$QUESTION_ID]=$USER_ANSWER_ID;
+        }
+      }
+    // If the user is not logged in, then see if there are answered questions already saved in the session
+    else
+      {
+      $onetAssessmentArray=$_SESSION['onetAssessmentArray'];
+      }
+
+    // We'll need some relative path info for our module to work
+    global $base_url;
+
+    // appPath is computed for our status bar and for some other parts of the script that need path info
+    $appPath=$base_url.'/'.drupal_get_path('module','onet_assessment');
+    $appPathArray=explode('/',$appPath);
+    for($i=1;$i<=3;$i++) array_shift($appPathArray);
+    $appPath="/".implode('/',$appPathArray);
+
+    /*Next, we start building the form...*/
+
+    // First, we add the appropriate CSS file...
+    $content .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$appPath/css/onet_assessment.css\">";
+
+    // adding a seperate IE 7 stylesheet, to fix irregularities for IE 7
+    $content .= "<!--[if IE 7]><link rel=\"stylesheet\" type=\"text/css\" href=\"$appPath/css/ie7.css\"><![endif]-->";
+
+    // Set a javascript variable for the status bar javascript script
+    $content .= "<script type=\"text/javascript\">appPath = '$appPath';</script>";
+
+	$base_path_url = base_path();
+
+
+    // Lines Andrew added?  Perhaps to accomodate it within the Guided Approach...
+    $content .= "<script type=\"text/javascript\">snapShotRoot = '$base_url';</script>";
+    $content .= "<script type=\"text/javascript\" src=\"".$base_path_url."sites/all/modules/custom/vcn/onet_assessment/js/snapshot.js\"></script>";
+
+	 if (!strstr($_SERVER['REQUEST_URI'], 'getting-started') && ($_GET['page_num']=="intro" || $_GET['page_num']==""))
+	   {
+	   if($_GET['nav']!="Display Careers")
+	   $content .= "<br/><div\"><b>Welcome to the O*NET Interest Profiler</b><br/><br/>
+		The O*NET Interest Profiler can help you find out what your interests are and how they relate to the world of work.
+		You can find out what you like to do.
+		<br/><br/>
+		The O*NET Interest Profiler helps you decide what kinds of careers you might want to explore.
+		<br/><br/>
+		On each screen, click the Next button at the bottom to continue. You can use the Previous button at the bottom
+		to re-read the instructions or change your answers.
+		<br/><br/>
+		The O*NET Interest Profiler has 60 questions about work activities that some people do on their jobs.
+		<br/><br/>
+		Read each question carefully and decide how you would feel about doing each type of work:
+		<ul>
+		<li>Strongly Dislike</li>
+		<li>Dislike</li>
+		<li>Unsure</li>
+		<li>Like</li>
+		<li>Strongly Like</li>
+		</ul>
+		Try NOT to think about:
+		<ul>
+		<li>If you have enough education or training to do the work; or</li>
+		<li>How much money you would make doing the work.</li>
+		</ul>
+		Just think about if you would like or dislike doing the work.
+		<br/><br/>
+		There are no right or wrong answers!
+		<br/><br/>
+		Please take your time answering the questions. There is no need to rush!
+		<br/><br/>
+		You are learning about your interests, so that you can explore work you might like and find rewarding!
+		<br/><br/>
+		On the next screen, please answer each question, in order, before continuing. There are 5 screens of questions in all. You can change your answers at any time; use the Previous button to return to an earlier screen.
+		<br/><br/>";
+		if($_GET['iframe'] == 'yes'){
+			$content .= "<a href=\"".base_path()."interest-profiler?page_num=1&iframe=yes\" style=\"border:none;\"><img style=\"border:none;\" src=\"".base_path().drupal_get_path("module","onet_assessment")."/images/ready_lets_begin_reg.png\" alt=\"Ready? Then Let's Begin!\" title=\"Ready? Then Let's Begin!\"></a>
+			<a href=\"javascript:popit('http://www.onetonline.org')\"> 
+			<img alt=\"Ready? Then Let's Begin!\" src=\"".base_path().drupal_get_path("module","onet_assessment")."/images/onet.png\" height=\"60px\" align=\"right\" />
+			</a>";
+		}else{
+			$content .= "<a href=\"".base_path()."interest-profiler?page_num=1\" style=\"border:none;\"><img style=\"border:none;\" src=\"".base_path().drupal_get_path("module","onet_assessment")."/images/ready_lets_begin_reg.png\" alt=\"Ready? Then Let's Begin!\" title=\"Ready? Then Let's Begin!\"></a>
+			<a href=\"javascript:popit('http://www.onetonline.org')\"> 
+			<img alt=\"Ready? Then Let's Begin!\" src=\"".base_path().drupal_get_path("module","onet_assessment")."/images/onet.png\" height=\"60px\" align=\"right\" />
+			</a>";
+		}
+		$content .= "</div>";
+	  }	
+	  else
+	  {
+	    $content .= "<div style=\"width:600px; margin-left:184px;\"><p>Thank you for taking the O*Net Interest Profiler.  Your results are shown below:</p></div>";
+	  }
+
+    // <DIV> container that holds everything - added by Andrew for Guided Approach
+    if (strstr($_SERVER['REQUEST_URI'], 'getting-started') && $_GET['page_num']!="intro") {
+    	$content .= "<div class=\"oNetAssessment\" style=\"width:420px;\">";
+
+    	/** Set $gsStep below to a unique identifier for the page: **/
+	$gsStep="step-two-3";
+
+	// if the session array is not initialized, initialize it
+	if(!is_array($_SESSION['gsStepCountArray']))$_SESSION['gsStepCountArray']=array();
+	// add individual page value to the array, if it doesn't already exist.
+	$_SESSION['gsStepCountArray'][$gsStep]=1;
+
+	// count the number of items in gsStepCountArray and figure a percentage
+	$gsStepItemCount=count($_SESSION['gsStepCountArray']);
+	$gsPctDone=floor($gsStepItemCount/24*100);
+
+	// refresh the progress bar with the new percentages
+	$gsStepItemCount=count($_SESSION['gsStepCountArray']);
+	$gsPctDone=floor($gsStepItemCount/$vars['total_activities_count']*100);
+	echo "<script type=\"text/javascript\">
+	  function gsProgressBarInit()
+	    {
+	    document.getElementById('gsProgressBar').innerHTML = '<div class=\"progress-container\" style=\"width:80%;\"><div style=\"width:$gsPctDone%\"></div></div><div style=\"float:left;\">$gsPctDone%</div>';
+	    }
+	  // when the page loads, initialize the progress bar
+	  window.onload=gsProgressBarInit;
+  </script>";
+    }
+
+    elseif($_GET['page_num']!="" && $_GET['page_num']!="intro") {
+        	$content .= "<div class=\"oNetAssessment\">";
+         }
+
+    else {
+    	$content .= "<div>";
+         }
+
+    // we need to get the page number, so we can tell whether to show the assessment
+    // or display the results pages
+    if($_GET['page_num'])
+      {
+      $page_num=$_GET['page_num'];
+      }
+    else
+      {
+      $page_num="intro";
+      }
+
+    // Code to add POSTed values into database, if user is logged in.
+    for($i=1;$i<=60;$i++)
+      {
+      $postQuestion="Q".$i;
+      if($_GET[$postQuestion] != "" && $user->uid != 0)
+        {
+        $delete="DELETE from vcn_cma_user_assessment
+                 WHERE USER_ID=\"$USER_ID\"
+                 AND QUESTION_ID=\"$i\"";
+        $result=mysql_query($delete)
+          or die("Error running delete: ".mysql_error());
+
+        $select="SELECT USER_ID from vcn_cma_user WHERE USER_ID=\"$USER_ID\"";
+        $result=mysql_query($select)
+          or die("Error during execution of SELECT statement: ".mysql_error());
+        while($row=mysql_fetch_assoc($result)) extract($row);
+
+        $insert="INSERT into vcn_cma_user_assessment
+                 (USER_ID,QUESTION_ID,USER_ANSWER_ID)
+                 VALUES
+                 (\"$USER_ID\",\"$i\",\"$_GET[$postQuestion]\")";
+        $result=mysql_query($insert)
+          or die("$insert failed: ".mysql_error());
+        } // end if($_GET[$postQuestion] !="" && $user->uid != 0)
+      } // end for($i=1;$i<=60;$i++)
+
+
+    /*** Assessment Pages ***/
+	$base_path_url = base_path();
+    if(($_GET['nav']=="Next" || $_GET['nav']=="Previous" || $page_num==1) && $page_num!="intro")
+      {
+      if (strstr($_SERVER['REQUEST_URI'], 'getting-started'))
+        $content .= "<form method='get' action='$base_url/getting-started/step-two/3'>";
+      else
+        $content .= "<form method='get'>";
+
+      // Like, Dislike, etc. graphic
+      if($_SESSION['clientx']=="ie")
+        {
+        $content .= "<div style=\"float:left;\"><image class=\"topGraphic\" src=\"$base_path_url"."sites/all/modules/custom/vcn/onet_assessment/images/ques_header.gif\" alt=\"Like/Dislike Scale Graphic\" style=\"width: 166px; margin-left: 26px;\"></div>";
+        }
+      else
+        $content .= "<div style=\"float:left;\"><image class=\"topGraphic\" src=\"$base_path_url"."sites/all/modules/custom/vcn/onet_assessment/images/ques_header.gif\" alt=\"Like/Dislike Scale Graphic\"></div>";
+
+      if(is_array($_SESSION['assessment_answers']))
+        {
+        $assessment_answers=$_SESSION['assessment_answers'];
+        }
+      else $assessment_answers=array();
+
+      // question number is calculated, in part, from the current page number
+      for ($i=1;$i<=12;$i++)
+        {
+        $number=($page_num-1)*12+$i;
+        $question="Q".$number;
+        // If there is an answer that is POSTed, set assessment_answers array value to
+        // POSTed value.  If not, set the value to what is in the session.
+        if($_GET[$question]!="")$assessment_answers[$number]=$_GET[$question];
+        elseif($_SESSION['assessment_answers'][$number] != "") $assessment_answers[$number]=$_SESSION['assessment_answers'][$number];
+        }
+
+      // update Session's assessment answers, so they aren't lost
+      $_SESSION['assessment_answers']=$assessment_answers;
+
+      // calculate the %completed for the progress bar
+      $numComplete=0;
+      foreach($assessment_answers as $numTest) if($numTest != "") $numComplete++;
+      $pctComplete = floor($numComplete/60*100);
+
+      // create the progress bar
+      $content .= "<div style=\"float:left;margin-left:30px;margin-top:20px;\" class=\"progress-container\"><div style=\"width:$pctComplete%;\"></div></div><div style=\"float:left;margin-top:20px;\">$pctComplete%</div>";
+
+
+      // Determine what page you are on
+      if($_GET['nav']=="Next")
+        {
+        $page_num = $page_num+1;
+		//$page_num = $page_num."&iframe=yes";
+        }
+
+      if($_GET['nav']=="Previous")
+        {
+        $page_num = $page_num-1;
+		//$page_num = $page_num."&iframe=yes";
+        }
+
+      // adding the page on the header
+      if($_GET['nav']=="Next" || $_GET['nav']=="Previous" || $page_num==1)
+        $content .= "<div class=\"pageNumText\">Page $page_num of 5</div>";
+
+      // creating the assessment table
+      $content .= "<br /><table>";
+
+      //create the actual table rows...
+      for($j=1;$j<=12;$j++)
+        {
+        $item_num = ($page_num-1)*12+$j;
+        $content .= "<tr>
+                     <td>$item_num</td>";
+
+        // tagged variable is used to determine if a checkmark is displayed, to indicate the question was answered
+        $tagged=0;
+
+        // determine if a radio button was previously selected
+        if($assessment_answers[$item_num]==0 && $assessment_answers[$item_num]!=NULL)
+          {
+          $tagged=1;
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Strongly Dislike\" value=\"0\" checked></td>";
+          }
+        else
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Strongly Dislike\" value=\"0\"></td>";
+        if($assessment_answers[$item_num]==1)
+          {
+          $tagged=1;
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Dislike\" value=\"1\" checked></td>";
+          }
+        else
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Dislike\" value=\"1\"></td>";
+        if($assessment_answers[$item_num]==2)
+          {
+          $tagged=1;
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Unsure\" value=\"2\" checked></td>";
+          }
+        else
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Unsure\" value=\"2\"></td>";
+        if($assessment_answers[$item_num]==3)
+          {$tagged=1;
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Like\" value=\"3\" checked></td>";
+          }
+        else
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Like\" value=\"3\"></td>";
+        if($assessment_answers[$item_num]==4)
+          {
+          $tagged=1;
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Strongly Like\" value=\"4\" checked></td>";
+          }
+        else
+          $content .= "<td class=\"oNetColor".$j."\" style=\"width:10px;\"><input type=\"radio\" name=\"Q".$item_num."\" title=\"Strongly Like\" value=\"4\"></td>";
+
+        // if a radio button was previously selected, check the question as answered
+        if($tagged==1)
+          {
+          $content .= "<td class=\"oNetColor".$j."\">$oNetQuestionArray[$item_num]</td><td class=\"oNetColor".$j."\"><img src=\"$appPath/images/check.bmp\" alt=\"Question Answered\"></td></tr>";
+          }
+        else
+          {
+          $content .= "<td class=\"oNetColor".$j."\">$oNetQuestionArray[$item_num]</td><td class=\"oNetColor".$j."\">&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>";
+          }
+        } // end for($j=1;$j<=12;$j++)
+
+      $content .= "</table>";
+      // navigation buttons
+      $content .= "<div class=\"buttonBar\">";
+      if($page_num != 1) $content .= "<div class=\"previous\"><input type=\"submit\" name=\"nav\" id=\"navPrevious\" value=\"Previous\"></div>";
+      if($page_num != 5) $content .= "<div class=\"next\"><input type=\"submit\" name=\"nav\" id=\"navNext\" value=\"Next\"></div>";
+      if($page_num == 5) $content .= "<div class=\"jobs\"><input type=\"submit\" name=\"nav\" id=\"navJobs\" value=\"Display Careers\"></div>";
+
+      $content .= "</div>";
+
+      $content .= "<input type=\"hidden\" name=\"page_num\" id=\"page_num\" value=\"$page_num\">";
+	  
+	  if ($_GET['iframe']=='yes')
+		$content .= "<input type=\"hidden\" name=\"iframe\" id=\"iframe\" value=\"yes\">";
+
+      $content .= "</form>";
+      } // end if($_GET['nav']=="Next" || $_GET['nav']=="Previous" || $page_num==1)
+
+
+
+    /*** This is where we go if the user clicks on "Display Careers" ***/
+
+    if($_GET['nav']=="Display Careers")
+      {
+      // First, we save any updated checked radio boxes from the last page, if coming from the assessment page
+      // if coming from "Display Careers" page, just set the assessment_answers array to session value
+      if($_GET['page_num'] != 7)
+        {
+        $assessment_answers=$_SESSION['assessment_answers'];
+        for ($i=49;$i<=60;$i++)
+          {
+          $question="Q".$i;
+          $assessment_answers[$i]=$_GET[$question];
+          }
+        $_SESSION['assessment_answers']=$assessment_answers;
+        }
+      else // we're coming from the "Display Careers" page
+        {
+        $assessment_answers=$_SESSION['assessment_answers'];
+        }
+
+      //Determine if all questions were answered
+      $unanswered_array=array();
+      for($i=1;$i<=60;$i++)
+        {
+        if($assessment_answers[$i]=="")array_push($unanswered_array,$i);
+        }
+
+      // If there are unanswered questions, don't proceed until they answer them
+      if(count($unanswered_array) > 0)
+        {
+        $content .= "<h1>Before We Go Further...</h1>";
+        $content .= "We cannot show you your matched results, because you have not answered all the assessment questions.
+                     Please, go back and answer the following questions: <br /><br />";
+        for($i=0;$i<=count($unanswered_array)-2;$i++)
+          {
+          $content .= $unanswered_array[$i].", ";
+          }
+        if(count($unanswered_array)>1)
+          {
+          $content .= "and ";
+          }
+        $content .= $unanswered_array[count($unanswered_array)-1];
+        } // end if(count($unanswered_array) > 0)
+
+      // Otherwise, calculate the scores
+      else // calculate scores and display careers
+        {
+        $realistic_score=0;
+        $investigative_score=0;
+        $artistic_score=0;
+        $social_score=0;
+        $enterprising_score=0;
+        $conventional_score=0;
+
+        //First, the realistic score:
+        for($i=0;$i<=4;$i++)
+          {
+          $realistic_score=$realistic_score+$assessment_answers[$i*12+1]+$assessment_answers[$i*12+2];
+          }
+
+        //Next, the investigative score:
+        for($i=0;$i<=4;$i++)
+          {
+          $investigative_score=$investigative_score+$assessment_answers[$i*12+3]+$assessment_answers[$i*12+4];
+          }
+
+        //Next, the artistic score:
+        for($i=0;$i<=4;$i++)
+          {
+          $artistic_score=$artistic_score+$assessment_answers[$i*12+5]+$assessment_answers[$i*12+6];
+          }
+
+        //Next, the social score:
+        for($i=0;$i<=4;$i++)
+          {
+          $social_score=$social_score+$assessment_answers[$i*12+7]+$assessment_answers[$i*12+8];
+          }
+
+        //Next, the enterprising score:
+        for($i=0;$i<=4;$i++)
+          {
+          $enterprising_score=$enterprising_score+$assessment_answers[$i*12+9]+$assessment_answers[$i*12+10];
+          }
+
+        //Finally, the conventional score:
+        for($i=0;$i<=4;$i++)
+          {
+          $conventional_score=$conventional_score+$assessment_answers[$i*12+11]+$assessment_answers[$i*12+12];
+          }
+
+        // Store the scores in a session array
+        $assessment_scores_array=array("realistic_score"=>$realistic_score,
+                                       "investigative_score"=>$investigative_score,
+                                       "artistic_score"=>$artistic_score,
+                                       "social_score"=>$social_score,
+                                       "enterprising_score"=>$enterprising_score,
+                                       "conventional_score"=>$conventional_score);
+        $_SESSION['assessment_scores_array']=$assessment_scores_array;
+
+        $content .= "<h1>Career Matching</h1>";
+        $content .= "Based upon the interests you have expressed, we believe these careers seem to be the best fit for you:<br /><br />";
+
+        // Get the O*Net scores
+        $oNetScores=$_SESSION['assessment_scores_array'];
+
+        /*
+         * Build the array of comparison values, per O*Net job classification
+         */
+
+        /**
+         * We currently have no O*Net interest profiler metricts for the following careers:
+         * 31-1014.00, 31-1015.00, 29-2057.00, 29-2099.05, 29-1128.00, 29-2035.00, 21-1094.00 and 31-9097.00
+         * Once we have data from O*Net for these, we will add them in
+         */
+        $oNetCareersArray = array
+          (
+          "29-2011.00"=>array(5.67,7.00,1.67,2.00,2.67,4.67),
+	  "29-2011.02"=>array(5.00,6.67,1.67,1.67,1.67,3.33),
+	  "29-2011.03"=>array(7.00,5.33,1.33,1.33,1.67,4.67),
+	  "29-2012.00"=>array(5.67,5.67,1.67,4.00,1.67,4.33),
+	  "29-2021.00"=>array(5.67,3.00,1.00,6.00,2.00,3.67),
+	  "31-9091.00"=>array(5.67,3.33,1.33,4.67,2.67,6.00),
+	  "51-9081.00"=>array(6.33,5.00,2.00,2.67,1.67,4.33),
+	  "19-4011.02"=>array(5.67,5.00,1.67,1.00,1.67,5.00),
+	  "29-1031.00"=>array(2.33,6.67,2.33,6.33,4.00,2.00),
+	  "29-2051.00"=>array(4.00,4.33,1.67,6.33,2.67,2.33),
+	  "15-1121.01"=>array(3.00,5.00,2.00,5.33,2.67,3.33),
+	  "29-2071.00"=>array(2.00,1.00,1.00,2.33,3.67,7.00),
+	  "31-9094.00"=>array(4.00,3.33,2.33,2.00,2.67,7.00),
+	  "29-1071.00"=>array(4.00,6.33,2.00,6.33,1.67,2.67),
+	  "53-3011.00"=>array(7.00,1.67,1.33,5.67,3.33,3.00),
+	  "31-9092.00"=>array(4.33,3.00,1.33,6.33,2.33,6.33),
+	  "43-6013.00"=>array(3.00,3.33,1.33,4.33,3.33,7.00),
+	  "21-1022.00"=>array(1.00,4.00,3.33,7.00,3.33,3.00),
+	  "29-2053.00"=>array(3.67,3.00,1.67,6.67,3.67,2.67),
+	  "31-1013.00"=>array(4.67,2.33,2.33,7.00,2.00,4.67),
+	  "29-1141.00"=>array(3.67,5.67,1.67,7.00,2.00,4.67),
+	  "29-1141.01"=>array(4.33,5.33,2.00,7.00,2.33,1.67),
+	  "29-1141.03"=>array(4.00,4.33,2.67,6.67,3.00,2.67),
+	  "29-1141.04"=>array(2.00,4.00,1.00,5.67,6.67,4.33),
+	  "29-1151.00"=>array(5.00,6.67,1.67,4.33,1.33,2.67),
+	  "29-1171.00"=>array(4.33,6.00,2.67,6.33,2.33,2.67),
+	  "29-2061.00"=>array(5.00,3.33,1.33,7.00,2.33,3.67),
+	  "29-9099.01"=>array(3.67,2.67,2.00,7.00,2.67,1.33),
+	  "31-1011.00"=>array(5.00,2.00,2.00,7.00,2.33,2.67),
+	  "39-9021.00"=>array(5.33,1.67,1.33,7.00,2.33,4.33),
+	  "29-2052.00"=>array(5.00,3.00,1.00,3.67,2.67,7.00),
+	  "31-9095.00"=>array(4.67,2.67,1.00,3.33,3.33,7.00),
+	  "15-2041.01"=>array(3.00,6.67,2.00,1.67,1.00,5.33),
+	  "19-2041.00"=>array(5.33,7.00,3.33,1.67,1.67,4.00),
+	  "29-1124.00"=>array(5.33,3.67,1.00,5.67,1.67,5.00),
+	  "29-2033.00"=>array(6.00,6.33,1.33,4.00,1.67,3.67),
+	  "29-2034.00"=>array(6.67,3.67,1.33,5.00,3.00,3.00),
+	  "29-2099.06"=>array(6.33,3.00,1.33,3.67,3.00,4.00),
+	  "19-4092.00"=>array(5.33,6.67,2.33,1.33,1.33,5.00),
+	  "29-1071.01"=>array(5.33,4.67,1.00,5.00,2.67,2.67),
+	  "29-2031.00"=>array(5.33,5.33,1.33,5.33,2.33,3.67),
+	  "29-2032.00"=>array(5.33,6.00,1.67,5.67,2.67,3.33),
+	  "29-2041.00"=>array(4.33,4.67,1.33,6.33,4.00,2.67),
+	  "29-2055.00"=>array(6.00,2.33,1.00,5.00,2.33,4.00),
+	  "29-2091.00"=>array(5.00,4.67,2.33,7.00,2.00,2.00),
+	  "29-2092.00"=>array(4.00,6.00,1.67,6.00,3.00,2.67),
+	  "29-2099.01"=>array(6.33,5.00,1.33,3.33,2.67,3.67),
+	  "29-9011.00"=>array(4.00,6.67,1.33,4.00,2.67,5.33),
+	  "29-9012.00"=>array(5.00,4.00,1.33,3.33,3.00,7.00),
+	  "29-9092.00"=>array(1.00,6.33,4.00,6.67,2.33,2.67),
+	  "31-9093.00"=>array(6.33,3.67,1.00,2.00,2.00,6.00),
+	  "31-9099.02"=>array(6.67,4.67,1.00,2.33,1.67,4.33),
+	  "43-4051.03"=>array(1.00,2.33,1.67,6.67,3.67,2.00),
+	  "49-9062.00"=>array(7.00,5.00,1.67,1.33,1.67,4.67),
+	  "51-9082.00"=>array(7.00,4.67,2.33,4.33,1.67,3.00),
+	  "21-1015.00"=>array(1.00,4.00,3.67,7.00,3.33,3.33),
+	  "29-1122.00"=>array(3.00,4.33,3.33,7.00,3.00,3.67),
+	  "29-1122.01"=>array(4.33,4.67,3.00,7.00,3.00,2.67),
+	  "29-1123.00"=>array(4.33,5.67,2.33,7.00,2.67,3.00),
+	  "29-1125.01"=>array(1.67,3.67,4.67,7.00,3.33,2.33),
+	  "29-1126.00"=>array(4.33,5.00,1.33,6.67,2.33,2.67),
+	  "29-1181.00"=>array(2.67,6.67,2.33,6.33,1.67,3.67),
+	  "29-2054.00"=>array(4.67,4.67,1.67,7.00,1.33,4.33),
+	  "31-2011.00"=>array(4.33,3.33,3.00,7.00,1.67,2.67),
+	  "31-2012.00"=>array(4.67,2.00,2.00,7.00,2.00,3.33),
+	  "31-2021.00"=>array(5.33,4.00,1.67,6.67,2.33,2.67),
+	  "31-2022.00"=>array(5.67,1.67,1.33,6.67,2.33,2.67),
+	  "31-9011.00"=>array(5.67,3.67,1.67,6.33,2.33,3.00),
+	  "31-9099.01"=>array(3.00,3.00,2.00,6.33,2.67,5.67),
+	  "39-9031.00"=>array(5.33,1.67,3.00,7.00,4.33,1.33),
+	  "29-2081.00"=>array(4.33,1.67,1.67,4.33,6.33,5.33),
+	  "51-9083.00"=>array(7.00,2.33,1.00,1.00,2.00,3.67),
+      "11-9111.00"=>array(1.67,3.33,1.67,5.00,7.00,5.00),
+      "21-1091.00"=>array(1.67,3.33,3.33,7.00,4.33,2.67),
+          );
+
+        //starting assessment careers display
+        $test_array=array();
+        foreach($oNetScores as $oNetScore)
+          {
+          $test_array[]=$oNetScore;
+          }
+
+        /* To evaluate closeness to 6 parameters, we originally evaluated the six dimensional distance between the
+         * assessment scores and job rating scores.  However, the preferred way to do this is to use a "curve fitting"
+         * formula to calculate out a "correlation coefficient".
+         *
+         * The formula is the first quantity of (the summation of X-(mean of X) times Y-(mean of Y)) divided by the second
+         * quantity of (6 (the number of matching parameters) times the standard deviation of X times the standard
+         * deviation of Y).
+         *
+         * This creates a value between -1 and 1.  A score of 1 indicates the match is identical, whereas a score of -1
+         * indicates a diametrical opposite.
+         */
+
+        //Set up an array to keep track of the correlation coefficients
+        $corrCoef_array=array();
+
+        // First, we determine the mean and standard deviation of our test value
+        $testMean=($test_array[0]+$test_array[1]+$test_array[2]+$test_array[3]+$test_array[4]+$test_array[5])/6;
+        $testStdDev=sqrt((pow(($test_array[0]-$testMean),2)+pow(($test_array[1]-$testMean),2)+pow(($test_array[2]-$testMean),2)+pow(($test_array[3]-$testMean),2)+pow(($test_array[4]-$testMean),2)+pow(($test_array[5]-$testMean),2))/5);
+
+        // get the keys for the O*Net careers array
+        $keyed_array=array_keys($oNetCareersArray);
+
+        // Next, we process each of the dimensions of each O*Net occupation, to get the Correlation Coefficient.
+        for($i=0;$i<=count($oNetCareersArray)-1;$i++)
+          {
+          // calculate out the mean and standard deviation of each O*Net career
+          $oNetMean=($oNetCareersArray[$keyed_array[$i]][0]+$oNetCareersArray[$keyed_array[$i]][1]+$oNetCareersArray[$keyed_array[$i]][2]+$oNetCareersArray[$keyed_array[$i]][3]+$oNetCareersArray[$keyed_array[$i]][4]+$oNetCareersArray[$keyed_array[$i]][5])/6;
+          $oNetStdDev=sqrt((pow(($oNetCareersArray[$keyed_array[$i]][0]-$oNetMean),2)+pow(($oNetCareersArray[$keyed_array[$i]][1]-$oNetMean),2)+pow(($oNetCareersArray[$keyed_array[$i]][2]-$oNetMean),2)+pow(($oNetCareersArray[$keyed_array[$i]][3]-$oNetMean),2)+pow(($oNetCareersArray[$keyed_array[$i]][4]-$oNetMean),2)+pow(($oNetCareersArray[$keyed_array[$i]][5]-$oNetMean),2))/5);
+
+          // calculate the top half of the equation...
+          $corrCoefSum=0;
+          for($j=0;$j<=5;$j++)
+            {
+            $corrCoefSum = (($oNetCareersArray[$keyed_array[$i]][$j]-$oNetMean)*($test_array[$j]-$testMean))+$corrCoefSum;
+            }
+
+          // completing the equation...
+          $corrCoef = $corrCoefSum/(6*$testStdDev*$oNetStdDev);
+
+          // adding the coefficient to the array
+          $corrCoef_array[$keyed_array[$i]]=$corrCoef;
+          } // end for($i=0;$i<=75;$i++)
+
+        // Sort the array from largest to smallest, maintaining key associations
+        arsort($corrCoef_array);
+
+        /** uncomment out the line below to display the keyed array sorted by coefficient in reverse order **/
+        //foreach($corrCoef_array as $dkey=>$dval) $content .= "$dkey has a coefficient of $dval<br />";
+		
+        // displayCount is number of career items to display
+        $displayCount=5;
+        $trimCount=0;
+		$flag=0;
+        foreach($corrCoef_array as $dkey=>$dval)
+          {
+          if($dval >= 0.05)
+            {
+			$flag=1;
+            $query="select DISPLAY_TITLE from vcn_occupation WHERE `ONETCODE`=\"$dkey\"";
+            $result=mysql_query($query)
+              or die("Error Running Query: ".mysql_error());
+            $row=mysql_fetch_assoc($result);
+            extract($row);
+
+            if (strstr($_SERVER['REQUEST_URI'], 'getting-started'))
+              {
+              $occupation = get_details($dkey);
+              $displaytitle=$occupation->occupation->displaytitle;
+              $tempdesc=str_replace("'", "\'", $occupation->occupation->detaileddescription);
+              $pieces = explode ('.',$tempdesc);
+              if ($pieces[0])
+                $desc=$pieces[0].".";
+              $skills=goodImplode($occupation->occupation->skills->item,'5','comma');
+              $education=str_replace("'", "\'", getTraining($occupation->occupation->typicaltraining->title));
+              $tools=goodImplode($occupation->occupation->toolstechnology->tools->item,'4','comma');
+              $tech=goodImplode($occupation->occupation->toolstechnology->technology->item,'2','comma');
+              $onet=$dkey;
+              $dashonet=str_replace(".", "-", $onet);
+              $content .= "<a href=\"javascript:void(0);\" onclick=\"snapshot('$displaytitle','$desc','$skills','$education','$tools','$tech','$onet','$dashonet')\">$DISPLAY_TITLE</a><br /><br />";
+              } // end if (strstr($_SERVER['REQUEST_URI'], 'getting-started'))
+            else
+              {
+				  if($_GET['iframe'] == 'yes'){
+				  $content .= "<a href=\"/careerladder/overview_with_back.php?onetcode=$dkey\" title =\"Career Overview\" >$DISPLAY_TITLE</a><br /><br />";
+				  }else{
+				  $base_url_careerdeatils = base_path();
+				  $base_url_careerdeatils = substr_replace($base_url_careerdeatils ,"",-1);
+				  $content .= "<a href=\"javascript:popit('$base_url_careerdeatils/careerdetails?onetcode=$dkey')\">$DISPLAY_TITLE</a><br /><br />";
+				  }
+			  
+              }
+            $trimCount++;
+            } // end if($trimCount!=$displayCount)
+
+			
+          } // end foreach($corrCoef_array as $dkey=>$dval)
+		if($flag==0){ // This is to update the user that no careers were found if none of the $dval is less than 0.05
+			$content .= "None";
+		}
+		
+		  
+        } //end else // calculate scores and display careers
+      // adding Navigation buttons
+      $content .= "<form method=\"get\">";
+      $content .= "<input type=\"hidden\" name=\"page_num\" value=\"6\">";
+      $content .= "<div class=\"buttonBar\">";
+      $content .= "<div class=\"previous\"><input type=\"submit\" name=\"nav\" id=\"navPrevious\" value=\"Previous\"></div>";
+	  
+	  if($_GET['iframe'] == 'yes')
+	  $content .= "<div class=\"previous\"><input type=\"hidden\" name=\"iframe\" id=\"iframe\" value=\"yes\"></div>";
+
+      } // end if($_GET['nav']=="Display Careers")
+
+
+    $content .= "</div>"; // closing the oNetAssessment div
+
+    // close the mysql connection
+    mysql_close($connection);
+
+    // Set the blocks content to $content
+    $blocks['content']=$content;
+
+    // Return the data to the user...
+    return $blocks;
+    break;
+    } //end switch($op)
+  } // end function onet_assessment_block

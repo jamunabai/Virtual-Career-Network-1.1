@@ -1,0 +1,84 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.fhcsearch {
+    float: left;
+    margin-right: 15px;
+    padding: 10px;
+    border-style: solid;
+    border-width: 1px;
+	border-color: #189AB0;
+    font-size: 12px;
+}
+#result {
+	height:20px;
+	font-size:16px;
+	font-family:Arial, Helvetica, sans-serif;
+	color:#333;
+	padding:5px;
+	margin-bottom:10px;
+	background-color:#FFFF99;
+}
+#country{
+	padding:3px;
+	border:1px #CCC solid;
+	font-size:17px;
+}
+.suggestionsBox {
+	position: absolute;
+	left: 10px;
+	top: 46px;
+	margin: -13px 0px 0px 0px;
+	width: 200px;
+	padding:0px;
+	background-color: #ffffff;
+	border-bottom: 1px solid #558be3;
+	border-top: 1px solid #558be3;
+	color: #fff;
+}
+.suggestionList {
+	margin: 0px;
+	padding: 0px;
+}
+.suggestionList ul li {
+	list-style:none;
+	margin: 0px;
+	padding: 6px;
+	border-left: 1px solid #558be3;
+	border-right: 1px solid #558be3;
+	cursor: pointer;
+}
+.suggestionList ul li:hover {
+	background-color: #d5e2ff;
+	color:#000;
+}
+/*
+ul {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color:#000000;
+	padding:0;
+	padding-left: 0;
+	margin:0;
+}
+*/
+.load{
+background-image:url(../occupations_layout/loader.gif);
+background-position:right;
+background-repeat:no-repeat;
+}
+
+#suggest {
+	position:relative;
+}

@@ -1,0 +1,438 @@
+<?php 
+$includes = drupal_get_path('module','vcn').'/includes';
+require_once($includes . '/vcn_common.inc');
+ 	
+/**
+Allows users to search for an office using zip codes
+**/
+
+function office_locator_locate_office() {
+
+	$zip = '';
+
+	$cma = vcnCma::getInstance();
+
+	if(preg_match("/^[0-9]{5}$/",$cma->zipcode) && strlen($cma->zipcode)) {
+		$zip = $cma->zipcode; 
+	}
+
+	if(preg_match("/^[0-9]{5}$/",$_SESSION['zipcode']) && strlen($_SESSION['zipcode']))  {
+		$zip = $_SESSION['zipcode'];
+	}
+	
+	if(strlen($_GET['zip'])) {
+		$zip = $_GET['zip']; 
+		if ($zip == '00000') {
+			$zip = '';
+		}
+	}
+  
+	if (strlen($zip)) {
+		$partnersHtml = get_vcn_partners_html($zip);
+		$oneStopCentersHtml = get_one_stop_centers_html($zip);
+		$communityCollegesHtml = get_community_colleges_html($zip);
+	}
+	
+	$vPath = base_path() . drupal_get_path('module','vcn_getting_started');
+	
+	$html = "<body onload=\"document.getElementById('zip').focus();\">
+			<script language=\"javascript\">
+			function FindOffices() {
+			   var validated = false; 
+				if (document.getElementById('zip').value.length > 0 && !isNaN(document.getElementById('zip').value)) {
+			       // make syncronous call to get the zip validation
+			       $.ajax({url: '/careerladder/zipvalidation.php?zipcode='+document.getElementById('zip').value, 
+			   				                 success: function(result) { 
+			   								    if (result == 'true') { 
+			   									    validated = true; 
+			   								    } 
+			   							     }, 
+			   				                 async: false}); 
+				}
+			   if (!validated) { 
+			       alert('Please enter a valid US ZIP code.');
+			   }
+			   return validated; 
+			}
+			</script>
+			<form id=\"locatorform\" method=\"get\" action=\"office-locator\" onsubmit=\"return FindOffices();\">
+			   <p>If you are interested in receiving additional help or career counseling you can contact 
+			   the nearest participating VCN Partner Office, One-Stop Career Center or Community College. 
+			   </p>
+				Enter a ZIP Code to find the nearest office: 
+			   <label for=\"zip\"><input id=\"zip\" name=\"zip\" type=\"text\" value=\"$zip\" size=\"5\" maxlength=\"5\" /></label> 
+			   <input title=\"Go\" style=\"cursor:pointer; position:relative; top:8px;\" type=\"image\" src=\"$vPath/images/go.png\" border=\"0\" alt=\"Go\"> 
+				<br/><br/>
+				<br/>
+			</form>";
+	
+	if (strlen($zip)) {				
+		$html .= "<div>
+				 	<div style=\"float: left; width: 275px; padding-left: 0px; background-color: transparent;\">
+				 		<strong style=\"text-decoration:underline;\">VCN Partner Office</strong>
+				 		<br/><br/>$partnersHtml
+				 	</div>
+				 	<div style=\"float: left; width: 295px; padding-left: 20px; background-color: transparent;\">
+				 		<strong style=\"text-decoration:underline;\">One-Stop Career Center</strong>
+				 		<br/><br/>$oneStopCentersHtml
+				 	</div>
+				 	<div style=\"float: left; width: 295px; padding-left: 20px; background-color: transparent;\">
+				 		<strong style=\"text-decoration:underline;\">Community College</strong>
+				 		<br/><br/>$communityCollegesHtml
+				 	</div>
+				 	<br style=\"clear: left;\" />
+				 </div>";
+		
+		if (strlen($GLOBALS['contact_method_text'])) {
+			$html .= '<div style="color:red"><br/><br/><br/>** Note: ' . $GLOBALS['contact_method_text'] . '</div>';	
+		}
+	} 
+	
+	echo $html;
+}
+
+function get_one_stop_centers_html($zip) {
+	$objDOM = call_one_stop_web_service($zip);
+	
+	$html = '';
+	if ($objDOM) {
+		$items = $objDOM->getElementsByTagName('Detail');
+		
+		$distance = 9999;
+		$name = '';
+		$street = '';
+		$city = '';
+		$state = '';
+		$zipcode = '';
+		$phone = '';
+		
+		if ($items) {
+			foreach($items as $item) {
+				foreach($item->childNodes as $i) {
+					switch (strtoupper($i->nodeName)) {
+						case 'NAME':
+							$name0 = $i->nodeValue;
+							break;
+						case 'ADDRESS_1':
+							$street0 = $i->nodeValue;
+							break;
+						case 'CITY':
+							$city0 = $i->nodeValue;
+							break;
+						case 'STATE':
+							$state0 = $i->nodeValue;
+							break;
+						case 'ZIP':
+							$zip0 = $i->nodeValue;
+							break;
+						case 'PHONE':
+							$phone0 = $i->nodeValue;
+							break;
+						case 'DIST':
+							$dist0 = $i->nodeValue;
+							break;
+					}
+				}
+			
+				if ($dist0) {
+					$dist0 = intval($dist0);
+
+					if ($dist0 < $distance) {
+						$distance = $dist0;
+						$name = $name0;
+						$street = $street0;
+						$city = $city0;
+						$state = $state0;
+						$zipcode = $zip0;
+						$phone = $phone0;
+					}
+				}
+			}
+		}
+		
+		if (strlen($name)) {
+			$html .= $name;
+			
+			if (strlen($street)) {
+				$html .= '<br/>' . $street;
+			}
+					
+			if (strlen($city) && strlen($state)) {
+				$html .= '<br/>' . $city . ', ' . $state;
+			}
+			
+			if (strlen($zipcode)) {
+				if (!strlen($street) && !strlen($city) && !strlen($state)) {
+					$html .= '<br/>';
+				}
+				$html .= ' ' . $zipcode;
+			}
+			
+			if (strlen($phone)) {
+				$phone = str_replace(',', '<br/>', $phone);
+				$html .= '<br/>' . $phone;
+			}	
+			
+			if (strlen($distance)) {
+				$html .= '<br/><br/>Approx. ' . round($distance, 1) . ' miles';
+			}
+		}
+	}
+	
+	if (!strlen($html)) {
+		$html = 'None found';
+	}
+	
+	return $html;
+}
+
+function call_one_stop_web_service($zip) {
+	
+	$key = vcn_get_one_stop_webservice_key();
+	$maxDistance = '100';
+	
+	$success = false;
+	
+	$url = 'http://www.servicelocator.org/wservice2/CVServices.asmx/FindOneStopsByZip?zip=' . $zip . '&state=VA&distance=' . $maxDistance . '&userID=' . $key;
+		
+	$objDOM = new DOMDocument();
+	
+	if (!$objDOM->load($url)) {
+		for ($j = 0; $j < 3; $j++) {
+			sleep(1);
+			if ($objDOM->load($url)) {
+				$success = true;
+				break;
+			}
+		}	
+	} else {
+		$success = true;	
+	}
+	
+	if (!$success) {
+		$objDOM = false;
+	}
+	
+	return $objDOM;
+}
+
+function get_vcn_partners_html($zip) {
+
+	$html = '';
+	
+	$coords = vcn_get_zip_code_lat_lon($zip);
+	$latitude = $coords["latitude"];
+	$longitude = $coords["longitude"];
+	
+	// Need to first check to see if the zip code exists in the vcn_office_zipcode table.
+	// If it does exist then we pull back the office that matches it from vcn_office_partners.
+	// If it does NOT exist then we need to search the vcn_office_partners table to find
+	// the nearest office using the office zip code to the user's zip code
+	
+	if (strlen($latitude) && strlen($longitude)) {
+		
+		$conn = vcn_connect_to_db();
+		
+		$sql = " SELECT oz.office_id, 
+			           op.office_name,  
+			           op.address,  
+			           op.city,  
+			           op.state,  
+			           op.zipcode as zip,  
+			           op.phone, 
+			           op.contact_person,
+			           op.email,
+			           op.preferred_contact_method, 
+			           op.url,
+			           VCNGetDistanceBetweenTwoPoints( $latitude, $longitude, mz.latitude, mz.longitude ) as distance   
+			    FROM vcn_office_zipcode oz  
+			    JOIN vcn_office_partners op ON (op.office_id = oz.office_id) 
+	        	LEFT OUTER JOIN vcn_master_zipcode mz ON (mz.zip = op.zipcode)
+			    WHERE oz.zipcode = '$zip' 
+			    AND op.category IN ( 'Goodwill', 'IAJVS', 'SER') 
+				ORDER BY distance ";
+		
+		$result = mysql_query($sql);
+		
+		$count = mysql_num_rows($result);
+		
+		if ($count < 1) {
+	
+			$sql = " SELECT op.office_id, 
+				           op.office_name,  
+				           op.address,  
+				           op.city,  
+				           op.state,  
+				           op.zipcode as zip,  
+				           op.phone, 
+				           op.contact_person, 
+				           op.email,
+				           op.preferred_contact_method, 
+				           op.url,
+				           VCNGetDistanceBetweenTwoPoints( $latitude, $longitude, mz.latitude, mz.longitude ) as distance 
+				    FROM vcn_office_partners op 
+				    JOIN vcn_master_zipcode mz ON (mz.zip = op.zipcode)  
+				    WHERE zip IS NOT NULL 
+				    AND mz.latitude IS NOT NULL 
+				    AND op.category IN ( 'Goodwill', 'IAJVS', 'SER')
+				    ORDER BY distance ASC 
+				    LIMIT 1 ";	
+				
+			$result = mysql_query($sql);// or die("Error getting closest Office Partner: " . mysql_error());
+
+		}
+		
+		if ($result) {
+			while ($rec = mysql_fetch_object($result)) {
+				$name = $rec->office_name;
+				$street = $rec->address;
+				$city = $rec->city;
+				$state = $rec->state;
+				$zipcode = $rec->zip;
+				$phone = $rec->phone;
+				$contact = $rec->contact_person;
+				$email = $rec->email;
+				$contact_method = $rec->preferred_contact_method;
+				$url = $rec->url;
+				$distance = $rec->distance;
+					
+				if (strlen($name)) {
+					if (strlen($url)) {
+						if (stripos($url, 'http') === false) {
+							$url = 'http://' . $url;
+						}
+						$html .= vcn_build_link_window_opener($url, $name, false);
+					} else {
+						$html .= $name;
+					}
+					
+					if (strlen($contact_method)) {
+						$GLOBALS['contact_method_text'] = $contact_method;
+						$html .= ' <span style="color:red;font-size:smaller;">**</span>';
+					}
+					
+					if (strlen($street)) {
+						$html .= '<br/>' . $street;
+					}
+				
+					if (strlen($city) && strlen($state)) {
+						$html .= '<br/>' . $city . ', ' . $state;
+					}
+				
+					if (strlen($zipcode)) {
+						if (!strlen($street) && !strlen($city) && !strlen($state)) {
+							$html .= '<br/>';
+						}
+						$html .= ' ' . $zipcode;
+					}
+				
+					if (strlen($phone)) {
+						$phone = str_replace(',', '<br/>', $phone);
+						$html .= '<br/>' . $phone;
+					}
+				
+					if (strlen($contact)) {
+						$html .= '<br/>' . $contact;
+					}
+				
+					if (strlen($email)) {
+						$html .= '<br/><a href="mailto:' . $email . '">' . $email . '</a>';
+					}
+				
+					if (strlen($distance) && ((strlen($zipcode) || (strlen($city) && strlen($state))) || !$GLOBALS['contact_method_text'])) {
+						$html .= '<br/><br/>Approx. ' . round($distance, 1) . ' miles';
+					}
+					$html .= '<br/><br/>';
+				}	
+			}
+		}
+		
+		vcn_disconnect_from_db($conn);
+	}
+	
+	if (!strlen($html)) {
+		$html = 'None found';
+	}
+	
+	return $html;
+}
+
+function get_community_colleges_html($zip) {
+	$html = '';
+	
+	$coords = vcn_get_zip_code_lat_lon($zip);
+	$latitude = $coords["latitude"];
+	$longitude = $coords["longitude"];
+	
+	if (strlen($latitude) && strlen($longitude)) {
+		$conn = vcn_connect_to_db();
+		
+		$sql = " SELECT instnm, 
+			           addr,  
+			           city, 
+			           stabbr, 
+			           oz.zip, 
+			           gentele, 
+			           VCNGetDistanceBetweenTwoPoints($latitude, $longitude, mz.latitude, mz.longitude ) as distance 
+			    FROM vcn_provider oz 
+			    JOIN vcn_master_zipcode mz ON (LEFT(oz.zip, 5) = mz.zip) 
+			    WHERE oz.zip IS NOT NULL 
+			    AND mz.latitude IS NOT NULL 
+			    AND sector = 4 
+			    ORDER BY distance ASC 
+			    LIMIT 1 ";
+	
+		$result = mysql_query($sql) or die("Error getting Community Colleges: " . mysql_error());
+		
+		$rec = mysql_fetch_object($result);
+		$name = $rec->instnm;
+		$street = $rec->addr;
+		$city = $rec->city;
+		$state = $rec->stabbr;
+		$zipcode = $rec->zip;
+		$phone = $rec->gentele;
+		$distance = $rec->distance;
+		
+		if (strlen($name)) {
+			$html .= $name;
+			
+			if (strlen($street)) {
+				$html .= '<br/>' . $street;
+			}
+					
+			if (strlen($city) && strlen($state)) {
+				$html .= '<br/>' . $city . ', ' . $state;
+			}
+			
+			if (strlen($zipcode)) {
+				if (!strlen($street) && !strlen($city) && !strlen($state)) {
+					$html .= '<br/>';
+				}
+				$html .= ' ' . $zipcode;
+			}
+			
+			if (strlen($phone)) {
+				if (strpos($phone, '-') === false) {
+					$phonepre = substr($phone, 0, 3);
+					$phonemid = substr($phone, 3, 3);
+					$phonesuf = substr($phone, 6, 4);
+					$html .= '<br/>' . $phonepre . '-' . $phonemid . '-' . $phonesuf;
+				} else {
+					$html .= '<br/>' . $phone;
+				}
+			}
+			
+			if (strlen($distance)) {
+				$html .= '<br/><br/>Approx. ' . round($distance, 1) . ' miles';
+			}
+		}
+		
+		vcn_disconnect_from_db($conn);
+	}
+			
+	if (!strlen($html)) {
+		$html = 'None found';
+	}
+	
+	return $html;
+}

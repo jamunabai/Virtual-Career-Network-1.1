@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implementation of hook_block().
+ */
+function occupations_actinfo_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Occupations ACT Information');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_occupations_actinfo();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function occupations_actinfo_theme() {
+  return array(
+           'occupations_actinfo' => array (
+                             'template' => 'occupations_actinfo',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+function _get_occupations_actinfo() {
+  $css_path = drupal_get_path('module', 'occupations_actinfo') . "/occupations_actinfo.css";
+  drupal_add_css($css_path);
+
+  return theme('occupations_actinfo');
+}
+

@@ -1,0 +1,82 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.pla_container
+  {
+  margin-right: 150px;
+  }
+
+.pla_section1
+  {
+  margin-top: 5px;
+  border-bottom-style:dotted;
+  border-bottom-width: 1px;
+  border-bottom-color: black;
+  background-color: #c2dfe3;
+  padding: 5px;
+  }
+
+.pla_section2
+  {
+  margin-top: 5px;
+  border-bottom-style:dotted;
+  border-bottom-width: 1px;
+  border-bottom-color: black;
+  background-color: #dbe9ea;
+  padding: 5px;
+  }
+
+.pla_intro
+  {
+  }
+  
+.pla_bullet
+  {
+  color:#000000;
+  font-weight: bold;
+  width: 14px;
+  float: left;
+  }
+
+.pla_left
+  {
+  margin-left: 20px;
+  margin-right: 162px;
+  }
+
+.pla_bold
+  {
+  font-weight: bold;
+  }
+
+.pla_text
+  {
+  margin-bottom: 5px;
+  padding: 5px;
+  margin-right: 10px;
+  }
+
+.pla_link
+  {
+  width: 160px;
+  border: solid;
+  border-width: 1px;
+  padding:5px;
+  #margin-bottom: 5px;
+  margin-right: -160px;
+  margin-top:-50px;
+  background-color: #FFF;
+  float:right;
+  #vertical-align: top;
+  }

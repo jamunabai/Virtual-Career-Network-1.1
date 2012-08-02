@@ -1,0 +1,128 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+; $Id: zen_hvcp.info,v 1 2010/11/16 16:05:31 sehill Exp $
+
+
+  ; The name and description of the theme used on the admin/build/themes page.
+name        = Zen HVCP
+description = 508 Compliant theme based on the Zen theme.
+
+  ; The screenshot used on the admin/build/themes page.
+screenshot = screenshot.png
+
+  ; "core" specifies the version of Drupal that this theme is compatible with.
+  ; "base theme" specifies that this is a theme that uses the "zen" theme as its
+  ; base theme. Its unlikely you will ever need to change these, but they are
+  ; required fields for a Zen sub-theme. The "engine" field is not used in a
+  ; sub-theme since the engine is inherited from its base theme.
+core       = 6.x
+base theme = zen
+
+  ; This section adds CSS files to your theme. The media type is specified in
+  ; the brackets. Typical CSS media types include "all", "screen", "print", and
+  ; "handheld". See http://www.w3.org/TR/CSS21/media.html#media-types for a full
+  ; list of stylesheet media types in CSS 2.1. The iPhone's preferred media type
+  ; is based on the CSS3 Media queries. http://www.w3.org/TR/css3-mediaqueries/
+  ;
+  ; You can also override any of Zen's stylesheets or any module's stylesheets,
+  ; an /extremely/ useful feature. See the excellent Drupal 6 Theme Guide at
+  ; http://drupal.org/node/171209 for more details.
+;stylesheets[all][]   = css/html-reset.css
+;stylesheets[all][]   = css/wireframes.css
+;stylesheets[all][]   = css/layout-fixed.css
+;stylesheets[all][]   = css/page-backgrounds.css
+;stylesheets[all][]   = css/tabs.css
+;stylesheets[all][]   = css/messages.css
+;stylesheets[all][]   = css/pages.css
+;stylesheets[all][]   = css/block-editing.css
+;stylesheets[all][]   = css/blocks.css
+;stylesheets[all][]   = css/navigation.css
+;stylesheets[all][]   = css/panels-styles.css
+;stylesheets[all][]   = css/views-styles.css
+;stylesheets[all][]   = css/nodes.css
+;stylesheets[all][]   = css/comments.css
+;stylesheets[all][]   = css/forms.css
+;stylesheets[all][]   = css/fields.css
+;
+; all of the above have been aggregated into the following
+; stylesheet in order to get around ie limitation of 31 css files
+;
+stylesheets[all][]   = css/hvcp-aggregated.css
+stylesheets[all][]   = css/tabs.css
+;
+stylesheets[all][]   = css/local.css
+stylesheets[print][] = css/print.css
+; stylesheets[handheld][] = css/mobile.css
+; stylesheets[only screen and (max-device-width: 480px)][] = css/iphone.css
+
+  ; Set the conditional stylesheets that are processed by IE.
+conditional-stylesheets[if IE][all][]       = css/ie.css
+conditional-stylesheets[if lte IE 8][all][] = css/ie8.css
+conditional-stylesheets[if lte IE 7][all][] = css/ie7.css
+conditional-stylesheets[if lte IE 6][all][] = css/ie6.css 
+conditional-stylesheets[if sf][all][] = css/chrome.css
+
+  ; Optionally add some JavaScripts to your theme.
+; scripts[] = js/script.js
+;scripts[] = js/parent_bg_image.js
+;scripts[] = js/jquery-ready.js
+scripts[] = js/jquery-cookie.js
+scripts[] = js/gen_validatorv4.js
+scripts[] = js/md5.js
+  ; The regions defined in Zen's default page.tpl.php file.  The name in
+  ; brackets is the name of the variable in the page.tpl.php file, (e.g.
+  ; "[content_top]" in the .info file means there should be a $content_top
+  ; variable in the page.tpl.php file.) The text after the equals sign is a
+  ; descriptive text used on the admin/build/blocks page.
+  ;
+  ; To add a new region, copy Zen's page.tpl.php to your sub-theme's directory,
+  ; add a line line to this file, and then add the new variable to your
+  ; page.tpl.php template.
+;regions[sidebar_first]  = First sidebar
+;regions[sidebar_second] = Second sidebar
+regions[navigation]     = Navigation bar
+regions[highlight]      = Highlighted content
+regions[content_top]    = Content top
+regions[content_bottom] = Content bottom
+regions[header]         = Header
+regions[footer]         = Footer
+regions[page_closure]   = Page closure
+
+  ; Various page elements output by the theme can be toggled on and off. The
+  ; "features" control which of these check boxes display on the
+  ; admin/build/themes config page. This is useful for suppressing check boxes
+  ; for elements not used by your sub-theme. To suppress a check box, omit the
+  ; entry for it below. See the Drupal 6 Theme Guide for more info:
+  ; http://drupal.org/node/171205#features
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = mission
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+features[] = secondary_links
+
+  ; Set the default settings to be used in theme-settings.php
+settings[zen_block_editing]        = 1
+settings[zen_breadcrumb]           = yes
+settings[zen_breadcrumb_separator] = ' › '
+settings[zen_breadcrumb_home]      = 1
+settings[zen_breadcrumb_trailing]  = 1
+settings[zen_breadcrumb_title]     = 0
+settings[zen_rebuild_registry]     = 1
+settings[zen_wireframes]           = 0

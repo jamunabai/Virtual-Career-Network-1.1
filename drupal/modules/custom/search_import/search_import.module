@@ -1,0 +1,82 @@
+<?php 
+/**
+ Import nodes of type "external_content" in order to allow this content to be indexed by our search
+ engine. Node display will then redirect to external view.
+**/
+
+function search_import_cron() {
+  // connect to HVCP (non-Drupal) database.
+  if(!function_exists('connectIt'))
+    {
+    function connectIt()
+      {
+      //extracting database
+      $dbpull .= hvcp_get_db_url();
+      $tempArr1=explode("/",$dbpull);
+      $tempArr2=explode(":",$tempArr1[2]);
+      $dbuser=$tempArr2[0];
+      $tempArr3=explode("@",$tempArr2[1]);
+      $dbpass=$tempArr3[0];
+      $dbserver=$tempArr3[1].":3306";
+      unset($tempArr1,$tempArr2,$tempArr3);
+
+      //For now, until we get the REST server set up, we'll just pull the data directly from the database
+      $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+        or die("Error making database connection: ".mysql_error());
+      $db=mysql_select_db('hvcp',$connection)
+        or die("Error selecting database: ".mysql_error());
+      return($connection);
+      }
+    }
+
+  $select="SELECT * FROM vcn_occupation";
+  $connection=connectIt();
+  $result=mysql_query($select)
+    or die("Error getting USER_ID from vcn_occupation: ".mysql_error());
+  mysql_close($connection);
+  $numrows = 0;
+  while ($occ = mysql_fetch_assoc($result)) {
+     $occ_title = $occ['DISPLAY_TITLE'];
+     
+     // if node title does not already exist in Drupal database, create it
+     
+     $checkquery = "select count(*) num from node where title = '" . $occ_title . "' and type = 'external_content'";
+     $checkresult = db_query($checkquery);
+     while ($checkrow = db_fetch_object($checkresult)) {
+        $count = $checkrow->num;
+        //print $checkquery . " -> " . $count . "<br />";
+     }
+     if ($count==0) {
+        $occ_body = $occ['TITLE'] . " " .
+                    "<hr />" .
+                    $occ['DAY_IN_LIFE'] . " " .
+                    "<hr />" .
+                    $occ['ACADEMIC_REQUIREMENT'] . " " .
+                    "<hr />" .
+                    $occ['PHYSICAL_REQUIREMENT'] . " " .
+                    "<hr />" .
+                    $occ['HEALTH_REQUIREMENT'] . " " .
+                    "<hr />" .
+                    $occ['WORK_EXPERIENCE_REQUIREMENT'] . " " .
+                    "<hr />" .
+                    $occ['DETAILED_DESCRIPTION'];
+        $occ_onetcode = $occ['ONETCODE'];
+        $occ_url = "careerdetails?onetcode=" . $occ_onetcode;
+        print "ADDING OCCUPATION: " . $occ_title . "<br />";
+        //print "OCCUPATION: " . $occ_body . "<br />";
+        //print "OCCUPATION: " . $occ_url . "<br />";
+     
+        // add new node to database
+        $newnode = new StdClass();
+        $newnode->type = 'external_content'; 
+        $newnode->title = $occ_title;
+        $newnode->body = $occ_body;
+        $newnode->uid = 1; // NOTE: admin user should always have uid=1 on this system
+        $newnode->status = 1; // published
+        $newnode->field_target_path[0]['value'] = $occ_url;
+        node_save($newnode);
+        
+        $numrows++;
+     }
+  }
+}

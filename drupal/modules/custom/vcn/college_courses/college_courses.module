@@ -1,0 +1,310 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Module for showing the Employer Training form in a block.
+ */
+if(!function_exists('connectIt'))
+{
+function connectIt()
+  {
+  //extracting database
+  $dbpull .= hvcp_get_db_url();
+  $tempArr1=explode("/",$dbpull);
+  $tempArr2=explode(":",$tempArr1[2]);
+  $dbuser=$tempArr2[0];
+  $tempArr3=explode("@",$tempArr2[1]);
+  $dbpass=$tempArr3[0];
+  $dbserver=$tempArr3[1].":3306";
+  unset($tempArr1,$tempArr2,$tempArr3);
+
+  //For now, until we get the REST server set up, we'll just pull the data directly from the database
+  $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+    or die("Error making database connection: ".mysql_error());
+  $db=mysql_select_db('hvcp',$connection)
+    or die("Error selecting database: ".mysql_error());
+  return($connection);
+  }
+}
+
+/**
+ * Implementation of hook_block
+ */
+function college_courses_block($op='list',$delta=0,$edit=array())
+  {
+  switch ($op)
+    {
+    case "list":
+    // This shows the block name of "College Courses" when you list blocks in admin mode
+    $blocks[0]['info']=t('College Courses');
+    return $blocks;
+    break;
+
+    case "view":
+    // block title is "College Course Credit"
+    $blocks['subject']=t('College Course Credit');
+
+    $base_url = base_path();
+    $path=$base_url."/college-courses";
+
+    /**
+     * This next section gets the CMA User ID...
+     */
+    global $user;
+    if($user->uid!=0) $userID=$user->uid;
+    else
+      {
+      $userID=session_id();
+      if($userID=="")
+        {
+        $userID=$_COOKIE[session_name()];
+        }
+      }
+    $select="SELECT USER_ID FROM vcn_cma_user WHERE USER_SESSION_ID=\"$userID\"";
+    $connection=connectIt();
+    $result=mysql_query($select)
+      or die("Error getting USER_ID from vcm_cma_user: ".mysql_error());
+    mysql_close($connection);
+    $row=mysql_fetch_assoc($result);
+    extract($row);
+
+    drupal_add_css("sites/all/modules/custom/vcn/pla_main/css/pla_supplemental.css");
+
+    /**
+     * This section handles a college credit delete request
+     */
+// look for POSTed DELETE request...
+if($_POST['function']=="delete")
+  {
+  $USER_COURSE_ID=$_POST['USER_COURSE_ID'];
+  $delete="DELETE from vcn_cma_user_course
+           WHERE USER_COURSE_ID=\"$USER_COURSE_ID\"";
+//echo "Query is $delete <br /><br />";
+  $connection=connectIt();
+  $result=mysql_query($delete)
+    or die("Error deleting course: ".mysql_error());
+  mysql_close($connection);
+  }
+    // get the last course for the user in the database
+    $select="SELECT MAX(USER_COURSE_ID) AS DB_LAST_COURSE FROM vcn_cma_user_course WHERE USER_ID=\"$USER_ID\"";
+    $connection=connectIt();
+    $result=mysql_query($select)
+      or die("Error selecting last user course".mysql_error());
+    mysql_close($connection);
+    if($row=mysql_fetch_assoc($result)) extract($row);
+    else $DB_LAST_COURSE="";
+
+    // set the last extracted courses
+    if($DB_LAST_COURSE!="")
+      {
+      $select="SELECT COURSE_NAME,COURSE_CODE  FROM vcn_cma_user_course WHERE USER_COURSE_ID=\"$DB_LAST_COURSE\"";
+      $connection=connectIt();
+      $result=mysql_query($select)
+        or die("Error selecting info from last record: ".mysql_error);
+      mysql_close($connection);
+      $row=mysql_fetch_assoc($result);
+      extract($row);
+      }
+    else
+      {
+      $COURSE_NAME="";
+      $COURSE_CODE="";
+      }
+
+    // testVal is to determine if all the blocks are filled in.  If set to 1, yes.  If set to 0, no.
+    $testVal=1;
+    $testArray=array("gs_schoolName","gs_courseName","gs_courseNumber","gs_courseYear","gs_creditHours","gs_courseGrade");
+    foreach($testArray as $testItem)
+      {
+      if(!isset($_POST[$testItem]) || $_POST[$testItem]=="") $testVal=0;
+      else $$testItem=$_POST[$testItem];
+      }
+
+    //testValTwo is to see if the POSTed course name and number match the last database value, avoiding duplicates.
+    $testValTwo=0;
+    if($_POST['gs_courseName']==$COURSE_NAME && $_POST['gs_courseNumber']==$COURSE_CODE) $testValTwo=1;
+
+    // If all values are posted and there's no duplication between POSTed values and last retrieved DB values,
+    // then add the values to the database.
+    if($testVal==1 && $testValTwo==0)
+      {
+      $courseDate=$gs_courseYear."-01-01";
+      $insert="INSERT INTO vcn_cma_user_course
+               (USER_ID,INSTITUTION_NAME,COURSE_NAME,COURSE_CODE,DATE_COMPLETED,COURSE_CREDIT,COURSE_GRADE)
+               VALUES
+               (\"$USER_ID\",\"$gs_schoolName\",\"$gs_courseName\",\"$gs_courseNumber\",\"$courseDate\",\"$gs_creditHours\",\"$gs_courseGrade\")";
+      $connection=connectIt();
+      $result=mysql_query($insert)
+        or die("Error performing insert: ".mysql_error());
+      mysql_close($connection);
+      foreach($testArray as $testItem) unset($_POST[$testItem]);
+      }
+
+    /**
+     * section for tabbed interface
+     */
+    include(drupal_get_path('module','pla_main')."/tabs.inc.php");
+    $content .= "<div class=\"container-div\">";
+    /** end tabbed interface **/
+
+    $content .="<div class=\"leftSide\">";
+
+    $content .= "<h3>College Course Credit</h3>";
+
+    $content .="
+      <p>
+		Have you already taken college courses? If you earned a minimum grade of \"C\", you may be 
+		able to transfer these courses to your chosen degree program.
+		</p>
+		<p>
+		Colleges require an official record, or transcript, from every college you have attended 
+		in order to transfer the courses that apply to your intended program. 
+		</p>
+		<p>";
+    
+    $content .= vcn_build_link_window_opener('http://www.drexel.com/tools/transcript.aspx?process=alpha&letter=A', 'Click here', false);
+    
+	$content .= " to find the colleges you have attended and learn how to order a transcript. 
+		Before you order and pay for an official transcript, which usually costs between $5 -$20, 
+		find out if you can obtain an unofficial transcript free of charge. 
+		</p>
+		<p>
+		Give the academic advisor of your intended program as much information as you can about 
+		your prior college courses through unofficial transcripts.  If you are unable to get 
+		unofficial transcripts or want to show all of the courses you have taken (from multiple 
+		schools) in one report, enter the information you remember about those courses below.    
+		</p>
+
+      <form method=\"POST\" action=\"#\">
+		<p>
+		<strong>Add Course:</strong>
+		</p>";
+    
+    if($testVal==1) $content .="
+      <p>
+      <label for=\"gs_schoolName\">
+      School Name:
+      </label><br />
+      <input type=\"text\" name=\"gs_schoolName\" id=\"gs_schoolName\" size=\"40\"/>
+      </p>
+
+      <p>
+      <label for=\"gs_courseName\">
+      Course Name:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseName\" id=\"gs_courseName\" size=\"30\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseNumber\">
+      Course Number:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseNumber\" id=\"gs_courseNumber\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseGrade\">
+      Final Grade:
+      </label><br />
+      <input type=\"text\" id=\"gs_courseGrade\" name=\"gs_courseGrade\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseYear\">
+      Year Course Completed:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseYear\" id=\"gs_courseYear\" />
+      </p>
+
+      <p style=\"text-align: left;\">
+      <label for=\"gs_creditHours\">
+      Number of Credit Hours:
+      </label><br />
+      <input type=\"text\" name=\"gs_creditHours\" id=\"gs_creditHours\" />
+      </p>";
+
+    else $content .= "
+      <p>
+      <label for=\"gs_schoolName\">
+      School Name:
+      </label><br />
+      <input type=\"text\" name=\"gs_schoolName\" id=\"gs_schoolName\" size=\"40\" value=\"".$_POST['gs_schoolName']."\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseName\">
+      Course Name:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseName\" id=\"gs_courseName\" value=\"".$_POST['gs_courseName']."\" size=\"30\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseNumber\">
+      Course Number:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseNumber\" id=\"gs_courseNumber\" value=\"".$_POST['gs_courseNumber']."\"/>
+      </p>
+
+      <p>
+      <label for=\"gs_courseGrade\">
+      Final Grade:
+      </label><br />
+      <input type=\"text\" id=\"gs_courseGrade\" name=\"gs_courseGrade\" value=\"".$_POST['gs_courseGrade']."\" />
+      </p>
+
+      <p>
+      <label for=\"gs_courseYear\">
+      Year Course Completed:
+      </label><br />
+      <input type=\"text\" name=\"gs_courseYear\" id=\"gs_courseYear\" value=\"".$_POST['gs_courseYear']."\" />
+      </p>
+
+      <p style=\"text-align: left;\">
+      <label for=\"gs_creditHours\">
+      Number of Credit Hours:
+      </label><br />
+      <input type=\"text\" name=\"gs_creditHours\" id=\"gs_creditHours\" value=\"".$_POST['gs_creditHours']."\" />
+      </p>";
+
+    $content .="
+      <input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/save-to-my-learning-inventory.png \" name=\"Save\" alt=\"Save\" title=\"Save\" />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </form>";
+
+    $select="SELECT * FROM vcn_cma_user_course WHERE USER_ID=\"$USER_ID\" AND COURSE_CODE IS NOT NULL AND MILITARY_YN IS NULL";
+    $connection=connectIt();
+    $results=mysql_query($select) or die("Error selecting from user course table: ".mysql_error());
+    mysql_close($connection);
+    $rowCount=mysql_num_rows($results);
+    if($rowCount>0)
+      {
+      $courseCount=0;
+      $content .= "<p><b>The following courses have been saved:</b></p>";
+      while($row=mysql_fetch_assoc($results))
+        {
+        extract($row);
+        if($courseCount%2==0)
+	  $content .= "<div class=\"line1\">";
+	else
+        $content .= "<div class=\"line2\">";
+        $content .= "<div class=\"StepFiveDivStack\"><form method=\"POST\" action=\"$base_url/college-courses\">";
+        $content .= "<div class=\"StepFiveDivColumn1\">$COURSE_NAME $COURSE_CODE: $COURSE_CREDIT Hours</div>
+                     <div class=\"StepFiveDivColumn2\"><input type=\"hidden\" name=\"USER_COURSE_ID\" value=\"$USER_COURSE_ID\" /><input type=\"hidden\" name=\"function\" value=\"delete\" /></div>
+                     <div class=\"StepFiveDivColumn3\"><input type=\"image\" src=\"$base_url/sites/default/files/images/buttons/delete.png\" alt=\"Remove this item from your saved list\" title=\"Remove this item from your saved list\"></div>";
+        $content .= "<br /></form></div></div>";
+        $courseCount++;
+        }
+      }
+
+    
+    $content .= "<p><b>Hint:</b> Remember that each college determines how your prior learning might apply to a specific degree program.";
+	$content .= "</div> <!-- end div container-div -->";
+	$content .= "</div><!-- end div leftSide -->";
+    
+		
+    $blocks['content']=$content;
+    return $blocks;
+    break;
+
+    } //end switch($op)
+  } // end function college_courses_block

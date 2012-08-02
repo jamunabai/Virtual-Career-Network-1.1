@@ -1,0 +1,82 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+
+h2.title {display:none; }
+h4 { font-size: 15px; }
+a {color:#A71E28;}
+p { font-size:12px; }
+#content { font-size:12px;  }
+
+
+ 
+/* TRAINING SEARCH */
+#training-search-container { clear:both; float:left; margin-bottom:20px; padding:0px; width:100%; border:1px dotted #000;  }
+#training-search-container.certifications { border:none; margin-bottom:0; }
+#training-search { margin:5px 10px 10px; width:100%; float:left;}
+.training-search-label { font-size:12px; font-weight:bold; margin:0 10px 0 0 ;}
+p.training-search-label { font-weight:bold; margin:5px 10px 0 0 ;}
+.training-filters { float:left; margin-right:5px; }
+
+/* SIDEBAR */
+  
+/* TRAINING */
+tr.even { background:#E5E5E5; }
+tr.odd { background:none; }
+td { font-size:12px; padding:5px; vertical-align:top; }
+td.lastorlinks {width:125px;}
+/* TRAINING TABS */
+#training-tabs-container {float:left; margin:30px 0; width:100%; font-weight:bold;}
+#training-tabs  { border-bottom: 1px solid #999;float:left;width:960px;height:35px; }
+#training-tabs ul { float:left; height:35px; width:100%; list-style:none; margin:0; padding:0; }
+#training-tabs li { float:left; background:#ddd; border:1px solid black;width:175px; border-bottom:none; height:29px; padding-top:5px; text-align:center; }
+#training-tabs li.selected { background:#fff; height:30px; border-bottom: none; }
+
+
+
+/* TRAINING FIND */
+.lp-training, .lp-training li { width:100%; }
+.arrow-boxes { float:right; background:none; margin-left:20px; font-size:90%; line-height:130%; width:300px; }
+.arrow-box { border: 1px solid #999999; margin: 10px 10px 0 0; padding: 5px; float:right; width:260px; }
+.arrow-box.first { margin: 0px 10px 0 0;}
+.arrow-link { background:url(../images/arrow_link.jpg) 0 3px no-repeat; padding: 2px 0 2px 25px;}
+.lp-training li {border-bottom:1px dotted #777; padding:10px 0; float:left; clear:both;}
+.lp-training .num {background: #000; color:#fff; float:left; text-align:center; padding-top:3px; height:17px; width:20px;}
+.lp-training .description {background:none; float:left; line-height:140%; margin-left:15px; width:300px; }
+
+/*
+.lp-training .num {background:pink;float:left;}
+.lp-training .description  {clear:left;background:pink;margin-left:10px;}
+.arrow-boxes {background:red; margin:0;float:left;clear:left;}
+*/
+/* TRAINING GRID */
+#training-grid { font-size:11px; float:left;width:960px;}
+#training-grid label { width: 260px; }
+ 
+#training-grid th { background:#A71E28; border:1px solid #fff; height:50px; color:#fff; border-right:1px solid #fff; padding:5px; text-decoration:none; }
+ 
+
+.grid-school { font-weight:bold; }
+#training-grid th.sortable { background: #A71E28 url("../images/sortable.jpg") no-repeat right 10px; cursor:pointer; }
+#training-grid th.sortableDesc { background: #A71E28 url("../images/desc.jpg") no-repeat right 10px; cursor:pointer; color:#fff; }
+#training-grid th.sortableAsc { background: #A71E28 url("../images/asc.jpg") no-repeat right 10px; cursor:pointer; color:#fff; }
+#training-grid-data {width:960px;}
+
+/* TRAINING DETAIL */
+.training-detail-left { float:left; width:350px; padding:5px; }
+.training-detail-right { background:none; float:left; width:275px; margin: 0 0 0 10px; padding:10px; }
+.training-detail-right.gray { background:#ccc; margin-top:20px;}
+.training-detail-right p { border-bottom:1px solid #666; padding-bottom:5px; }
+#training-detail-details { clear:both;  }
+  

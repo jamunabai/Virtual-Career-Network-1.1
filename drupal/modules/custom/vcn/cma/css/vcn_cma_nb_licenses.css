@@ -1,0 +1,58 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/*
+    Document   : vcn_header
+    Created on : Feb 28, 2011, 1:53:29 PM
+    Author     : hills
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+#vcn-cma-notebook-licenses {
+    margin: 0px;
+    padding: 0px;
+}
+#vcn-cma-notebook-license-inner {
+    position: relative;
+}
+.cma-notebook-license {
+
+}
+.cma-notebook-license-inner {
+
+}
+.cma-notebook-license-header {
+
+}
+
+.license-target-button {
+    float: right;
+    margin-left: 5px;
+}
+.license-remove-button {
+    float: right;
+}
+
+.cma-notebook-license-body {
+    float: left;
+}
+
+.cma-notebook-license-match {
+    float: right;
+}
+
+hr.clear-both {
+    clear: both;
+}

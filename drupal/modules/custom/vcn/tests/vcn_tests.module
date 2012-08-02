@@ -1,0 +1,214 @@
+<?php
+// $Id:$
+	
+/**
+ * @file
+ * Module for fetching search data from the VCN Training data source.
+ * This module provides the filters for training and course searches.
+ *
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+ 
+ function vcn_reformat_date($date) {
+	 $date = getdate(strtotime($date)); 
+	 
+	 $thedate=$date['mon'].'/'.$date['mday'].'/'.$date['year'];
+	 
+	 if (strstr($thedate, '1969'))
+		$thedate = '';
+	 
+	 return $thedate;
+ 
+ }
+ 
+function vcn_tests_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('Proctor List');
+	  $blocks[1]['info'] = t('For Credit Courses');
+	  $blocks[2]['info'] = t('Test Scheduling - Test Taker');
+	  $blocks[3]['info'] = t('Test Scheduling - Proctor');
+	  $blocks[4]['info'] = t('Test schedule confirmation');
+	  $blocks[5]['info'] = t('Test Initiation');
+	  $blocks[6]['info'] = t('Start Test');
+      
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Proctor List'), 
+         			'content' => _vcn_tests_main(),
+         		);
+       		break;
+      		case 1: 
+         		$block = array(
+   					'subject' => t('For Credit Courses'), 
+         			'content' => _vcn_credit_courses(),
+         		);
+       		break;
+      		case 2: 
+         		$block = array(
+   					'subject' => t('Test Scheduling - Test Taker'), 
+         			'content' => _vcn_test_taker(),
+         		);
+       		break;	
+      		case 3: 
+         		$block = array(
+   					'subject' => t('Test Scheduling - Proctor'), 
+         			'content' => _vcn_proctor(),
+         		);
+       		break;	
+      		case 4: 
+         		$block = array(
+   					'subject' => t('Test schedule confirmation'), 
+         			'content' => _vcn_confirmation(),
+         		);
+       		break;	
+      		case 5: 
+         		$block = array(
+   					'subject' => t('Test Initiation'), 
+         			'content' => _vcn_initiation(),
+         		);
+       		break;	
+      		case 6: 
+         		$block = array(
+   					'subject' => t('Start Test'), 
+         			'content' => _vcn_teststart(),
+         		);
+       		break;				
+        	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+ 
+ 
+
+/**
+ * Implementation of menu().
+ */
+function vcn_tests_menu() {
+	$items = array();
+	
+  	/* TRAINING FIND */
+	$items['tests'] = array(
+		'title' => 'Proctor List', 
+		'page callback' => '_vcn_tests_main',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+	
+	$items['tests/creditcourses'] = array(
+		'title' => 'For Credit Courses', 
+		'page callback' => '_vcn_credit_courses',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);	
+  		
+	$items['tests/testtaker'] = array(
+		'title' => 'Test Scheduling - Test Taker', 
+		'page callback' => '_vcn_test_taker',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);	
+
+	$items['tests/proctor'] = array(
+		'title' => 'Test Scheduling - Proctor', 
+		'page callback' => '_vcn_proctor',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);
+	
+	$items['tests/schedule-confirmation'] = array(
+		'title' => 'Test schedule confirmation', 
+		'page callback' => '_vcn_confirmation',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);	
+
+	$items['tests/initiation'] = array(
+		'title' => 'Test Initiation', 
+		'page callback' => '_vcn_initiation',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);	
+
+	$items['tests/start'] = array(
+		'title' => 'Start Test', 
+		'page callback' => '_vcn_test_start',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);		
+  	
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_tests_theme( ) { 
+ 		
+  	return array (
+  		'vcn_tests_main' => array ( 'template'=>'templates/vcn_tests_main', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_credit_courses' => array ( 'template'=>'templates/vcn_credit_courses', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_test_taker' => array ( 'template'=>'templates/vcn_test_taker', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_proctor' => array ( 'template'=>'templates/vcn_proctor', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_confirmation' => array ( 'template'=>'templates/vcn_confirmation', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_initiation' => array ( 'template'=>'templates/vcn_initiation', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_test_start' => array ( 'template'=>'templates/vcn_test_start', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		
+ 	);
+}
+ 
+
+function _vcn_get_tests() {
+ 	return 'This block may not be called directly';
+}
+
+
+function _vcn_tests_main($type) { 	 
+  	return theme('vcn_tests_main', $errors, $vars, $content, $data);
+ }
+ 
+function _vcn_credit_courses($type) { 	 
+	return theme('vcn_credit_courses', $errors, $vars, $content, $data);
+}
+ 
+function _vcn_test_taker($type) { 	 
+	return theme('vcn_test_taker', $errors, $vars, $content, $data);
+}
+
+function _vcn_proctor($type) { 	 
+	return theme('vcn_proctor', $errors, $vars, $content, $data);
+}
+
+function _vcn_confirmation($type) { 	 
+	return theme('vcn_confirmation', $errors, $vars, $content, $data);
+}
+
+function _vcn_initiation($type) { 	 
+	return theme('vcn_initiation', $errors, $vars, $content, $data);
+}
+
+function _vcn_test_start($type) { 	 
+	return theme('vcn_test_start', $errors, $vars, $content, $data);
+}
+
+?>

@@ -1,0 +1,41 @@
+<?php 
+/**
+To implement help hook
+**/
+
+// ENTIRE MODULE IS NO LONGER USED -- can be deleted
+
+/*
+function custom_user_form_alter($form, &$form_state){ 
+
+	$form_id = $form['form_id']['#value'];  
+	if(!user_access('administer')){
+		switch($form_id){
+		case 'user_profile_form':
+			$form['#submit'] = array('custom_user_profile_form_submit');
+			$form['#redirect'] = ''; // replace user/password with url on that you want to redirect user after registration
+			return $form;
+			break;
+
+		case 'user_register':
+			$form['#redirect'] = 'register'; // replace user/password with url on that you want to redirect user after registration
+			return $form;
+			break;
+		}
+	}
+}
+
+function custom_user_profile_form_submit($form, &$form_state) {
+  $account = $form_state['values']['_account'];
+  $category = $form_state['values']['_category'];
+  unset($form_state['values']['_account'], $form_state['values']['op'], $form_state['values']['submit'], $form_state['values']['delete'], $form_state['values']['form_token'], $form_state['values']['form_id'], $form_state['values']['_category']);
+  user_module_invoke('submit', $form_state['values'], $account, $category);
+  user_save($account, $form_state['values'], $category);
+
+  // Clear the page cache because pages can contain usernames and/or profile information:
+  cache_clear_all();
+
+  drupal_set_message('Your password has been updated'); 
+  return;
+}
+*/

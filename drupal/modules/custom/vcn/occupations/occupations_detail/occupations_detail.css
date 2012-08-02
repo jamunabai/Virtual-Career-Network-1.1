@@ -1,0 +1,50 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.details-left {
+	float: left;
+	width: 60%;
+
+}
+.details-right {
+    float: left;
+    margin-left: 61px;
+    width: 31%;
+	background-color: #f3f3f4;
+	/*padding: 8px;*/
+	-moz-border-radius: 8px 8px 8px 8px;
+}
+.imgA1 { 
+	position: absolute; 
+	top: 0px; 
+	left: 0px; 
+	z-index: 1;
+} 
+
+.imgB1 { 
+	position: absolute; 
+	margin-top: 145px; 
+	left: 145px; 
+	z-index: 3; 
+} 
+#video-link {
+	height: 210px;
+	position: relative;
+}
+
+#tt {position:absolute; display:block; background:url(images/tt_left.gif) top left no-repeat}
+#tttop {display:block; height:5px; margin-left:5px; background:url(images/tt_top.gif) top right no-repeat; overflow:hidden}
+#ttcont {display:block; padding:2px 12px 3px 7px; margin-left:5px; background:#666; color:#FFF}
+#ttbot {display:block; height:5px; background:url(images/tt_bottom.gif) top right no-repeat; overflow:hidden}
+.hotspot {color:#900; padding-bottom:1px;  cursor:pointer}

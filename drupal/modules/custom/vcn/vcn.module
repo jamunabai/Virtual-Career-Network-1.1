@@ -1,0 +1,3 @@
+<?php
+require_once(drupal_get_path('module','vcn').'/includes/classes/vcn_app_properties.class.inc');
+require_once(drupal_get_path('module','vcn').'/includes/classes/vcn_facebook.class.inc');

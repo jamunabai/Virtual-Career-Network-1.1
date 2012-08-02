@@ -1,0 +1,128 @@
+<?php 
+/**
+Customization of user / login functions for VCN
+**/
+
+/* change_button_type for cancel button -- see http://drupal.org/node/133861 */
+
+function change_button_type($markup, $element) {
+    $markup = str_replace('input type="image"', 'img', $markup);
+    return $markup;
+}
+
+function vcn_user_message_alter(&$messages) {
+   // various message replacements
+    
+   $numstatus = sizeof($messages->messages['status']);
+   for ($i=0; $i<$numstatus; $i++) {
+      $messages->messages['status'][$i] == str_replace("Password and further instructions", 
+	                                                   "Further instructions",                                  $messages->messages['status'][$i]);
+	  $messages->messages['status'][$i] == str_replace("Your password and further instructions", 
+	                                                   "Further instructions",                                  $messages->messages['status'][$i]);
+   }
+}
+
+function vcn_user_mail_alter(&$message) {
+    $message_id = $message['id'];
+    $message_user = $message['params']['account']->name;
+    $uc_message_user = ucfirst($message_user);
+    //print "VCN USER MAIL ALTER: " . $message_id . "<br />";
+
+    if ($message_id=='login_toboggan_register_no_approval_required') {
+       $orig_message_body = $message['body'][0];
+       $omb_explode = explode("After logging in", $orig_message_body);
+       $first_half_message_body = $omb_explode[0];
+       $fixed_message_body = $first_half_message_body . "\n\nThank you.\n\nVCN Healthcare Team";
+       $fixed_message_body = str_replace("username", "Username", $fixed_message_body);
+       $fixed_message_body = str_replace("password", "Password", $fixed_message_body);
+       $fixed_message_body = str_replace("also log in", "log in", $fixed_message_body);
+       $fixed_message_body = str_replace("on this link", "on the link", $fixed_message_body);
+       $message['body'] = $fixed_message_body;
+    } else if ($message_id=='user_password_reset') {
+       $message['subject'] = str_replace("Replacement login information", "Account password change", $message['subject']);
+       $orig_message_body = $message['body'][0];
+       $omb_explode = explode("redirected ", $orig_message_body);
+       $firsthalf_message_body = $omb_explode[0];
+       $message['body'] = $firsthalf_message_body . "able to change your password.\n\nThank you.";
+    }
+    $message['body'] = str_replace($message_user,$uc_message_user,$message['body']);
+}
+
+function vcn_user_form_alter($form, &$form_state){ 
+    global $base_url;
+    $http_base_url = $base_url;
+	//This condition is to make sure that the cancel button is taking the user to provider page and the regular home page or from the page where they have come from 
+	if($_SERVER['HTTP_REFERER'] && strpos($_SERVER['HTTP_REFERER'],"/user") === false){
+		$url_for_register = $_SERVER['HTTP_REFERER'];
+		$url_for_login = $_SERVER['HTTP_REFERER'];
+	}else{
+		$url_for_register = $http_base_url;
+		$url_for_login = $http_base_url;
+	}
+	$form_id = $form['form_id']['#value'];  
+/* 	print "VCN USER FORM ALTER: " . $form_id . "<br /> <pre>";
+	print_r($form);
+	echo"</pre>"; */
+	if ($form_id=="user_login") {
+	   $form['submit'] = array('#type' => 'image_button',
+           '#src'=>'/sites/all/themes/zen_hvcp/images/user_login.png',
+           '#title'=>t('Log in'),
+           '#alt'=>t('Log in'));    
+      
+       $form['cancel'] = array('#type' => 'image_button',
+           '#prefix'=>'&nbsp;',
+           '#src'=>'/sites/default/files/images/buttons/cancel.png',
+	       '#attributes' => array(
+          	  'onclick' => 'window.location = "' . $url_for_login . '"'),
+           '#post_render'=>array('change_button_type'),
+           '#title'=>t('Cancel'),
+           '#alt'=>t('Cancel'));
+	} else if ($form_id=="user_register") {
+       $form['submit'] = array('#type' => 'image_button',
+          '#src'=>'/sites/all/themes/zen_hvcp/images/create_new_account.png',
+          '#title'=>t('Create New Account'),
+          '#alt'=>t('Create New Account'));
+
+       $form['createcancel'] = array('#type' => 'image_button',
+          '#prefix'=>'&nbsp;',
+          '#src'=>'/sites/default/files/images/buttons/cancel.png',
+	      '#attributes' => array(
+    	     'onclick' => 'window.location = "' . $url_for_register . '"'),
+          '#post_render'=>array('change_button_type'),
+          '#title'=>t('Cancel'),
+          '#alt'=>t('Cancel'));
+    } else if ($form_id=="user_pass") {
+			//This condition is to make sure that the cancel button is taking the user to provider page and the regular home page 
+			if($_SERVER['HTTP_REFERER'] && strpos($_SERVER['HTTP_REFERER'],"provider")){
+				$url_for_pass = "http://".$_SERVER['SERVER_NAME'].base_path()."providerlogin?user=provider";
+			}else{
+				$url_for_pass = "http://".$_SERVER['SERVER_NAME'].base_path();
+			}
+	   $form['name'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Username or e-mail address'),
+       	  '#description' => t('<x style="font-size: 12px; font-family: Verdana;">Please enter the e-mail address associated with your account and click the "Submit" button below.</x>'),
+          '#size' => 60,
+          '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
+          '#required' => TRUE);
+       $form['submit'] = array('#type' => 'image_button',
+          '#src'=>'sites/default/files/images/buttons/submit.png',
+          '#title'=>t('Submit'),
+          '#alt'=>t('Submit'));
+
+       $form['cancel'] = array('#type' => 'image_button',
+          '#prefix'=>'&nbsp;',
+          '#src'=>'/sites/default/files/images/buttons/cancel.png',
+	      '#attributes' => array(
+         	 'onclick' => 'window.location = "' . $url_for_pass . '"'),
+          '#post_render'=>array('change_button_type'),
+          '#title'=>t('Cancel'),
+          '#alt'=>t('Cancel'));
+    } else if ($form_id=="user_pass_reset") {
+	    $form['submit'] = array('#type' => 'image_button',
+		  '#src'=>'modules/user/login.png',
+		  '#title'=>t('Log in'),
+		  '#alt'=>t('Log in'));          
+	}
+	return $form;
+}

@@ -1,0 +1,84 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* $Id: layout-liquid-rtl.css,v 1.7 2009/11/04 20:16:50 johnalbin Exp $ */
+
+/**
+ * @file
+ * RTL companion for the layout-liquid.css file.
+ */
+
+
+/*
+ * Content
+ */
+#content {
+  float: right;
+  margin-left: -100%;
+  margin-right: 0; /* Negative value of #content's width + left margin. */
+}
+
+.sidebar-first #content .section {
+  padding-left: 0; /* The width + left margin of .region-sidebar-first. */
+  padding-right: 200px;
+}
+
+.sidebar-second #content .section {
+  padding-left: 200px;
+  padding-right: 0; /* The width + right margin of .region-sidebar-second. */
+}
+
+/*
+ * Navigation
+ */
+#navigation {
+  float: right;
+  margin-left: -100%;
+  margin-right: 0; /* Negative value of #navigation's width + left margin. */
+}
+
+#navigation ul /* Primary and secondary links */ {
+  text-align: right;
+}
+
+#navigation li /* A simple method to get navigation links to appear in one line. */ {
+  float: right;
+  padding: 0 0 0 10px;
+}
+
+/*
+ * First sidebar
+ */
+.region-sidebar-first {
+  float: right;
+  margin-left: -200px;
+  margin-right: 0; /* Negative value of .region-sidebar-first's width + left margin. */
+}
+
+.region-sidebar-first .section {
+  margin: 0 0 0 20px;
+}
+
+/*
+ * Second sidebar
+ */
+.region-sidebar-second {
+  float: left;
+  margin-left: 0; /* Negative value of .region-sidebar-second's width + right margin. */
+  margin-right: -200px;
+}
+
+.region-sidebar-second .section {
+  margin: 0 20px 0 0;
+}

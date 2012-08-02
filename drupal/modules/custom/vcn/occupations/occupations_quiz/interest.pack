@@ -1,0 +1,26 @@
+function setupCodeBaby(){codebaby=new CodeBaby();codebaby.projectName="sam3"
+codebaby.stageName="Stage 1"
+codebaby.sceneGroupName="interest"
+codebaby.publishRoot="./";codebaby.projectXML="cb/xml/"
++"project.xml";codebaby.gatewayMovie="cb/swf/gateway/JavaScriptFlashGateway.swf";codebaby.containerId="CodeBabyContainer";codebaby.containerX=0;codebaby.containerY=0;codebaby.containerWidth=250
+codebaby.containerHeight=237
+codebaby.containerWindowMode="transparent";codebaby.containerPath="cb/swf/containers/";codebaby.containerFlashVersion="7,0,14,0";codebaby.speechBubbleMovie="cb/swf/speechbubble/SpeechBubble.swf";codebaby.speechBubbleId="CodeBabySpeechBubble";codebaby.speechBubbleWidth=300
+codebaby.speechBubbleHeight=200
+codebaby.speechBubbleX=codebaby.containerX+codebaby.containerWidth+5;codebaby.speechBubbleY=codebaby.containerY;codebaby.speechBubbleAlternateX=codebaby.containerX-codebaby.speechBubbleWidth-5;codebaby.speechBubbleAlternateY=codebaby.containerY;codebaby.speechBubbleWindowMode="transparent";codebaby.defaultSpeechBubbleFadeSpeed=20;codebaby.speechBubbleFlashVersion="7,0,14,0";}
+function CBSceneGroupListener(){};CBSceneGroupListener.prototype.onContainerReady=function(){}
+CBSceneGroupListener.prototype.onSceneLoad=function(sceneName){}
+CBSceneGroupListener.prototype.onPlayStateChange=function(newState){}
+CBSceneGroupListener.prototype.onSceneGroupLoad=function(sceneList){}
+CBSceneGroupListener.prototype.onPlayerShow=function(){}
+CBSceneGroupListener.prototype.onPlayerHide=function(){}
+CBSceneGroupListener.prototype.onSceneClick=function(){}
+CBSceneGroupListener.prototype.onConsoleDrag=function(){}
+CBSceneGroupListener.prototype.onConsoleCustomEvent=function(param){}
+CBSceneGroupListener.prototype.onExternalAction=function(name,description){}
+CBSceneGroupListener.prototype.onGetURL=function(url,target){}
+CBSceneGroupListener.prototype.onNavigateToSceneGroup=function(sceneGroupName){}
+CBSceneGroupListener.prototype.onDebugMessage=function(message){}
+CBSceneGroupListener.prototype.onShowSpeechBubble=function(){}
+CBSceneGroupListener.prototype.onHideSpeechBubble=function(){}
+CBSceneGroupListener.prototype.onSpeechBubbleHidden=function(){}
+CBSceneGroupListener.prototype.onResponse=function(speechBubbleName,linkId){}

@@ -1,0 +1,1343 @@
+<?php
+// $Id:$
+	
+/**
+ * @file
+ * Module for fetching search data from the VCN Training data source.
+ * This module provides the filters for training and course searches.
+ *
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+function vcn_training_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Training and Course Search Parent Module');
+      $blocks[1]['info'] = t('VCN Training Search');
+      $blocks[2]['info'] = t('VCN Course Search');
+      $blocks[3]['info'] = t('VCN Learn about the types of training programs');
+      $blocks[4]['info'] = t('VCN About Healthcare Learning');
+      $blocks[5]['info'] = t('VCN Find Healthcare Learning');
+      $blocks[6]['info'] = t('VCN Training Grid');
+      $blocks[7]['info'] = t('VCN Training Detail');
+      $blocks[8]['info'] = t('VCN Financial Aid');
+      $blocks[9]['info'] = t('VCN Training Assessment');
+      $blocks[10]['info'] = t('VCN Special Resources');
+      
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Learning and Course Search Parent Module'), 
+         			'content' => _vcn_get_training(),
+         		);
+       		break;
+       		case 1: // search
+         		$block = array(
+          			'subject' => t('Learning Search'), 
+          			'content' => _vcn_get_training_search(),
+        		);
+       		break;
+      		case 2: // search course
+         		$block = array(
+          		'subject' => t('Training Course Search'), 
+          		'content' => _vcn_get_training_search_course(),
+        	);
+      		case 3: //about
+         		$block = array(
+          			'subject' => t('Learn about the types of learning programs'), 
+          			'content' =>  _vcn_get_training_about(),
+        		);
+       		break;
+      		case 4: //about
+         		$block = array(
+          			'subject' => t('About Healthcare Learning'), 
+          			'content' => _vcn_get_training_about_learn(),
+        		);
+        	break;      	
+        	case 5: // find
+          		$block = array(
+          			'subject' => t('Find Healthcare Learning'), 
+          			'content' => _vcn_get_training_find(),
+        		);
+          	break;
+        	case 6: // training grid
+          		$block = array(
+          			'subject' => t('Healthcare Learning'), 
+          			'content' => _vcn_get_training_grid(),
+        		);
+        	break;        	
+        	case 7: // training detail
+           		$block = array(
+          			'subject' => t('Healthcare Learning Detail'), 
+          			'content' => _vcn_get_training_detail(),
+        		);       	
+        	break;
+        	case 8: // financial aid
+          		$block = array(
+          			'subject' => t('Financial Aid'), 
+          			'content' => _vcn_get_training_financialaid(),
+        		);        	
+        	break;
+         	case 9: // training assessment
+          		$block = array(
+          			'subject' => t('Assessment'), 
+          			'content' => _vcn_get_training_assessment(),
+        		);       
+         	case 10: // Special Resources
+          		$block = array(
+          			'subject' => t('Special Resources'), 
+          			'content' => _vcn_special_resources(),
+        		);        		 	
+        	break;       	
+        	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+ 
+ 
+
+/**
+ * Implementation of menu().
+ */
+function vcn_training_menu() {
+	$items = array();
+	
+  	/* TRAINING FIND */
+	$items['find-learning'] = array(
+		'title' => 'Get Qualified: Prepare for a Career in Healthcare', 
+		'page callback' => '_vcn_get_training_find',
+		'page arguments' => array('programs'),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  		
+	/* TRAINING ABOUT */
+	$items['find-learning/about'] = array(
+		'title' => 'Learn About the Types of Training Programs', 
+		'page callback' => '_vcn_get_training_about',
+		'page arguments' => array('programs'),
+	 	'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  
+
+	/* TRAINING GRID */
+ 	$items['find-learning/results'] = array(
+		'page callback' => '_vcn_get_training_grid',
+ 	   	'title' => 'Healthcare Training', 
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	); 
+  	
+
+	/* TRAINING DETAIL */
+	$items['find-learning/detail'] = array(
+		/*'title' => 'Training Details',*/ 
+		'page callback' => '_vcn_get_training_detail',
+		'page arguments' => array('programs'),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  		
+ 	
+  	/* FINANCIAL AID */  	
+	$items['find-learning/financialaid'] = array(
+		'title' => 'Financial Aid', 
+		'page callback' => '_vcn_get_training_financialaid',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);
+  
+    /* ASSESSMENT */  	
+	$items['find-learning/assessment'] = array(
+		'title' => 'Assessment', 
+		'page callback' => '_vcn_get_training_assessment',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);	
+	
+    /* SCHOOL  	*/
+	$items['find-learning/detail/school'] = array(
+		'title' => 'School', 
+		'page callback' => '_vcn_get_training_school',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+       'type' => MENU_CALLBACK,
+  	);		
+ 
+ /* AJAX */
+ 	$items['training/training-grid'] = array(
+		'page callback' => '_vcn_update_training_grid',
+ 	   	'title' => 'update training grid', 
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	
+  		$items['training/find-detail'] = array(
+		'page callback' => '_vcn_find_update',
+ 	   	'title' => 'update find learning', 
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+  	
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_training_theme( ) {
+  	return array (
+  		'vcn_training' => array ( 'template'=>'templates/training', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_training_search' => array ( 'template'=>'templates/training_search', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),  
+		'vcn_training_search_course' => array ( 'template'=>'templates/training_search_course', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_about' => array (	'template'=>'templates/vcn_training_about',	'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_about_learn' => array ( 'template'=>'templates/vcn_training_about_learn', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_find' => array ( 'template'=>'templates/vcn_training_find', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_find_update' => array ( 'template'=>'templates/vcn_training_find_update', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		
+	 	'vcn_training_grid'      	  => array ( 'template'=>'templates/vcn_training_grid', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+	 	'vcn_training_programs'       => array ( 'template'=>'templates/vcn_training_grid_programs', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_training_certifications' => array ( 'template'=>'templates/vcn_training_grid_certifications','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_licenses'       => array ( 'template'=>'templates/vcn_training_grid_licenses', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		'vcn_training_courses' => array ( 'template'=>'templates/vcn_training_grid_courses','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_training_vhs'     => array ( 'template'=>'templates/vcn_training_grid_vhs','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_training_school_programs'     => array ( 'template'=>'templates/vcn_training_grid_school_programs','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  	 
+		'vcn_training_detail' => array ( 'template'=>'templates/vcn_training_detail','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  		'vcn_training_financialaid' => array ( 'template'=>'templates/vcn_training_financialaid', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 		'vcn_training_assessment' => array ( 'template'=>'templates/vcn_training_assessment', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+ 		'vcn_special_resources' => array ( 'template'=>'templates/vcn_special_resources', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+		
+		'vcn_training_school' => array ( 'template'=>'templates/vcn_training_school', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+   	 
+ 	);
+}
+ 
+
+function _vcn_get_training() {
+ 	return 'This block may not be called directly';
+}
+
+function _vcn_get_training_search($vars = false) {  
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+  	
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+
+   	// get the type
+ 	$args   = arg();
+   	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+ 	$errors = $content = $data = array();
+ 
+ 	// only do this if not passed in
+ 	if (!$vars)
+ 	{
+   		// Get _POST vars
+	 	vcn_get_vars_post($vars, $_POST);
+  
+   		// Get _GET vars which override $_POST 
+		vcn_get_vars_get($vars, $_GET);
+  
+ 		// Get url vars which override $_POST AND $_GET
+	  	vcn_get_vars_arg($vars, $args);
+	  	
+	 	// Set additional vars
+ 		vcn_get_vars_set( $vars );
+  
+		// type should come from args and not be overrode by post or get
+ 	 	$vars['type'] = $type;
+  	}
+	//$valid['education_category_id_less'] = 'valid';
+	//$vars['education_category_id_less'] = $vars['awlevel'];
+	//unset($vars['fawlevel']);
+	//unset($vars['awlevel']);	
+	
+	// Process if needed
+	if (!array_key_exists('onetcode',$vars ) OR !$vars['onetcode']) 
+	{
+ 	  	$valid = array('onetcode'=>'valid');
+ 		$result = vcn_get_data ($errors, $vars, $valid,'occupationsvc',onetlaytitles,'count' );
+        $laytitles_count = (string) $result->count;
+ 
+       	// get the list
+ 		$result = vcn_get_data ($errors, $vars, array(),'occupationsvc',onetlaytitles,'list', $laytitles_count,'', 'laytitle' );
+    	$laytitles = array();
+ 
+	  	foreach ($result->onetlaytitle AS $laytitle)
+	  	{
+ 	  	 	 $title    = (string) $laytitle->laytitle;
+	  	 	 $onetcode = (string) $laytitle->newonetcode;
+	   		 $laytitles[$title] = $onetcode;
+ 	  	}
+ 
+ 	  	$data['laytitles'] = $laytitles;
+  	}
+  	
+  	// send flag if details page
+  	$vars['detail'] = (isset($args[1]) AND $args[1] == 'detail') ? true : false;
+  	
+ 	return theme( 'vcn_training_search', $errors, $vars, $content, $data );
+}
+
+
+
+function _vcn_get_training_find($type) {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+
+	$errors = $content = $data = array();
+ 
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+  	// Set additional vars
+ 	vcn_get_vars_set($vars );
+ 	
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;  	
+	
+  	// clear onetcode
+  	$vars['onetcode'] = false;
+  	$vars['hide_search'] = true; 
+	
+	
+	$awlevel = explode('/',(string)$vars['q']);
+	
+	foreach ($awlevel as $k=>$v) {
+		if ($v=='awlevel')
+			$awlevelvalue=$awlevel[$k+1];
+	
+	}
+	
+	$valid['education_category_id_less'] = 'valid';
+	$vars['education_category_id_less'] = $awlevelvalue;	
+	
+
+  	$content['search']  = _vcn_get_training_search($vars);	
+  
+  //$block = module_invoke('hvcp_map', 'block', 'view', 0);
+  //$content['sidebar']  = '<div class="panel-pane">' . $block['content'] . '</div>';
+  //$content['sidebar'] .= '<div class="panel-pane">' .  node_view(node_load(50))  . '</div>';
+    $content['sidebar'] .= '<div class="panel-pane no-padding">' . _vcn_special_resources() . '</div>';
+ 
+ 		
+ 	 
+  	return theme('vcn_training_find', $errors, $vars, $content, $data);
+ }
+  
+  
+function _vcn_find_update() { 
+
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = dirname(drupal_get_path('module','vcn_training'));
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+ 
+	$errors = $content = $data = false;  
+	
+  	// get the type
+ 	$args    = arg();
+ 	$section = (isset($args[2]) AND $args[2]) ? $args[2] : '';
+  
+   	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+
+  	// Set additional vars
+ 	vcn_get_vars_set($vars, $type);
+ 	
+    $vars['section'] = $section;   
+	
+	
+		
+/*	
+	if ($vars['fawlevel']=='124') {
+	
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '4';
+
+	}
+//	print_r($vars);
+	
+	if (!($vars['fawlevel'])) {
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '3';
+		$vars['awlevel'][3] = '4';
+		$vars['awlevel'][4] = '5';
+		$vars['awlevel'][5] = '7';		
+	
+//$vars['awlevel']=(string)'4';	
+
+	}			
+*/
+	
+	if ($vars['awlevel']>0) {
+		$valid['education_category_id_less'] = 'valid';
+		$vars['education_category_id_less'] = $vars['awlevel'];
+	}
+
+	//unset($vars['fawlevel']);
+	//unset($vars['awlevel']);	
+
+
+  	// get the data
+ 	if ($section == 1)
+  	{
+  	 	$vars['type'] = 'licenses';
+  		$valid        =  vcn_get_valid('licenses');
+  		$result       = vcn_get_data ($errors, $vars,$valid,'trainingsvc','licenses','list','10',$offset,$order,$direction );
+   		$data['licenses'] = theme( 'vcn_training_find_update', $errors, $vars, $content, $result->licenses );
+
+  		$vars['type'] = 'certifications';
+  		$valid        =  vcn_get_valid('certifications');
+  		$result       = vcn_get_data ($errors, $vars,$valid,'trainingsvc','certifications','list','10',$offset,$order,$direction );
+  	 	$data['certifications'] = theme( 'vcn_training_find_update', $errors, $vars, $content, $result->certifications );
+  
+  		$vars['zipcode'] = $vars['zip'];
+  		$result       = vcn_get_data ($errors, $vars,$valid,'occupationsvc','occupation','detail','10',$offset,$order,$direction );
+  		$vars['type'] = 'legal';
+   		$data['legal'] = theme( 'vcn_training_find_update', $errors, $vars, $content, $result->occupation );
+  	 	
+  	 	$vars['type'] = 'medical';
+  	 	$data['medical'] = theme ( 'vcn_training_find_update', $errors, $vars, $content, $result->occupation );
+  		unset($vars['zipcode']);
+  	}	
+   	if ($section == 2)
+  	{
+  	 	$vars['type'] = 'programs';
+  		$valid        =  vcn_get_valid('programs'); 
+  		$result       = vcn_get_data ($errors, $vars,$valid,'trainingsvc','programs','list','10',$offset,$order,$direction );
+   		$data['programs'] = theme( 'vcn_training_find_update', $errors, $vars, $content, $result->programs );
+	}	
+	  
+
+  	echo json_encode($data) ;
+  
+ }
+ 
+ 
+ 
+ 
+ function _vcn_get_training_about($type = false) {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 	
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+ 	$errors = $content = $data = array();
+ 
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+ 
+  		
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+  	// Set additional vars
+ 	vcn_get_vars_set($vars );	
+ 	 	
+  	$content['main'] = node_view(node_load(13));
+  	$content['search']  = _vcn_get_training_search($vars);
+ 
+	$block = module_invoke('hvcp_map', 'block', 'view', 0);
+   	$content['sidebar']  = '<div class="panel-pane">'. $block['content'] . '</div>';
+ // $content['sidebar'] .= '<div class="panel-pane">'. _vcn_get_training_about_learn() . '</div>';
+  
+  	return theme('vcn_training_about', $errors, $vars, $content, $data);
+}
+ 
+function _vcn_get_training_about_learn($type = false) {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = drupal_get_path('module','vcn_training' );
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+  	
+  	return theme('vcn_training_about_learn' );
+}
+
+
+function _vcn_special_resources($type = false) {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = drupal_get_path('module','vcn_training' );
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+  	
+  	return theme('vcn_special_resources' );
+ }
+   
+function _vcn_get_training_grid() {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+   
+ 	$errors = $content = $data = false;
+ 
+  	// get the type
+ 	$args   = arg();
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+	
+ 	$valid = vcn_get_valid($type);
+   	$valid_all = array_merge(vcn_get_valid('programs'),
+  	                         vcn_get_valid('certifications'),
+  	                         vcn_get_valid('licenses'),
+  	                         vcn_get_valid('courses'),
+  	                         vcn_get_valid('vhs') 
+  	                         );
+   
+   	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+ 
+  	// Set additional vars
+ 	vcn_get_vars_set($vars );
+ 
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+ 
+  	global $user;
+  	$profile = profile_load_profile($user);
+	
+	
+  	 
+  	if ($user->profile_provider_id && $_SESSION['provider']==1) {
+  		$vars['zip'] = '';
+  	}
+/*	
+	if ($vars['awlevel']=='124') {
+	
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '4';
+
+	}
+//	print_r($vars);
+	
+	if (!($vars['awlevel'])) {
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '3';
+		$vars['awlevel'][3] = '4';
+		$vars['awlevel'][4] = '5';
+		$vars['awlevel'][5] = '7';		
+	
+//$vars['awlevel']=(string)'4';	
+
+	}	
+*/	
+	$valid['education_category_id_less'] = 'valid';
+	$valid_all['education_category_id_less'] = 'valid';
+	
+	$vars['education_category_id_less'] = $vars['awlevel'];
+	
+	if($type == 'programs' || $vars['type'] == 'programs'){
+		$valid['order']='valid';
+		$vars['order']='awlevel';
+		
+		$valid['direction_programs']='valid';
+		$vars['direction_programs']='Asc';
+		
+		$valid['direction']='valid';
+		$vars['direction']='Asc';
+	}
+	//unset($vars['fawlevel']);
+	//unset($vars['awlevel']);		
+	
+    // Do not process if both onetcode and unitid missing
+    if (in_array($vars['type'], array('programs','certifications','licenses' )) AND !$vars['onetcode'] AND !$vars['unitid'])
+    {
+  		$errors[] = '<font color=#A71E28> Select a career </font>';
+	}
+	else 
+	{
+		if (!$vars['onetcode'] AND in_array($vars['type'], array('programs','certifications','licenses' )) )
+		{
+			$errors[] = '<font color=#A71E28> Select a career to find specific programs.</font>';
+		}
+	 	if (!$vars['zip'] AND $vars['type'] == 'programs') {
+			$errors[] = '<font color=#A71E28> Enter a location ZIP Code to find programs near you! </font>';
+		}
+		if (!$vars['stfips'] AND $vars['type'] == 'licenses') {
+			$errors[] = '<font color=#A71E28> Enter a state to find the license requirements for that state!</font>'; 
+		}
+	
+		// get the counts
+		$result = vcn_get_data ($errors, $vars, $valid_all, 'trainingsvc','training','count');
+	  	
+	 	$vars['occupation-title']     = (string) $result->occupation->title;
+		$vars['count_programs']       = (string) $result->programscount ? (string) $result->programscount : 0;
+	  	$vars['count_certifications'] = (string) $result->certificationscount? (string) $result->certificationscount : 0;
+		$vars['count_licenses']       = (string) $result->licensescount ? (string) $result->licensescount : 0;
+		$vars['count_courses']        = (string) $result->coursescount ? (string) $result->coursescount : 0;
+		$vars['count_vhs']            = (string) $result->vhscount ? (string) $result->vhscount : 0;
+	
+	   
+		// set specific vars
+		$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+		$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+		$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+		$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+		$vars['pg_'.$type] = $vars['pg'] = $pg =  1;
+		
+	
+	 
+		// set page vars  	 	
+		if ($count > 0 ) $total_pgs = ceil($count / $limit );
+		if ($pg > $total_pgs) { $pg = $vars['total_pgs']; }
+		if ($pg < 1) {$pg = 1; }
+		$offset = ($pg * $limit) - ($limit);
+
+		// get the data
+		if ($type == 'certifications') $order= 'rank';
+		//if ($type == 'programs') $order= 'awlevel';
+
+ 		$result = vcn_get_data ($errors,$vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+		$data = $result->$type;
+  	}
+  	
+  	if ($user->profile_provider_id && $_SESSION['provider'] == 1) {
+  		$vars['hide_search'] = true;
+  	} 
+  	$content['search']  = _vcn_get_training_search($vars);
+	
+  	$content['pagination']  = '<span style="float:left; margin-right:5px; color:#000000;">Page </span>'.include($includes . '/pagination.inc'); 
+  	return theme('vcn_training_grid', $errors, $vars, $content, $data);
+}
+
+function _vcn_update_training_grid() { 
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 
+ 	$training_path = dirname(drupal_get_path('module','vcn_training'));
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+ 
+	$errors = $content = $data = false;  
+	
+  	// get the type
+ 	$args   = arg();
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+ 	
+ 	$valid = vcn_get_valid($type);
+  	$valid_all = array_merge(vcn_get_valid('programs'),
+  	                         vcn_get_valid('certifications'),
+  	                         vcn_get_valid('licenses'),
+  	                         vcn_get_valid('courses'),
+  	                         vcn_get_valid('vhs') 
+  	                         );
+ 		 	
+  	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+
+  	// Set additional vars
+ 	vcn_get_vars_set($vars, $type);
+
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+/*
+	if ($vars['awlevel']=='124') {
+	
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '4';
+
+	}
+
+	if ((!$vars['awlevel'])) {
+		$vars['awlevel'] = array();
+		$vars['awlevel'][0] = '1';
+		$vars['awlevel'][1] = '2';
+		$vars['awlevel'][2] = '3';
+		$vars['awlevel'][3] = '4';
+		$vars['awlevel'][4] = '5';
+		$vars['awlevel'][5] = '7';	
+	}
+ */ 	 	
+	$valid['education_category_id_less'] = 'valid';
+	$vars['education_category_id_less'] = $vars['awlevel'];
+	//unset($vars['fawlevel']);
+	//unset($vars['awlevel']);	
+
+	if (!strlen($vars['order_programs'])) {
+	
+		$valid['order_programs']='valid';
+		$vars['order_programs']='awlevel';		
+	}
+	//print_r($vars); exit;
+	
+	
+	// get the counts
+//	$result = vcn_get_data ($errors, $vars, $valid, 'trainingsvc','training','count');
+//	$vars['occupation-title']     = (string) $result->occupation->title;
+// 	$vars['count_programs']       = (string) $result->programscount ? (string) $result->programscount : 0;
+//	$vars['count_certifications'] = (string) $result->certificationscount? (string) $result->certificationscount : 0;
+//	$vars['count_licenses']       = (string) $result->licensescount ? (string) $result->licensescount : 0;
+
+ 	// set specific vars
+  	$count     = ( array_key_exists('count_'.$type, $vars) AND $vars['count_'.$type] ) ? $vars['count_'.$type] : 0;
+  	$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+  	$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+  	$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+  	$pg        = ( array_key_exists('pg_'.$type, $vars) AND $vars['pg_'.$type] ) ? $vars['pg_'.$type] : 1;
+
+   
+  	// set page vars  	 	
+  	if ($count > 0 ) $total_pgs = ceil($count / $limit );
+  	if ($pg > $total_pgs) { $pg =$total_pgs; }
+	if ($pg < 1) {$pg = 1; }
+	$offset = ($pg * $limit) - ($limit);
+
+  	// get the data
+	$result = vcn_get_data ($errors, $vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+ 	$data = $result->$type;
+
+ 	$content['pagination']  = '<span style="float:left; margin-right:5px; color:#000000;">Page </span>'.include($includes . '/pagination.inc');
+
+ 	global $user;
+ 	$profile = profile_load_profile($user);
+ 	
+	if (!empty($user->profile_provider_id) && $_SESSION['provider'] == 1) {
+	  	echo theme('vcn_training_school_programs', $errors, $vars, $content, $data ); 
+	} else {
+		echo theme('vcn_training_'.$type, $errors, $vars, $content, $data );
+	}
+ }
+ 
+ function _vcn_get_training_detail() { 
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+	  	
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+   
+   	$errors = $content = $data = array();
+	
+	// get the type
+ 	$args   = arg();
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+ 	
+  	$valid = vcn_get_valid($type, true);
+   		
+  	// Get _POST vars
+ 	vcn_get_vars_post($vars,  $_POST);
+ 
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+ 
+   	// Set additional vars
+ 	vcn_get_vars_set($vars );
+ 
+ 	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+  	
+  	if (strtolower($type) == 'programs') {
+	
+		// get data directly from DB instead of rest services
+		$conn = vcn_connect_to_db();
+		
+		// Get the Program's main Details
+		$query = "SELECT v.awlevel AS awlevel, 
+						v.awards_desc as awdesc,
+						v.other_cost AS othercost,
+						v.other_req AS otherrequirements,
+						v.program_contact_email AS programcontactemail,
+						v.program_contact_name AS programcontactname, 
+						v.program_contact_phone AS programcontactphone,
+						v.program_id AS programid,
+						v.program_url AS programurl,
+						v.status AS status,
+						v.total_courses AS totalcourses, 
+						v.total_credits AS totalcredits,
+						v.tuition_in_state AS tuitioninstate,
+						v.tuition_out_state AS tuitionoutstate,
+						e.education_category_name AS ipedsdesc, e.duration AS duration,
+						(case when v.program_description is not null then v.program_description else v3.cipdesc end) AS programdescription,
+						(case when v.program_name is not null then v.program_name else v3.ciptitle end) AS programname,
+						'" . mysql_real_escape_string($vars['cipcode']) . "' AS cipcode 
+					FROM vcn_program v 
+					INNER JOIN vcn_program_cipcode v2 ON v.program_id = v2.program_id 
+					INNER JOIN vcn_cipcode v3 ON v2.cipcode = v3.cipcode
+					LEFT JOIN vcn_edu_category_iped i ON v.awlevel = i.iped_lookup_code 
+        			INNER JOIN vcn_edu_category e ON i.education_category_id = e.education_category_id
+					WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'
+					AND v3.cipcode = '" . mysql_real_escape_string($vars['cipcode']) . "' 
+					AND v3.cipcode_year = 2010
+					ORDER BY v2.cipcode_year desc ";
+		
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['programdetails'] = mysql_fetch_object($result);
+	
+		// Get the Program's Required Courses
+		$query = "SELECT v6.course_id AS courseid,
+						v11.description AS deliverymodedescription,
+						v8.course_info_url AS courseinfourl,
+						v8.course_level AS courselevel,
+						v8.course_title AS coursetitle,
+						v8.course_type AS coursetype,
+						v8.delivery_mode AS deliverymode,
+						v8.description AS description,
+						v8.online_course_url AS onlinecourseurl,
+						v10.description AS subjectareadescription,
+						v6.min_gpa AS mingpa 
+				FROM vcn_program v 
+				INNER JOIN vcn_program_cipcode v2 ON v.program_id = v2.program_id 
+				INNER JOIN vcn_cipcode v3 ON v2.cipcode_2010 = v3.cipcode 
+				LEFT JOIN vcn_program_course_req v6 ON v.program_id = v6.program_id 
+				LEFT JOIN vcn_course v8 ON v6.course_id = v8.course_id 
+				LEFT JOIN vcn_course_cipcode v9 ON v8.course_id = v9.course_id AND (v9.cipcode = v2.cipcode)
+				LEFT JOIN vcn_subject_area v10 ON v8.subject_area = v10.subject_area 
+				LEFT JOIN vcn_course_delivery_mode v11 ON v8.delivery_mode = v11.delivery_mode 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "' 
+				AND v3.cipcode = '" . mysql_real_escape_string($vars['cipcode']) . "' 
+				AND v2.cipcode_year = 2010 
+				AND v3.cipcode_year = 2010";
+			
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['programreqcourses'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['programreqcourses'], $row);
+		}
+	
+		// Get the Program's Required Education
+		$query = "SELECT v13.education_level AS educationlevel, 
+						v13.min_gpa AS mingpa,  
+						v14.name AS name
+				FROM vcn_program v 
+				INNER JOIN vcn_program_education_req v13 ON v.program_id = v13.program_id 
+				LEFT JOIN vcn_education_level v14 ON v13.education_level = v14.education_level 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+			
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['programreqeducation'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['programreqeducation'], $row);
+		}
+		
+		// Get the Program's Entrance Tests
+  		$query = "SELECT v15.min_score AS minscore,  
+						v15.hs_grad_or_transfer_student as hsgradortransferstudent,
+						v16.test_name AS testname, 
+						v16.test_description AS testdescription, 
+						v16.test_url AS testurl 
+				FROM vcn_program v 
+				INNER JOIN vcn_program_entrance_test v15 ON v.program_id = v15.program_id 
+				LEFT JOIN vcn_test v16 ON v15.test_id = v16.test_id 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+			
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['programentrancetests'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['programentrancetests'], $row);
+		}
+	
+		// Get the Program's Accredited By
+		$query = "SELECT v18.name AS v18__name, 
+						v18.description AS v18__description, 
+						v18.address_1 AS v18__address_1, 
+						v18.address_2 AS v18__address_2, 
+						v18.city AS v18__city, 
+						v18.state AS v18__state, 
+						v18.zipcode AS v18__zipcode, 
+						v18.phone AS v18__phone, 
+						v18.fax AS v18__fax, 
+						v18.email_address AS v18__email_address, 
+						v18.website_url AS v18__website_url
+				FROM vcn_program v 
+				LEFT JOIN vcn_program_accreditor v17 ON v.program_id = v17.program_id 
+				INNER JOIN vcn_school_accreditor v18 ON v17.accreditor_id = v18.accreditor_id 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+			
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['programaccredited'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['programaccredited'], $row);
+		}
+				
+		// Get the Provider's main Details
+		$query = "SELECT v7.addr AS addr, 
+						v7.city AS city,
+						v7.faidurl AS faidurl, 
+						v7.faidurl_flag AS faidurlflag,
+						v7.gentele AS gentele, 
+						v7.instnm AS instnm,
+						v7.min_gpa_for_transfer AS mingpafortransfer,
+						v7.stabbr AS stabbr,
+						v7.transfer_policy AS transferpolicy,
+						v7.unitid AS unitid, 
+						v7.zip AS zip, 
+						(case when v.admission_url is not null then v.admission_url else v7.adminurl end) AS adminurl, 
+						(case when v.admission_url is not null then v.admission_url_flag else v7.adminurl_flag end) AS adminurlflag
+				FROM vcn_program v 
+				INNER JOIN vcn_provider v7 ON v.unitid = v7.unitid
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+		
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['providerdetails'] = mysql_fetch_object($result);
+	
+		// Get the Provider's Required Courses
+		$query = "SELECT v22.course_id AS courseid,
+						v25.description AS deliverymodedescription,
+						v23.course_info_url AS courseinfourl, 
+						v23.course_level AS courselevel,
+						v23.course_title AS coursetitle,
+						v23.course_type AS coursetype,
+						v23.delivery_mode AS deliverymode,
+						v23.description AS description,
+						v23.online_course_url AS onlinecourseurl,
+						v24.description AS subjectareadescription, 
+						v22.min_gpa AS mingpa
+				FROM vcn_program v 
+				INNER JOIN vcn_provider v7 ON v.unitid = v7.unitid
+				LEFT JOIN vcn_provider_course_req v22 ON v7.unitid = v22.unitid 
+				LEFT JOIN vcn_course v23 ON v22.course_id = v23.course_id 
+				LEFT JOIN vcn_subject_area v24 ON v23.subject_area = v24.subject_area 
+				LEFT JOIN vcn_course_delivery_mode v25 ON v23.delivery_mode = v25.delivery_mode 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+		
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['providerreqcourses'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['providerreqcourses'], $row);
+		}
+	
+		// Get the Provider's Entrance Tests
+		$query = "SELECT v20.min_score AS minscore,  
+						v20.hs_grad_or_transfer_student as hsgradortransferstudent,
+						v21.test_name AS testname, 
+						v21.test_description AS testdescription,  
+						v21.test_url AS testurl 
+				FROM vcn_program v 
+				INNER JOIN vcn_provider v7 ON v.unitid = v7.unitid
+				INNER JOIN vcn_provider_entrance_test v20 ON v7.unitid = v20.unitid 
+				LEFT JOIN vcn_test v21 ON v20.test_id = v21.test_id 
+				WHERE v.program_id = '" . mysql_real_escape_string($vars['program_id']) . "'";
+		
+		$result = mysql_query($query) or die("Error running query: ".mysql_error());
+		$data['providerentrancetests'] = array();
+		while ($row = mysql_fetch_object($result)) {
+		    array_push($data['providerentrancetests'], $row);
+		}
+	
+		vcn_disconnect_from_db($conn);
+		
+  	} else {
+  		// Sanity Check
+  		$result = vcn_sanity_check ($errors, $vars, $valid);
+  		
+  		// Process if no errors
+  		if ($result) {
+  			$data = vcn_get_data ($errors, $vars, $valid,'trainingsvc',$type,'detail' );
+  		}
+  		
+  		// Make sure onet and occupation title are set;
+  		if (!$vars['onetcode'])
+  		{
+  			switch ($type)
+  			{
+  				case 'programs':
+  					$vars['onetcode'] =  (string)$data->$type->cipcodedetail->socxcip->socxonet->occupation->onetcode;
+  					$vars['occupation-title'] = $vars['fjobtitle'] = (string)$data->$type->cipcodedetail->socxcip->socxonet->onetxwalk->occupation->item->title;
+  					break;
+  				case 'certifications':
+  					$vars['onetcode'] =	(string)$data->$type->certonetassign->occupation->onetcode;
+  					$vars['occupation-title']  = $vars['fjobtitle'] = (string)$data->$type->certonetassign->onetxwalk->occupation->item->title;
+  					break;
+  				case 'licenses':
+  					$vars['onetcode'] =	(string)$data->$type->licxonet->occupation->onetcode;
+  					$vars['occupation-title']  = $vars['fjobtitle'] = (string)$data->$type->licxonet->onetxwalk->occupation->item->title;
+  					break;
+  				default:
+  			}
+  		}  			
+  	}
+ 	$vars['hide_search'] = true; 	
+  	$content['search']  = _vcn_get_training_search($vars);
+  	
+ //	$block = module_invoke('hvcp_map', 'block', 'view', 0);
+ //	$content['sidebar']  = '<div class="panel-pane">'. $block['content'] . '</div>';
+ // $content['sidebar'] .= '<div class="panel-pane">'. _vcn_get_training_about_learn() . '</div>';
+ 
+	return theme('vcn_training_detail', $errors, $vars, $content, $data ); 
+}
+ 
+function _vcn_get_training_financialaid() {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 	  	
+ 	$training_path = drupal_get_path('module','vcn_training' );
+ 	drupal_add_css($training_path . '/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path . '/js/vcn_training.js');
+ 
+  	$errors = $content = $data = array();   
+
+	// get the type
+ 	$args   = arg();
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+  	$type   = ($type == 'courses') ? 'course' : $type;
+   	
+	$valid = vcn_get_valid( $type );
+ 	
+   	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+ 
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+ 
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+	// Set additional vars
+ 	vcn_get_vars_set($vars );
+ 
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+ 
+	// Sanity Check 
+ 	$result = vcn_sanity_check ($errors, $vars, $valid);
+ 
+ 	// Process if no errors
+ 	if ($result) {
+ 		$data = vcn_get_data ($errors, $vars, $valid,'trainingsvc',$type,'detail' );
+ 	}	
+ 
+	$vars['hide_search'] = true; 	
+  	$content['search']   = _vcn_get_training_search($vars);
+ 
+ 	$block = module_invoke('hvcp_map', 'block', 'view', 0);
+    $content['sidebar'] = '<div class="panel-pane">' . $block['content'] . '</div>';
+ //	$content['sidebar'] .= '<div class="panel-pane">' . _vcn_get_training_about_learn() . '</div>';		
+   		
+	return theme('vcn_training_financialaid', $errors, $vars, $content, $data  );
+ } 
+  
+ 
+ function _vcn_get_training_assessment() {
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 	  	
+ 	$training_path = drupal_get_path('module','vcn_training' );
+ 	drupal_add_css($training_path . '/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path . '/js/vcn_training.js');
+ 
+  	$errors = $content = $data = array();   
+
+	// get the type
+ 	$args   = arg();
+ 	$type   = (isset($args[2]) AND $args[2]) ? $args[2] : 'programs';
+  	$type   = ($type == 'courses') ? 'course' : $type;
+   	
+	$valid = vcn_get_valid( $type );
+ 	
+   	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+ 
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+ 
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+	// Set additional vars
+ 	vcn_get_vars_set($vars);
+ 
+	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+  	 
+
+ /*
+	// Sanity Check 
+ 	$result = vcn_sanity_check ($errors, $vars, $valid);
+ 
+ 	// Process if no errors
+ 	if ($result) {
+ 		$data = vcn_get_data ($errors, $vars, $valid,'trainingsvc',$type,'detail' );
+ 	}	
+*/ 
+	$vars['hide_search'] = true; 	
+  	$content['search']   = _vcn_get_training_search($vars);
+ 
+ 	$block = module_invoke('hvcp_map', 'block', 'view', 0);
+    $content['sidebar'] = '<div class="panel-pane">' . $block['content'] . '</div>';
+ //  	$content['sidebar'] .= '<div class="panel-pane">' . _vcn_get_training_about_learn() . '</div>';		
+   		
+	return theme('vcn_training_assessment', $errors, $vars, $content, $data  );
+ } 
+
+ function _vcn_get_training_school() { 
+ 	$includes = drupal_get_path('module','vcn').'/includes';
+ 	require_once($includes . '/vcn_common.inc');
+ 	  	
+ 	$training_path = drupal_get_path('module','vcn_training');
+ 	drupal_add_css($training_path.'/css/vcn_training.css', 'module','all');
+ 	drupal_add_js ($training_path. '/js/vcn_training.js');
+   
+   	$errors = $content = $data = array();
+	
+	// get the type
+ 	$args   = arg();
+ 	$type =  'providers';
+
+  	$valid = vcn_get_valid($type, true);
+   		
+  	// Get _POST vars
+ 	vcn_get_vars_post($vars,  $_POST);
+ 
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+ 
+   	// Set additional vars
+ 	vcn_get_vars_set($vars);
+ 
+ 	// type should come from args and not be overrode by post or get
+  	$vars['type'] = $type;
+	
+	if (isset($vars['stabbr']))
+		unset($vars['stabbr']);
+
+	if (isset($vars['zip']))
+		unset($vars['zip']);
+
+	// get data directly from DB instead of rest services
+	$conn = vcn_connect_to_db();
+	
+	// Get the Provider's main Details
+	$query = "SELECT v.unitid AS unitid, 
+					v.addr AS addr, 
+					v.applurl AS applurl, 
+					v.applurl_flag AS applurlflag, 
+					v.city AS city, 
+					v.faidurl AS faidurl, 
+					v.faidurl_flag AS faidurlflag, 
+					v.gentele AS gentele, 
+					v.instnm AS instnm, 
+					v.stabbr AS stabbr, 
+					v.status AS status, 
+					v.webaddr AS webaddr, 
+					v.webaddr_flag AS webaddrflag, 
+					v.zip AS zip, 
+					v2.act_composite_25th_percentile_score AS actcomposite25thpercentilescore, 
+					v2.act_composite_75th_percentile_score AS actcomposite75thpercentilescore, 
+					v2.act_english_25th_percentile_score AS actenglish25thpercentilescore, 
+					v2.act_english_75th_percentile_score AS actenglish75thpercentilescore, 
+					v2.act_math_25th_percentile_score AS actmath25thpercentilescore, 
+					v2.act_math_75th_percentile_score AS actmath75thpercentilescore, 
+					v2.act_writing_25th_percentile_score AS actwriting25thpercentilescore, 
+					v2.act_writing_75th_percentile_score AS actwriting75thpercentilescore, 
+					v2.books_and_supplies AS booksandsupplies, 
+					v2.combined_charge_room_board AS combinedchargeroomboard, 
+					v2.first_time_degree_certificate_undergrad_enrollment AS firsttimedegreecertificateundergradenrollment, 
+					v2.graduate_enrollment AS graduateenrollment, 
+					v2.in_state_credit_charge_part_time_grad AS instatecreditchargeparttimegrad, 
+					v2.in_state_credit_charge_part_time_undergrad AS instatecreditchargeparttimeundergrad, 
+					v2.mission_statement AS missionstatement, 
+					v2.mission_statement_url AS missionstatementurl, 
+					v2.mission_statement_url_flag AS missionstatementurlflag, 
+					v2.out_of_state_credit_charge_part_time_grad AS outofstatecreditchargeparttimegrad, 
+					v2.out_of_state_credit_charge_part_time_undergrad AS outofstatecreditchargeparttimeundergrad, 
+					v2.percent_admitted_total AS percentadmittedtotal, 
+					v2.percent_american_indian_or_alaska_native AS percentamericanindianoralaskanative, 
+					v2.percent_asian_native_hawaiian_pacific_islander AS percentasiannativehawaiianpacificislander, 
+					v2.percent_black_or_african_american AS percentblackorafricanamerican, 
+					v2.percent_hispanic_latino AS percenthispaniclatino, 
+					v2.percent_nonresident_alien AS percentnonresidentalien, 
+					v2.percent_race_ethnicity_unknown AS percentraceethnicityunknown, 
+					v2.percent_white AS percentwhite, 
+					v2.percent_women AS percentwomen, 
+					v2.price_in_state_off_campus_family AS priceinstateoffcampusfamily, 
+					v2.price_in_state_off_campus_no_family AS priceinstateoffcampusnofamily, 
+					v2.price_in_state_on_campus AS priceinstateoncampus, 
+					v2.price_out_of_state_off_campus_family AS priceoutofstateoffcampusfamily, 
+					v2.price_out_of_state_off_campus_no_family AS priceoutofstateoffcampusnofamily, 
+					v2.price_out_of_state_on_campus AS priceoutofstateoncampus, 
+					v2.sat_critical_reading_25th_percentile_score AS satcriticalreading25thpercentilescore, 
+					v2.sat_critical_reading_75th_percentile_score AS satcriticalreading75thpercentilescore, 
+					v2.sat_math_25th_percentile_score AS satmath25thpercentilescore, 
+					v2.sat_math_75th_percentile_score AS satmath75thpercentilescore, 
+					v2.sat_writing_25th_percentile_score AS satwriting25thpercentilescore, 
+					v2.sat_writing_75th_percentile_score AS satwriting75thpercentilescore, 
+					v2.total_enrollment AS totalenrollment, 
+					v2.undergraduate_enrollment AS undergraduateenrollment,
+					i.codedesc AS ipedsdesc
+	        FROM vcn_provider v 
+			LEFT JOIN vcn_provider_detail v2 ON v.unitid = v2.unitid  
+			LEFT JOIN ipeds_lookup i ON v.sector = i.colcode AND ((i.coltitle = 'SECTOR' AND i.colcode = v.sector))
+			WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'";
+	
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['providerdetails'] = mysql_fetch_object($result);
+
+	// Get the Provider's Services
+	$query = "SELECT v2.service_name AS servicename 
+			FROM vcn_provider v 
+			LEFT JOIN vcn_provider_service v1 ON v.unitid = v1.unitid 
+			LEFT JOIN vcn_provider_service_type v2 ON v1.service_id = v2.service_id 
+			WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'
+			ORDER BY servicename";
+			
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['providerservices'] = array();
+	while ($row = mysql_fetch_object($result)) {
+	    array_push($data['providerservices'], $row->servicename);
+	}
+	
+	// Get the Provider's Entrance Tests
+	$query = "SELECT v20.min_score AS minscore,
+						v20.hs_grad_or_transfer_student as hsgradortransferstudent,
+						v21.test_name AS testname, 
+						v21.test_description AS testdescription,  
+						v21.test_url AS testurl 
+				FROM vcn_provider v 
+				INNER JOIN vcn_provider_entrance_test v20 ON v.unitid = v20.unitid 
+				LEFT JOIN vcn_test v21 ON v20.test_id = v21.test_id 
+				WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'";
+	
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['providerentrancetests'] = array();
+	while ($row = mysql_fetch_object($result)) {
+		array_push($data['providerentrancetests'], $row);
+	}	
+
+	// Get the Provider's Required Courses
+	$query = "SELECT v22.course_id AS courseid,
+						v25.description AS deliverymodedescription,
+						v23.course_info_url AS courseinfourl, 
+						v23.course_level AS courselevel,
+						v23.course_title AS coursetitle,
+						v23.course_type AS coursetype,
+						v23.delivery_mode AS deliverymode,
+						v23.description AS description,
+						v23.online_course_url AS onlinecourseurl,
+						v24.description AS subjectareadescription, 
+						v22.min_gpa AS mingpa
+				FROM vcn_provider v 
+				LEFT JOIN vcn_provider_course_req v22 ON v.unitid = v22.unitid 
+				LEFT JOIN vcn_course v23 ON v22.course_id = v23.course_id 
+				LEFT JOIN vcn_subject_area v24 ON v23.subject_area = v24.subject_area 
+				LEFT JOIN vcn_course_delivery_mode v25 ON v23.delivery_mode = v25.delivery_mode 
+				WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'";
+	
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['providerreqcourses'] = array();
+	while ($row = mysql_fetch_object($result)) {
+		array_push($data['providerreqcourses'], $row);
+	}
+	
+	// Get the Provider's Degrees Offered
+	$query = "SELECT DISTINCT 
+			i2.codedesc AS codedesc 
+			FROM vcn_provider v 
+			INNER JOIN vcn_program v5 ON v.unitid = v5.unitid AND (v5.awlevel > 0) 
+			INNER JOIN ipeds_lookup i2 ON v5.awlevel = i2.colcode AND ((i2.coltitle = 'AWLEVEL' AND i2.colcode = v5.awlevel)) 
+			WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'
+			ORDER BY colcode";
+			
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['providerdegrees'] = array();
+	while ($row = mysql_fetch_object($result)) {
+	    array_push($data['providerdegrees'], $row->codedesc);
+	}
+	
+		
+	// Get the Provider's FAID Offered
+	$query = "SELECT v2.unitid AS v2__unitid, v2.loan_id AS v2__loan_id, v3.loan_id AS v3__loan_id,
+	v3.loan_name AS v3__loan_name, v3.loan_url AS v3__loan_url, 
+	v3.loan_url_flag AS v3__loan_url_flag 
+	FROM vcn_provider v 
+	LEFT JOIN vcn_provider_additional_faid v2 ON v.unitid = v2.unitid 
+	LEFT JOIN vcn_additional_faid v3 ON v2.loan_id = v3.loan_id
+	
+	WHERE v.unitid = '" . mysql_real_escape_string($vars['unitid']) . "'";
+			
+	$result = mysql_query($query) or die("Error running query: ".mysql_error());
+	$data['provideradditionalfaid'] = array();
+	while ($row = mysql_fetch_object($result)) {
+	    array_push($data['provideradditionalfaid'], $row);
+	}	
+	
+	
+	
+	
+	
+	
+	vcn_disconnect_from_db($conn);
+ 	
+ 	$vars['hide_search'] = true; 	
+  	$content['search']  = null; //_vcn_get_training_search($vars);
+	
+ 	$block = module_invoke('hvcp_map', 'block', 'view', 0);
+  	$content['sidebar']  = '<div class="panel-pane">'. $block['content'] . '</div>';
+ 	
+	return theme('vcn_training_school', $errors, $vars, $content, $data ); 
+}    

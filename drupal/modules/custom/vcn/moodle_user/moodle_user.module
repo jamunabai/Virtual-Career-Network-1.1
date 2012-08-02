@@ -1,0 +1,101 @@
+<?php 
+/**
+ * Create and synchronize Moodle user identical to Drupal user
+ */
+
+function moodle_user_user($op, &$edit, &$account, $category = NULL) {
+   // if password has been changed, update moodle
+   if (($op == 'update' || $op == 'insert') && $category == 'account') { 
+   
+     // connect to Moodle (non-Drupal) database.
+  
+     if(!function_exists('connectMoodle')) {
+        function connectMoodle() {
+            //extracting database
+            $dbpull .= hvcp_get_moodle_url();
+            $tempArr1=explode("/",$dbpull);
+            $tempArr2=explode(":",$tempArr1[2]);
+            $dbuser=$tempArr2[0];
+            $tempArr3=explode("@",$tempArr2[1]);
+            $dbpass=$tempArr3[0];
+            $dbserver=$tempArr3[1].":3306";
+            unset($tempArr1,$tempArr2,$tempArr3);
+
+            $connection=mysql_connect($dbserver,$dbuser,$dbpass)
+               or die("Error making database connection: ".mysql_error() . " " . $dbserver . " ON " . $_SERVER["SERVER_NAME"]);
+            $db=mysql_select_db('moodle19',$connection)
+               or die("Error selecting database: ".mysql_error());
+            return($connection);
+        }
+     }
+     $connection=connectMoodle();
+
+     if ($op=='insert') {
+        // add user to moodle database
+   
+        $ins = 'insert mdl_user values (NULL,' .                      // id
+                                        '"manual",' .                 // auth
+                                        '1,' .                        // confirmed
+                                        '1,' .                        // policyagreed
+                                        '0,' .                        // deleted
+                                        '1,' .                        // mnethostid
+                                        '"' . $account->name . '",' . // username
+                                        '"' . $account->pass . '",' . // password
+                                        '"' . $user->uid . '",' .     // idnumber
+                                        '"First",' .                 // firstname
+                                        '"Last",' .                  // lastname
+                                        '"' . $account->mail . '",' . // email
+                                        '0,' .                        // emailstop
+                                        '"",' .                       // icq
+                                        '"",' .                       // skype
+                                        '"",' .                       // yahoo
+                                        '"",' .                       // aim
+                                        '"",' .                       // msn
+                                        '"",' .                       // phone1
+                                        '"",' .                       // phone2
+                                        '"",' .                       // institution
+                                        '"",' .                       // department
+                                        '"",' .                       // address
+                                        '"",' .                       // city
+                                        '"",' .                       // country 
+                                        '"en_us",' .                  // lang
+                                        '"",' .                       // theme
+                                        '99,' .                       // timezone
+                                        'unix_timestamp(),' .         // firstaccess
+                                        'unix_timestamp(),' .         // lastaccess
+                                        'unix_timestamp(),' .         // lastlogin
+                                        'unix_timestamp(),' .         // currentlogin
+                                        '"",' .                       // lastip
+                                        '"",' .                       // secret
+                                        '0,' .                        // picture
+                                        '"",' .                       // url
+                                        '"",' .                       // description                                     
+                                        '1,' .                        // mailformat
+                                        '0,' .                        // maildigest
+                                        '2,' .                        // maildisplay
+                                        '1,' .                        // htmleditor
+                                        '1,' .                        // ajax
+                                        '1,' .                        // autosubscribe
+                                        '0,' .                        // trackforums
+                                        'unix_timestamp(),' .         // timemodified
+                                        '0,' .                        // trustbitmask
+                                        '"",' .                       // imagealt
+                                        '0)';                         // screenreader
+     
+        $result=mysql_query($ins)
+           or die("Error on Moodle DB query: ".mysql_error());
+     } else if ($op=='update') {
+        // update password and/or email if changed
+        if (!empty($edit['pass'])) {
+           $updpass = 'update mdl_user set password = md5("' . $edit['pass'] . '") where username = "' . $account->name . '"';
+           $result=mysql_query($updpass)
+              or die("Error on Moodle DB query: ".mysql_error());
+        }
+        if (!empty($edit['mail'])) {
+           $updmail = 'update mdl_user set email = "' . $edit['mail'] . '" where username = "' . $account->name . '"';
+           $result=mysql_query($updmail)
+              or die("Error on Moodle DB query: ".mysql_error());
+        }
+     }
+   }
+}

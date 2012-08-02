@@ -1,0 +1,39 @@
+<?php
+// $Id: register.module
+
+/**
+* @file
+* Register functions for this site.
+*/
+
+/* Implementations of hook_functions  */
+
+function register_menu(){
+	$items = array();
+	$items['register']	= array(
+		'title' => 'Register',
+		'path' => 'register',
+		'page callback' => 'register_page',
+		'page arguments' => array('register'),
+		'access callback' => TRUE,
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+	
+	return $items;
+}
+
+function register_page(){
+	//return "<br/> <br/> <br/> Please use the link sent to your email and click <a href='javascript:void(0);' onClick='close_moz();'>here</a> to close this window.";
+	return "<br/> <br/> <br/> Please use the link sent to your email.";
+}
+
+
+
+$registeredurl = $_SERVER['REQUEST_URI'];
+$registeredurl = explode("/", $registeredurl);
+if ($registeredurl[2] == 'register'){
+	drupal_add_js(drupal_get_path('module','register') . "/register.js"); 
+}
+
+

@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implementation of hook_block().
+ */
+function occupations_worktypes_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Occupations Worktypes');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_occupations_worktypes();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function occupations_worktypes_theme() {
+  return array(
+           'occupations_worktypes' => array (
+                             'template' => 'occupations_worktypes',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+function _get_occupations_worktypes() {
+  $css_path = drupal_get_path('module', 'occupations_worktypes') . "/occupations_worktypes.css";
+  drupal_add_css($css_path);
+
+  return theme('occupations_worktypes');
+}
+

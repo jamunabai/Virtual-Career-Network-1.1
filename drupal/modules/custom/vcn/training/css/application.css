@@ -1,0 +1,141 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+.title {
+display:none;
+}
+body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td {
+  margin: 0;
+  padding: 0;
+}
+
+div.wrapper { margin: 0 auto; position: relative; width: 960px; }
+
+a.cancel_link {
+  line-height: 24px;
+}
+
+.required_field {
+  color: red;
+}
+
+.validation_message {
+  display: none;
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
+
+.center {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.clear { /* generic container (i.e. div) for floating buttons */
+  overflow: hidden;
+  width: 100%;
+}
+
+img.button, .fadable {
+  text-align:center;
+  vertical-align:middle;
+  border:none;
+}
+
+.empty_community_members {
+  padding-top:100px;
+  background: transparent url(/images/icons/ic_community_members.png) no-repeat center center;
+  height: 100px;
+}
+
+tr.unviewed td {
+  font-weight: bold;
+}
+
+h1.title {font-size:1.25em;line-height:2em;}
+
+.disabled_overlay {background-color:white;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";filter:alpha(opacity=50);opacity:0.5;position:absolute;}
+
+/* left nav */
+div.left_nav {}
+div.left_nav span.title {color:#1774b7;float:left;}
+div.left_nav div.box_group {border:1px solid #e2e2e2;margin-top:10px;}
+div.left_nav label {font-weight:bold;display:block;margin-bottom:5px;}
+div.left_nav label:after {content:'';}
+div.left_nav input, div.left_nav select {display:block;}
+
+/* generic boxes with headers */
+.box_grey { background-color: #f5f5f5; }
+.box_blue { background-color: #c3d9e7; }
+.box_dark_grey { background-color: #eaeaea; }
+.box_dark_blue { background-color: #c1d0f9; border: 1px solid #aebce2; }
+.box_light_grey { background-color: #f0f0f0; border: 1px solid #e2e2e2; }
+.grey_top_border {border-top: 1px solid #dcdcdc;}
+
+.grey_header { background-color: #e2e2e2; border-bottom: 1px solid #cecece; margin-bottom: 10px; }
+.black_box_gradient_header {color:white;background:url(/images/common/black_box_gradient_header.jpg) top left repeat-x;border-radius:5px 5px 0 0;-moz-border-radius:5px 5px 0 0;}
+.box_light_grey h2, .grey_header h2 { padding: 5px; }
+.gradient_box {border:1px solid #e2e2e2;background:url(/images/common/bg-box-gradient.png) top left repeat-x;}
+.side_gradient_box {border:1px solid #e2e2e2;background:url(/images/common/bg-side-gradient.png) bottom left repeat-x;}
+.rounded_box {border-radius:5px;-moz-border-radius:5px;}
+.shadow_box {float:left;width:675px;height:21px;background:url(/images/common/bg-box-shadow.png) top left no-repeat;}
+
+.alternating_light_blue_box > div {border-bottom:1px solid #dbe2f9}
+.alternating_light_blue_box > div:nth-child(odd) {background-color:#f1f4ff;}
+
+/* sidebar */
+.sidebar div.intro {font-size:1.1em;color:#52b7f2;margin-bottom:5px;text-align:center;}
+.sidebar h2 {font-size:1.2em;color:#3a6ebc;margin-bottom:15px;}
+.sidebar div.description {font-size:0.9em;color:#555555;margin-bottom:15px;}
+.sidebar div.divider {width:173px;height:1px;margin:10px 0;background:url(/images/divider.png) top left no-repeat;}
+
+/* colored tags */
+span.blue_tag {color:white;font-size:10px;padding:0 3px;background-color:#6292ad;border-radius:3px;-moz-border-radius:3px;}
+span.green_tag {color:white;font-size:10px;padding:0 3px;background-color:#69ac71;border-radius:3px;-moz-border-radius:3px;}
+
+/* results */
+.results div.header h2 {color:#1774B7;margin-bottom:5px;}
+
+/* loading box */
+.loading_box {width:30px;height:30px;margin:50px auto 0;background:url(/images/common/loading_wheel.gif) center center no-repeat;border-radius:3px;-moz-border-radius:3px;}
+
+/* industry specific */
+.industry_education ul { margin-left: 20px; }
+.industry_education li { font-size: 11px; margin-bottom: 10px; }
+
+/* list with checkmark icons */
+ul.checkmark_list {float:left;margin:0;}
+ul.checkmark_list li {float:left;list-style:none;width:90%;margin-left:10px;padding:15px 0 15px 32px;font-weight:bold;border-bottom:1px dashed #e2e2e2;background:url(/images/icons/checkmark.png) center left no-repeat;}
+ul.checkmark_list li.no_check {color:#666666;background:none;text-decoration:line-through;}
+
+/* horizontal list separated by | */
+ul.horizontal_info_list {float:left;margin:0;}
+ul.horizontal_info_list li {float:left;list-style:none;}
+ul.horizontal_info_list li:after {content:' |';padding:5px;}
+ul.horizontal_info_list li:last-child:after {content:'';}
+ul.horizontal_info_list li a:after {content: ',';}
+ul.horizontal_info_list li a:last-child:after {content: '';}
+
+/* lists on links */
+ul.blue_arrow { margin: 0; float: left; }
+ul.blue_arrow li { float: left; list-style: none; background: url(/images/blue_arrow.png) center left no-repeat; margin: 0px 0 5px 10px; padding-left: 10px; }
+ul.side_nav { margin: 0 10px; float: left; }
+ul.side_nav li { width: 229px; line-height: 29px; float: left; list-style: none; border-bottom: 1px dashed #cecece; }
+ul.side_nav li:last-child { border: none; }
+ul.side_nav li div { width: 229px; height: 29px; background: url(/images/menu/nav_highlight.png) center left no-repeat; }
+ul.side_nav li div span { display: inline-block; margin-left: 10px; color: white; }
+ul.side_nav li a { display: inline-block; margin-left: 10px; }
+

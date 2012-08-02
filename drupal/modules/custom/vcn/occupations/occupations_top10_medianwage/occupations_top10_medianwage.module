@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implementation of hook_block().
+ */
+function occupations_top10_medianwage_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Top 10 Occupations by Median Wage');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_occupations_top10_medianwage();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function occupations_top10_medianwage_theme() {
+  return array(
+           'occupations_top10_medianwage' => array (
+                             'template' => 'occupations_top10_medianwage',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+function _get_occupations_top10_medianwage() {
+  $css_path = drupal_get_path('module', 'occupations_top10_medianwage') . "/occupations_top10_medianwage.css";
+  drupal_add_css($css_path);
+
+  return theme('occupations_top10_medianwage');
+}
+

@@ -1,0 +1,461 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* 
+    Document   : local
+    Created on : Dec 23, 2010, 9:16:29 AM
+    Author     : hills
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+      
+*/
+table {
+  border-collapse: collapse;
+  /* width: 100%; */ /* Prevent cramped-looking tables */
+}
+
+body { background: #f2f2f2;  font-family: Verdana;  font-size: 12px; }
+
+/* Default Styles */
+a { color: #A71E28; }
+p { font-size:100%; }
+
+/* Regions */
+#header, #main-wrapper, #footer { clear:both;  }
+
+/* Common Styles */
+.vcn-heading { clear:both; font-size 110%; font-weight: bold; width: 100%; float: left; margin-bottom: 15px; }
+
+/* Andrew Added */
+
+#pager-table {margin-top:-25px;} 
+#loading {
+  background: #e8e8e8;
+  width: 175px;
+  border: 1px solid #000000;
+  left: 40%;
+  position: fixed;
+  top: 48%;
+  padding:5px;
+  z-index: 10;
+} 
+
+
+#loading.off {
+	display:none; 
+}
+
+
+.lineunder {
+	font-size 0.875em;
+	/*border-bottom: 1px solid #808080;*/
+	font-family: Verdana;
+	font-weight: bold;
+	width: 100%;
+	float: left;
+	clear: both;
+	padding-bottom: 3px;
+	margin-bottom: 10px;
+}
+.worktypes {
+
+width:100%;
+
+}
+.worktype1 {
+		float: left;
+		width: 31%;
+		padding-right: 5px;
+		padding-left: 5px;
+		padding-bottom: 5px;
+		border-width: 1px;
+		border-right-style: dotted;
+		border-left-style: dotted;
+		border-top-style: dotted;
+		border-bottom-style: dotted;
+		border-color: #777777;
+	}
+	.worktype2 {
+		float: left;
+		width: 31%;
+		padding-left: 5px;
+		padding-bottom: 5px;
+		padding-right: 5px;
+		border-width: 1px;
+		border-right-style: dotted;
+		border-top-style: dotted;
+		border-bottom-style: dotted;		
+		border-color: #777777;
+	}
+	.worktype3 {
+		float: left;
+		width: 31%;
+		padding-left: 5px;
+		padding-bottom: 5px;
+		margin-top: 265px;
+		border-right-style: dotted;
+		border-top-style: dotted;
+		border-bottom-style: dotted;	
+		border-width: 1px;
+		padding-right: 5px;
+	}
+	.seemore1 {
+		padding: 5px;
+		margin-top: -5px;
+		background-color: #E5E5E5;
+		-moz-border-radius-topleft:     .5em;
+		-moz-border-radius-topright:    .5em;
+		-moz-border-radius-bottomright: .5em;
+		-moz-border-radius-bottomleft:  .5em;
+
+	}
+	.seemore21 {
+		padding: 5px;
+		margin-top: -11px;
+		background-color: #E5E5E5;
+		-moz-border-radius-topleft:     .5em;
+		-moz-border-radius-topright:    .5em;
+		-moz-border-radius-bottomright: .5em;
+		-moz-border-radius-bottomleft:  .5em;
+
+	}
+	.seemore22 {
+		padding: 5px;
+		margin-top: -5px;
+		background-color: #E5E5E5;
+		-moz-border-radius-topleft:     .5em;
+		-moz-border-radius-topright:    .5em;
+		-moz-border-radius-bottomright: .5em;
+		-moz-border-radius-bottomleft:  .5em;
+
+	}	
+	.seemore3 {
+		padding: 5px;
+		margin-top: 33px;
+		background-color: #E5E5E5;
+		-moz-border-radius-topleft:     .5em;
+		-moz-border-radius-topright:    .5em;
+		-moz-border-radius-bottomright: .5em;
+		-moz-border-radius-bottomleft:  .5em;
+
+	}
+/*.leftec {
+	float: left;
+	width: 140%;
+}*/
+.helpus {
+		border: 1px solid #777777;
+		margin-bottom: 15px;
+		padding: 5px;
+		-moz-border-radius: 8px 8px 8px 8px;
+}
+.whyhc {
+		border: 1px solid #777777;
+		margin-bottom: 15px;
+		padding: 5px;
+		-moz-border-radius: 8px 8px 8px 8px;
+}
+.fromtheblog {
+		border: 1px solid #777777;
+		padding: 5px;
+		-moz-border-radius: 8px 8px 8px 8px;
+}
+.fhc {
+
+		border-width: 1px;
+		border-style: dotted;
+		font-size: 12px;
+		padding: 5px;
+}
+
+/* Andrew Added */
+
+#sellcma {
+
+margin-left:711px; 
+width:232px; 
+margin-top:-1360px;
+
+}
+
+.arrow-link {
+ background: transparent url(/drupal/sites/all/modules/custom/vcn/training/images/arrow_link.jpg) no-repeat;
+ padding-left:23px;
+
+}
+
+#mini-panel-hvcp_header ul.imagemenu li.leaf {
+  list-style-image: none;
+  list-style-type: none;
+  display: inline;
+  float: right;
+  padding-left: 4px;
+}
+
+#mini-panel-header-help h2 {
+  display: none;
+}
+
+#mini-panel-header-help img {
+  height: 30px;
+}
+
+#mini-panel-header-help {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  float: right;
+}
+
+#mini-panel-header-help ul.imagemenu li.leaf {
+  list-style-image: none;
+  list-style-type: none;
+  display: inline;
+  float: right;
+  padding-left: 4px;
+}
+
+#navigation ul.imagemenu li.leaf {
+  list-style-image: none;
+  list-style-type: none;
+  display: inline;
+  padding-right: 4px;
+}
+
+#navigation {
+  height: 63px; /* The navigation can have any arbritrary height. We picked one
+                    that is the image height plus 20 pixels: 43 + 20= 63px
+                    Set this to the same value as the margin-top below. */
+}
+
+.with-navigation #content,
+.with-navigation .region-sidebar-first,
+.with-navigation .region-sidebar-second {
+  margin-top: 63px; /* Set this to the same value as the navigation height above. */
+}
+
+div.header-search {
+  float: right;
+  margin-left: 10px;
+}
+
+div.header-logo {
+  margin-left: 10px;
+}
+
+div.header-links ul.menu li.leaf {
+  list-style-image: none;
+  list-style-type: none;
+  display: inline;
+  float: right;
+}
+
+div.pane-menu-secondary-links {
+  float: right;
+}
+div.pane-menu-secondary-links li.leaf {
+  padding-right: 14px;
+}
+div.pane-menu-secondary-links li.first {
+  padding-right: 4px;
+}
+
+div.pane-menu-primary-links li.leaf {
+  width: 95px;
+  text-align: center;
+  border: 1px solid black;
+}
+
+div.pane-menu-primary-links li.last {
+  width: 120px;
+}
+
+div.header-links li.leaf a {
+  text-decoration: none;
+}
+
+.fp-bottom-blocks {
+ width: 288px;
+ height: 170px;
+ padding: 5px;
+}
+
+div.fp-bottom-left {
+  position: relative;
+  left: 20px;
+  /*background: transparent url(/drupal/sites/default/files/images/box_nurse.jpg) no-repeat;*/
+}
+
+div.fp-bottom-center {
+  position: relative;
+  left: 2px;
+  background: transparent url(/drupal/sites/default/files/images/box_gray.png) no-repeat;
+}
+
+div.fp-bottom-right {
+  position: relative;
+  right: 10px;
+  background: transparent url(/drupal/sites/default/files/images/box_video.jpg) no-repeat;
+}
+
+div.snapshot {
+ background: transparent url(/drupal/sites/default/files/images/box_orange.png) no-repeat;
+ position: absolute;
+ left: 88px;
+ top: 136px;
+ z-index: 10;
+ width: 276px;
+ height: 112px;
+ padding-top: 0px;
+ padding-left: 10px;
+ padding-right: 5px;
+ font-size: 1em;
+}
+div.snapshot h3 {
+ padding-top: 3px;
+ padding-bottom: 5px;
+ margin: 0px;
+ font-size: 1.5em;
+}
+div.snapshot table {
+ width: auto;
+ padding: 0px;
+ margin: 0px;
+}
+div.snapshot table img {
+ vertical-align: bottom;
+}
+div.snapshot span.prompt {
+ font-weight: bold;
+}
+
+
+/* OCCUPATION */
+#occupation-grid table {
+  width: 100%;
+}
+
+
+#occupation-grid table td {
+  padding: 2px;
+}
+
+#occupation-grid table th {
+  padding: 2px;
+}
+
+
+/* HEADER -- Copied here to override conflicts */
+//#header { height: 125px; }
+#vcn-header { clear:both; float:left; height: 125px; margin:5px 0;width:100%; }
+#vcn-logo-block { float:left; height:113px; margin:0; width:161px; }
+#vcn-logo-block.front { float:left; height:136px; margin:0; width:194px; height:20px; }
+/*#vcn-logo-block.front .logo { background: transparent url(../images/logo_vcn_big.jpg) 0px 0px no-repeat; float:left; padding:68px 97px;} 
+.logo  { background: transparent url(../images/logo_vcn_small.jpg) 0px 0px no-repeat; float:left; padding:56px 80px;} 
+*/
+#vcn-header-links { float:left; height:30px; margin-top:15px; padding:0; width:960px; }
+//#vcn-header-links.front { align:center; height:30px; margin-top:-50px; margin-left: auto; margin-right: auto; padding:0;}
+#vcn-header-links.front { align:center; height:37px; margin-top:9px; width: 960px; padding:0;}
+#vcn-header-links-end { background: transparent url(../images/nav_right.jpg) 0 0 no-repeat; float:right; height:30px; margin:0; padding:0; height:37px; width:11px; }
+#vcn-header-links-front { background: #F2F2F2 url(../images/left_endcap_two_tone.png) 0 0 no-repeat; float:left; height:30px; margin:0; padding:0; height:37px; width:9px; }
+#vcn-header-links-front-dark { background: #F2F2F2 url(../images/left_endcap_two_tone_dark.png) 0 0 no-repeat; float:left; height:30px; margin:0; padding:0; height:37px; width:9px; }
+
+#vcn-header-links li a { color:fff; float:left; font-family:verdana; font-size:11px; font-weight:bold; margin:0; padding:10px 0 0; height:27px;  text-decoration:none; text-outline:none; }
+#vcn-header-links ul, 
+#vcn-help-links ul { list-style-type:none; list-style-image:none; margin:0; padding:0; }
+ 
+#vcn-header-links li  { background:transparent url(../images/nav_bg_off.jpg) 0 0px repeat-x; float:left; height:37px; list-style:none; padding:0 8px; text-align:center;}
+#vcn-header-links li.active-trail { background: #000 url(../images/nav_bg_on.jpg) 0 0px no-repeat; }
+
+#vcn-primary-links {float:left; margin:0; padding-right:0px;}
+#vcn-secondary-links {float:right; margin:0; padding-left:0px;}
+/*
+#vcn-primary-links li.first { background-position:-3px 0; padding-left:33px;}
+*/
+#vcn-header-links.front #vcn-primary-links li.first { background-position:-3px 0; padding-left:10px;}
+#vcn-secondary-links li  { border-right:none; }
+#vcn-secondary-links li.last  {background: transparent url(../images/nav_bg_off.jpg) 0 0px no-repeat; }
+#vcn-secondary-links li.last.active-trail  {background: transparent url(../images/nav_bg_lon.jpg) 0 0px no-repeat;  }
+#vcn-secondary-links li a { text-decoration:underline; }
+#vcn-primary-links .menu .menu li { position:absolute; margin-top:38px;margin-left:0;z-index:20; padding:0 10px;}
+
+#vcn-header-navbar { float:right; margin:25px 0px 0 0px; }
+#vcn-help-links { float:right; margin-right: -29px; margin-top: -19px; }
+//#vcn-search-block { float:right; margin-right: -120px; }
+#vcn-help-links li { float:left; margin-right:10px;}
+#vcn-header-search-image { background: #fff url(../images/icon_mag.jpg) 0 0px no-repeat; height:28px; width:31px; float:left; margin:7px 0 0 0; border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; border-right:none; }
+#vcn-header-search-input { float:left; height:28px; margin:7px 5px 0 0px; padding:0 5px; border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; border-right:1px solid #000; }
+#vcn-header-search-go { float:left; margin-top:3px;}
+
+
+/* FOOTER */
+#vcn-footer { border-top:1px solid #999; border-bottom:1px solid #999; float:left; font-size:12px; margin-top:15px; padding:5px 5px 15px; width:100%; }
+#vcn-footer-navigation { float:left;list-style:none; }
+ul.vcn-footer-links { clear:both; color:#111; font-size:12px; float:left; list-style:none; margin:0 0 10px; padding:0}
+.vcn-footer-links a { color:#111; }
+.vcn-footer-links li { float:left; margin-right:5px; padding-right:5px; border-right:1px solid #777;}
+.vcn-footer-links li.last { border-right:none;}
+
+#vcn-footer-connect { float:right;list-style:none; }
+#vcn-footer-connect .vcn-footer-links li { border-right:none; padding-right:0; }
+.facebook  { background: transparent url(../images/icon_social_network.jpg) -38px 0px no-repeat; padding:6px 13px;}
+.twitter { background: transparent url(../images/icon_social_network.jpg) -115px 0px no-repeat; padding:6px 13px;}  
+.linked-in { background: transparent url(../images/icon_social_network.jpg) -77px 0px no-repeat; padding:6px 13px;}
+.tellus { background: transparent url(../images/btn_tell_us.jpg) 0px 0px no-repeat; padding:7px 91px; cursor:pointer; }
+
+#copyright { clear:both; float:left; padding:15px; text-align:center; margin-bottom:50px;}
+.dol-seal {float:left; height:66px; width:66px; padding-top:15px; padding-left:50px; padding-right:15px;}
+.copyright-text {float: left; text-align: center; width: 560px; font-size:12px; padding-right:20px;}
+.aacc-seal {float:left; height:66px; width:177px; padding-top:15px;}
+
+#go-button-grid {
+float:left; 
+margin-left:15px;
+}
+
+.pursuitul {
+
+margin-left:-41px;
+
+}
+.videoli {
+
+margin-left:-10px;
+
+}
+
+.te_close_link{ background:url("../../../modules/custom/vcn/occupations/occupations_detail/images/top_up/dashboard/close_link.png") no-repeat; }
+
+
+
+#explore-search-jobtitle {
+
+	float:right; 
+	height:35px;
+
+}
+
+.redborder {
+	border: 2px solid red;
+}
+
+.cg_highlight {
+	color: #189ab0;	
+}
+}

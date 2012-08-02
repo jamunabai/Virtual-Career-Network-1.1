@@ -1,0 +1,913 @@
+<?php
+// $Id: vcn_cma.module, v 0.1 2011/02/02 10:23:00 hills Exp $
+
+/**
+ * @file
+ * Support for configurable user based career management accounts.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function vcn_cma_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#vcn_cma':
+      $output = '<p>'. t('The vcn_cma module allows you to maintain  and display your VCN Career Management Account information from the HVCP database in their <em>My Account</em> section.') .'</p>';
+      return $output;
+  }
+}
+//show only career account for non logged in users
+function vcn_cma_perm () {
+
+	return array(
+	'access vcn_cma_tools',
+	'access vcn_cma_history',
+	'access vcn_cma_profile',
+	'access cma_notebook_courses',
+	'access cma_notebook_vhs',
+	'access vcn_cma_documents',
+	'access vcn_cma_jobs',
+	'access vcn_cma_tests',
+	'cma_notebook_communities',
+	);
+
+}
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function vcn_cma_menu() {
+  $items = array();
+  $items['cma'] = array(
+    'title' => 'Career Management Account',
+    'page callback' => 'cma_interface',
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/profile'] = array(
+    'title' => 'Profile',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('profile'),
+    'access arguments' => array('access vcn_cma_profile'),
+    'type' => MENU_LOCAL_TASK,
+    //'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook'] = array(
+    'title' => 'Career Management Account',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('notebook'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history'] = array(
+    'title' => 'History',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('history'),
+    'access arguments' => array('access vcn_cma_history'),
+   // 'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+  
+  $items['cma/documents'] = array(
+    'title' => 'Documents',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('documents'),
+    'access arguments' => array('access vcn_cma_documents'),
+   // 'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );  
+
+  $items['cma/jobs'] = array(
+    'title' => 'Job Scouts',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('jobs'),
+    'access arguments' => array('access vcn_cma_jobs'),
+   // 'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );   
+
+  $items['cma/tests'] = array(
+    'title' => 'Test Scores',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('tests'),
+    'access arguments' => array('access vcn_cma_tests'),
+   // 'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );  
+
+  $items['cma/tools'] = array(
+    'title' => 'Career Tools',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('tools'),
+    'access arguments' => array('access vcn_cma_tools'),
+   // 'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+/**Begin PLA addition**/
+//first array item is top level tab
+  $items['cma/pla']=array(
+    'title' => 'College Credit',
+    'page callback' => 'cma_interface',
+    'page arguments' => array('pla'),
+    'access argument' => array('access vcn_cma_pla'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+//next four array items are submenu buttons
+  $items['cma/pla/military'] = array(
+    'title' => 'Military Training',
+    'page callback' => 'cma_pla',
+    'page arguments' => array('military'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/pla/business'] = array(
+    'title' => 'Professional Training',
+    'page callback' => 'cma_pla',
+    'page arguments' => array('business'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/pla/exams'] = array(
+    'title' => 'National Exams',
+    'page callback' => 'cma_pla',
+    'page arguments' => array('exams'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/pla/college'] = array(
+    'title' => 'College Courses',
+    'page callback' => 'cma_pla',
+    'page arguments' => array('college'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+/** End PLA addition**/
+
+  $items['cma/profile/view'] = array(
+    'title' => 'View',
+    'page callback' => 'cma_profile',
+    'page arguments' => array('view'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/profile/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_profile',
+    'page arguments' => array('edit'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+  
+  // cma documents
+  $items['cma/documents/list'] = array(
+    'title' => 'View',
+    'page callback' => 'cma_documents',
+    'page arguments' => array('view'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  // cma jos scouts
+  $items['cma/jobs/list'] = array(
+    'title' => 'View',
+    'page callback' => 'cma_jobs',
+    'page arguments' => array('view'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );  
+ /* $items['cma/documents/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_documents',
+    'page arguments' => array('edit'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );*/
+
+  // cma tests
+  $items['cma/tests/list'] = array(
+    'title' => 'View',
+    'page callback' => 'cma_tests',
+    'page arguments' => array('view'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  ); 
+  
+  $items['cma/notebook/careers'] = array(
+    'title' => 'Careers',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('careers'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook/communities'] = array(
+    'title' => 'Communities',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('communities'),
+	//'access arguments' => array('access cma_notebook_communities'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+  
+  $items['cma/notebook/certificates'] = array(
+    'title' => 'Certifications',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('certificates'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook/courses'] = array(
+    'title' => 'Courses',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('courses'),
+    'access arguments' => array('access cma_notebook_courses'),
+    //'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook/licenses'] = array(
+    'title' => 'Licenses',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('licenses'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook/programs'] = array(
+    'title' => 'Programs',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('programs'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/notebook/vhs'] = array(
+    'title' => 'Virtual High School',
+    'page callback' => 'cma_notebook',
+    'page arguments' => array('vhs'),
+    'access arguments' => array('access cma_notebook_vhs'),
+    //'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/publication'] = array(
+    'title' => 'Publications',
+    'page callback' => 'cma_history',
+    'page arguments' => array('publication'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/certification'] = array(
+    'title' => 'Certifications',
+    'page callback' => 'cma_history',
+    'page arguments' => array('certification'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/association'] = array(
+    'title' => 'Associations',
+    'page callback' => 'cma_history',
+    'page arguments' => array('association'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/education'] = array(
+    'title' => 'Education',
+    'page callback' => 'cma_history',
+    'page arguments' => array('education'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/employment'] = array(
+    'title' => 'Employment',
+    'page callback' => 'cma_history',
+    'page arguments' => array('employment'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/publication/list'] = array(
+    'title' => 'List',
+    'page callback' => 'cma_history_publication',
+    'page arguments' => array('list'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/publication/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'cma_history_publication',
+    'page arguments' => array('add'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/publication/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_history_publication',
+    'page arguments' => array('edit',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/publication/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_history_publication',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/certification/list'] = array(
+    'title' => 'List',
+    'page callback' => 'cma_history_certification',
+    'page arguments' => array('list'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/certification/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'cma_history_certification',
+    'page arguments' => array('add'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/certification/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_history_certification',
+    'page arguments' => array('edit',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/certification/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_history_certification',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+  
+  $items['cma/documents/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_documents_view',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );  
+  
+  $items['cma/jobs/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_jobs_view',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );    
+
+  $items['cma/history/association/list'] = array(
+    'title' => 'List',
+    'page callback' => 'cma_history_association',
+    'page arguments' => array('list'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/association/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'cma_history_association',
+    'page arguments' => array('add'),
+    'type' => MENU_LOCAL_TASK,
+    'access callback'  => TRUE,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/association/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_history_association',
+    'page arguments' => array('edit',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/association/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_history_association',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/education/list'] = array(
+    'title' => 'List',
+    'page callback' => 'cma_history_education',
+    'page arguments' => array('list'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/education/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'cma_history_education',
+    'page arguments' => array('add'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/education/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_history_education',
+    'page arguments' => array('edit',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/education/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_history_education',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/employment/list'] = array(
+    'title' => 'List',
+    'page callback' => 'cma_history_employment',
+    'page arguments' => array('list'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/employment/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'cma_history_employment',
+    'page arguments' => array('add'),
+    'access callback'  => TRUE,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/employment/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'cma_history_employment',
+    'page arguments' => array('edit',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  $items['cma/history/employment/%/delete'] = array(
+    'title' => 'Remove',
+    'page callback' => 'cma_history_employment',
+    'page arguments' => array('delete',3),
+    'access callback'  => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.pages.inc',
+  );
+
+  // callbacks
+
+  $items['cma/notebook/save/career'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/save/certificate'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/save/course'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/save/license'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/save/program'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/save/vhs'] = array(
+    'page callback' => 'cma_save_to_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/remove/career'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/remove/certificate'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/remove/documents'] = array(
+    'page callback' => 'cma_remove_documents',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );  
+  $items['cma/remove/jobs'] = array(
+    'page callback' => 'cma_remove_jobs',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );   
+  $items['cma/count/jobs'] = array(
+    'page callback' => 'cma_count_jobs',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );   
+  $items['cma/activeyn/jobs'] = array(
+    'page callback' => 'cma_activeyn_jobs',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );  
+  $items['cma/shareyn/documents'] = array(
+    'page callback' => 'cma_shareyn_documents',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );   
+  $items['cma/alldata/jobs'] = array(
+    'page callback' => 'cma_alldata_jobs',
+    'page arguments' => array(3, 4, 5, 6, 7, 8, 9),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );    
+  $items['cma/notebook/remove/course'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/remove/license'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/remove/program'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/remove/vhs'] = array(
+    'page callback' => 'cma_remove_from_notebook',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/career'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/certificate'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/course'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/license'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/program'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/notebook/target/vhs'] = array(
+    'page callback' => 'cma_target_notebook_item',
+    'page arguments' => array(3, 4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/user-key/save'] = array(
+    'page callback' => 'cma_save_user_key',
+    'page arguments' => array( 3, 4, 5, 6),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  $items['cma/user-key/delete'] = array(
+    'page callback' => 'cma_delete_user_key',
+    'page arguments' => array( 3, 4, 5,6),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+
+  $items['cma/user-info/update'] = array(
+    'page callback' => 'cma_update_user_info',
+    'page arguments' => array( 3, 4, 5 ),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'vcn_cma.ajaxfunctions.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function vcn_cma_theme() {
+  return array(
+    'vcn_cma_profile_view' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_profile_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+	'vcn_cma_documents_view' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma_documents-theme.inc',
+    ),
+	'vcn_cma_jobs_view' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma_jobs-theme.inc',
+    ),	
+	'vcn_cma_tests_view' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma_tests-theme.inc',
+    ),
+    'vcn_cma_documents_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma_documents-theme.inc',
+    ),
+    'vcn_cma_publication_list' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_publication_add' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_publication_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_publication_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_certification_list' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_certification_add' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_certification_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_certification_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_documents_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma_documents.theme.inc',
+    ),
+    'vcn_cma_jobs_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma_jobs.theme.inc',
+    ),	
+    'vcn_cma_association_list' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_association_add' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_association_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_association_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_education_list' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_education_add' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_education_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_education_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+ 	'vcn_cma_employment_list' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_employment_add' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_employment_edit' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_employment_delete' => array(
+      'arguments' => array('account' => NULL, 'fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_careers' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_communities' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),	
+    'vcn_cma_notebook_certificates' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_courses' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_licenses' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_programs' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+    'vcn_cma_notebook_vhs' => array(
+      'arguments' => array('fields' => array()),
+      'file' => 'vcn_cma-theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function vcn_cma_user($type, &$edit, &$user, $category = NULL) {
+
+ //   error_log('vcn_cma_user - type: ' . $type);
+    if (arg(0) == 'user') {
+      drupal_add_js(drupal_get_path('module', 'vcn_cma') . '/js/vcn_cma_login.js');
+    }
+    module_load_include('inc', 'vcn_cma', 'vcn_cma_user.forms');
+    switch ($type) {
+    case 'load':
+      return cma_load_cma($user);
+    case 'register':
+    case 'form':
+      return cma_form_cma($edit, $user);
+    case 'insert':
+    case 'update':
+      return cma_save_cma($edit, $user);
+    case 'validate':
+      return cma_validate_cma($edit);
+    case 'delete':
+     // return cma_delete_cma($user);
+       //   db_query('DELETE FROM {profile_values} WHERE uid = %d', $user->uid);
+    }
+}
+
+function vcn_cma_init() {
+    module_load_include('inc', 'vcn_cma','vcn_cma.class');
+    $cma = vcnCma::getInstance();
+    if (get_clean_url_paired_parameter('cma') == 'history') {
+      drupal_add_css(drupal_get_path('module', 'vcn_cma') . '/css/vcn_cma_history.css');
+    }
+	$vcn_path = drupal_get_path('module','vcn');
+ 	drupal_add_css($vcn_path.'/css/vcn.css', 'module','all');
+ 	drupal_add_js ($vcn_path. '/js/vcn.js');
+}
+

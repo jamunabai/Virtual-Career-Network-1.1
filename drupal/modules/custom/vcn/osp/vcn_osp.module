@@ -1,0 +1,169 @@
+<?php
+// $Id:$
+	
+/**
+ * @file
+ * Module for fetching search data from the VCN Training data source.
+ * This module provides the filters for training and course searches.
+ *
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+ 
+function vcn_get_announcements_news() {
+	$conn = vcn_connect_to_db();
+	
+	$query = "SELECT * FROM hvcp.vcn_osp_announcement ORDER BY announcement_date DESC";
+	$result = mysql_query($query);
+	$output = '';
+	
+	
+	while($row = mysql_fetch_object($result))
+		$output.=date("F jS, Y", strtotime($row->ANNOUNCEMENT_DATE))." - ".$row->ANNOUNCEMENT_TEXT."<br/><br/>";
+	
+	vcn_disconnect_from_db($conn);
+
+	return $output;
+
+} 
+ 
+function is_forum_page($curr_uri) {
+	$isosp = false;
+
+	$split_uri = split("\/",$curr_uri);
+	if ($split_uri[2]=="node") {
+	 $nid = $split_uri[3];
+	 $node = node_load($nid);
+	 if (!empty($node)) {
+		if (($node->type=="forum")) {
+			$isosp = true;
+		}
+	 }
+	}
+   return $isosp;
+} 
+ 
+function osp_page($curr_uri) {
+	$isosp = false;
+
+	$split_uri = split("\/",$curr_uri);
+	if ($split_uri[2]=="node") {
+	 $nid = $split_uri[3];
+	 $node = node_load($nid);
+	 if (!empty($node)) {
+		if (($node->type=="osp_page")) {
+			$isosp = true;
+		}
+	 }
+	}
+   return $isosp;
+}
+
+
+function vcn_osp_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('Welcome');
+	  $blocks[1]['info'] = t('Download');
+      $blocks[2]['info'] = t('Contribute');
+	  
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Welcome'), 
+         			'content' => _vcn_osp_main(),
+         		);
+       		break;
+      		case 1: 
+         		$block = array(
+   					'subject' => t('Download'), 
+         			'content' => _vcn_osp_download(),
+         		);
+       		break;			
+      		case 2: 
+         		$block = array(
+   					'subject' => t('Contribute'), 
+         			'content' => _vcn_osp_contribute(),
+         		);
+       		break;					
+      			
+        	default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+ 
+ 
+
+/**
+ * Implementation of menu().
+ */
+function vcn_osp_menu() {
+	$items = array();
+
+	$items['osp'] = array(
+		'title' => 'Welcome', 
+		'page callback' => '_vcn_osp_main',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);
+	
+	$items['osp/download'] = array(
+		'title' => 'Download', 
+		'page callback' => '_vcn_osp_download',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);	
+	
+	$items['osp/contribute'] = array(
+		'title' => 'Contribute', 
+		'page callback' => '_vcn_osp_contribute',
+		'page arguments' => array(1),
+		'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+  	);		
+	
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_osp_theme( ) { 
+ 		
+  	return array (
+  		'vcn_osp_main' => array ( 'template'=>'templates/vcn_osp_main', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_osp_download' => array ( 'template'=>'templates/vcn_osp_download', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+		'vcn_osp_contribute' => array ( 'template'=>'templates/vcn_osp_contribute', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+ 	);
+}
+ 
+
+
+function _vcn_osp_main($type) { 	 
+  	return theme('vcn_osp_main', $errors, $vars, $content, $data);
+ }
+ 
+ 
+function _vcn_osp_download($type) { 	 
+  	return theme('vcn_osp_download', $errors, $vars, $content, $data);
+ }
+ 
+ 
+ function _vcn_osp_contribute($type) { 	 
+  	return theme('vcn_osp_contribute', $errors, $vars, $content, $data);
+ }
+ 
+?>

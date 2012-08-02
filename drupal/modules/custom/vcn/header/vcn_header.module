@@ -1,0 +1,92 @@
+<?php
+require_once('sites/default/hvcp.functions.inc');
+
+// $Id: occupations_grid.module,v 0.1 2010/12/28 06:43:00 hills Exp $
+/**
+ * @file
+ * Module for fetching data from the VCN Occupations data source.
+ * This module provides the data for the occupations datagrid required for
+ * the 'Explore Careers' search results page.
+ *
+ */
+
+/**
+ * Implementation of hook_init().
+ */
+function vcn_header_init() {
+  drupal_add_js(drupal_get_path('module','vcn_header') . "/js/header.js");
+  drupal_add_js(drupal_get_path('module','vcn_header') . "/js/vcn_panels.js");
+  
+  $GLOBALS['base_path'] = $GLOBALS['hvcp_config_default_base_path'];
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function vcn_header_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Header');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_vcn_header();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_header_theme() {
+  return array(
+           'vcn_header' => array (
+                             'template' => 'vcn_header',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+
+//Change the - symbol to '.' to make it work to iajvs ser and goodwill
+
+function _get_vcn_header() {
+$path = $_SERVER['SERVER_NAME'];
+$path = explode('.', $path);
+//print_r($path); exit;
+if(strstr("/goodwill/", $path[0])){
+  $css_path = drupal_get_path('module', 'vcn_header') . "/vcn_header_goodwill.css";
+  drupal_add_css($css_path);
+  return theme('vcn_header');
+  }
+if(strstr("/ser/", $path[0])){ 
+  $css_path = drupal_get_path('module', 'vcn_header') . "/vcn_header_ser.css";
+  drupal_add_css($css_path);
+  return theme('vcn_header');
+  }
+if(strstr("/iajvs/", $path[0])){ 
+  $css_path = drupal_get_path('module', 'vcn_header') . "/vcn_header_iajvs.css";
+  drupal_add_css($css_path);
+  return theme('vcn_header');  
+  }
+else{
+  $css_path = drupal_get_path('module', 'vcn_header') . "/vcn_header.css";
+  drupal_add_css($css_path);
+  return theme('vcn_header');  
+  }
+}
+
+
+
+/*
+* Change the size of the search box so that americanjobcenter logo on the header would be on the top middle and not mixed up with other logos
+*/
+function vcn_header_form_alter($form, &$form_state){ 
+//echo "<pre>"; print_r($form['form_id']['#value']);exit;
+if ($form['form_id']['#value'] == 'search_block_form') {
+$form['search_block_form']['#size'] = 7;
+}
+  return $form;
+}

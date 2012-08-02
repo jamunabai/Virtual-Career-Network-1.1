@@ -1,0 +1,496 @@
+<?php
+// $Id:$
+	
+/**
+ * @file
+ * Module for allowing providers to add and update information.
+ *
+ */
+
+function vcn_portal_perm () {
+  return array(
+  	'access vcn_portal',
+ 	'access vcn_portal providers',
+  	'access vcn_portal contacts',
+   	'access vcn_portal programs',
+  	'access vcn_portal courses',
+  	
+ 	'administer vcn_portal providers',
+  	'administer vcn_portal contacts',
+   	'administer vcn_portal programs',
+  	'administer vcn_portal courses',
+  	
+  	'edit my vcn_portal providers',
+  	'edit my vcn_portal contacts',
+   	'edit my vcn_portal programs',
+  	'edit my vcn_portal courses',
+   	'edit all vcn_portal providers',
+  	'edit all vcn_portal contacts',
+   	'edit all vcn_portal programs',
+  	'edit all vcn_portal courses',
+   	
+   	'approve my vcn_portal providers',
+  	'approve my vcn_portal contacts',
+   	'approve my vcn_portal programs',
+  	'approve my vcn_portal courses',
+    'approve all vcn_portal providers',
+  	'approve all vcn_portal contacts',
+   	'approve all vcn_portal programs',
+  	'approve all vcn_portal courses',
+  	
+  	);
+}
+
+
+/**
+ * Implementation of hook_block().
+ */
+function vcn_portal_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+     case 'list' :
+      $blocks[0]['info'] = t('VCN Provider Portal Module');
+      $blocks[1]['info'] = t('VCN Provider Portal Search');
+      $blocks[2]['info'] = t('VCN Provider Portal Edit');
+      return $blocks;
+    break;
+ 	case 'view' :
+      	$block = array();
+      	switch ($delta) 
+		{
+      		case 0: // parent
+         		$block = array(
+   					'subject' => t('Provider Portal'), 
+         			'content' => _vcn_get_provider_portal(),
+         		);
+       		break;
+       		case 1: // search
+         		$block = array(
+          			'subject' => t('Search'), 
+          			'content' => _vcn_get_provider_portal_search(),
+        		);
+       		break;
+      		case 2: // search course
+         		$block = array(
+          		'subject' => t('Edit'), 
+          		'content' => _vcn_get_provider_portal_edit(),
+        	);
+     		default:
+       	}
+      	return $block;
+   	break;
+  }
+}
+  
+
+/**
+ * Implementation of menu().
+ */
+function vcn_portal_menu() {
+	$items = array();
+		
+  	// PROVIDER PORTAL 
+  	$items['portal'] = array(
+		'title' => 'VCN Portal',
+		'page callback' => '_vcn_get_portal_info_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal'),
+       'type' => MENU_CALLBACK,
+ 	);
+  
+  	// TOP LEVEL PORTAL  
+	$items['portal/providers'] = array(
+		'title' => 'Providers', 
+		'page callback' => '_vcn_get_portal_info_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0
+	);
+
+  	$items['portal/programs'] = array(
+		'title' => 'Programs',
+		'page callback' => '_vcn_get_portal_info_program',
+		'page arguments' => array('programs'),
+ 		'access arguments' => array('access vcn_portal programs'),
+  		'type' => MENU_LOCAL_TASK,
+   		'weight' => 1,
+  	);
+	$items['portal/courses'] = array(
+		'title' => 'Courses', 
+		'page callback' => '_vcn_get_portal_info_course',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal courses'),
+    	'type' => MENU_LOCAL_TASK,
+  		'weight' => 2,
+   	);
+   	 	$items['portal/contacts'] = array(
+		'title' => 'Contacts', 
+		'page callback' => '_vcn_get_portal_info_contact',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 3
+	);
+	// INFO
+	$items['portal/providers/information'] = array(
+		'title' => 'Information', 
+		'page callback' => '_vcn_get_portal_info_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+ 	);	 
+	$items['portal/contacts/information'] = array(
+		'title' => 'Information', 
+		'page callback' => '_vcn_get_portal_info_contact',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+ 	);	 
+ 	$items['portal/programs/information'] = array(
+		'title' => 'Information', 
+		'page callback' => '_vcn_get_portal_info_program',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal programs'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+ 	);	 
+	$items['portal/courses/information'] = array(
+		'title' => 'Course Information', 
+		'page callback' => '_vcn_get_portal_info_course',
+		'page arguments' => array('programs'),
+		'access arguments' => array('access vcn_portal courses'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+ 	);	 
+ 	
+ 	
+	// REGISTER 	
+ 	$items['portal/providers/register'] = array(
+			'title' => 'Register Provider', 
+			'page callback' => '_vcn_get_portal_register_provider',
+			'page arguments' => array('programs'),
+			'access arguments' => array('access vcn_portal'),
+		 	'type' => MENU_LOCAL_TASK,
+			'weight' => 1,
+  	);	
+ 	
+ 	$items['portal/contacts/register'] = array(
+			'title' => 'Register Contact', 
+			'page callback' => '_vcn_get_portal_register_contact',
+			'page arguments' => array('programs'),
+			'access arguments' => array('access vcn_portal'),
+		 	'type' => MENU_LOCAL_TASK,
+			'weight' => 1,
+  	);
+  	
+  	// ADMINISTER
+ 	$items['portal/providers/administer'] = array(
+		'title' => 'Administer Provider', 
+		'page callback' => '_vcn_get_portal_list_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 2,
+	);	
+	$items['portal/providers/administer/list'] = array(
+		'title' => 'List', 
+		'page callback' => '_vcn_get_portal_list_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+	);	
+	$items['portal/providers/administer/edit'] = array(
+		'title' => 'Edit', 
+		'page callback' => '_vcn_get_portal_edit_provider',
+		'page arguments' => array('programs'),
+		'access arguments' => array('edit vcn_portal providers'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	
+	
+ 	$items['portal/contacts/administer'] = array(
+		'title' => 'Administer Contacts', 
+		'page callback' => '_vcn_get_portal_list_contact',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal contacts'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 2,
+	);	
+	$items['portal/contacts/administer/list'] = array(
+		'title' => 'List', 
+		'page callback' => '_vcn_get_portal_list_contact',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+	);	
+	$items['portal/contacts/administer/edit'] = array(
+		'title' => 'Edit', 
+		'page callback' => '_vcn_get_portal_edit_contact',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	
+ 
+	$items['portal/programs/administer'] = array(
+		'title' => 'Administer Programs', 
+		'page callback' => '_vcn_get_portal_list_program',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal programs'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	$items['portal/programs/administer/list'] = array(
+		'title' => 'List', 
+		'page callback' => '_vcn_get_portal_list_program',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+	);	
+	$items['portal/programs/administer/edit'] = array(
+		'title' => 'Edit', 
+		'page callback' => '_vcn_get_portal_edit_program',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	
+ 
+	$items['portal/courses/administer'] = array(
+		'title' => 'Administer Courses', 
+		'page callback' => '_vcn_get_portal_list_course',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal courses'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	$items['portal/courses/administer/list'] = array(
+		'title' => 'List', 
+		'page callback' => '_vcn_get_portal_list_course',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_DEFAULT_LOCAL_TASK,
+		'weight' => 0,
+	);	
+	$items['portal/courses/administer/edit'] = array(
+		'title' => 'Edit', 
+		'page callback' => '_vcn_get_portal_edit_course',
+		'page arguments' => array('programs'),
+		'access arguments' => array('administer vcn_portal providers'),
+	 	'type' => MENU_LOCAL_TASK,
+		'weight' => 1,
+	);	
+	
+   	
+  	return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function vcn_portal_theme( ) {
+  	return array (
+  		'vcn_portal_search'        => array ( 'template'=>'templates/vcn_portal_search',  'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ),
+  		'vcn_portal_info_providers' => array ( 'template'=>'templates/info/vcn_portal_info_provider','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_info_contacts'  => array ( 'template'=>'templates/info/vcn_portal_info_contact', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_info_programs'  => array ( 'template'=>'templates/info/vcn_portal_info_program', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_info_courses'   => array ( 'template'=>'templates/info/vcn_portal_info_course',  'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+
+  		'vcn_portal_register_providers' => array ( 'template'=>'templates/register/vcn_portal_register_provider','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_register_contacts'  => array ( 'template'=>'templates/register/vcn_portal_register_contact', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+ 
+   		'vcn_portal_list_providers' => array ( 'template'=>'templates/administer/vcn_portal_list_provider','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_list_contacts'  => array ( 'template'=>'templates/administer/vcn_portal_list_contact', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_list_programs'  => array ( 'template'=>'templates/administer/vcn_portal_list_program', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_list_courses'   => array ( 'template'=>'templates/administer/vcn_portal_list_course',  'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+ 
+ 		'vcn_portal_edit_providers' => array ( 'template'=>'templates/administer/vcn_portal_edit_provider','arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_edit_contacts'  => array ( 'template'=>'templates/administer/vcn_portal_edit_contact', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_edit_programs'  => array ( 'template'=>'templates/administer/vcn_portal_edit_program', 'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+  		'vcn_portal_edit_courses'   => array ( 'template'=>'templates/administer/vcn_portal_edit_course',  'arguments'=>array('errors'=>NULL, 'vars'=>NULL, 'content'=>NULL, 'data'=>NULL) ), 
+   	);
+}
+ 
+ 
+function _vcn_get_portal() { return 'This page should not be called directly'; }
+
+function _vcn_get_portal_search( $type=false, $vars=false ) {
+	$includes = drupal_get_path('module','vcn').'/includes';
+	require_once($includes . '/vcn_common.inc');
+  	$errors = $content = $data = false;
+ 	
+ 	if (! $vars )
+ 	{ 
+	 	$vars = false;
+	 	// Get _POST vars
+	 	vcn_get_vars_post($vars, $_POST);
+	  
+	   	// Get _GET vars which override $_POST 
+	  	vcn_get_vars_get($vars, $_GET);
+	  
+	 	// Get url vars which override $_POST AND $_GET
+	  	vcn_get_vars_arg($vars, $args);
+	  	
+  		// Set additional vars
+ 		vcn_get_vars_set($vars, $type);
+ 	}
+ 		
+	return theme( 'vcn_portal_search', $errors, $vars, $content, $data );
+} 
+ 
+function _vcn_get_portal_info_provider () { return _vcn_get_portal_info('providers'); }
+function _vcn_get_portal_info_contact () { return _vcn_get_portal_info('contacts'); }
+function _vcn_get_portal_info_program () { return _vcn_get_portal_info('programs'); }
+function _vcn_get_portal_info_course () { return _vcn_get_portal_info('courses'); }
+  
+function _vcn_get_portal_register_provider () { return _vcn_get_portal_register('providers'); }
+function _vcn_get_portal_register_contact () { return _vcn_get_portal_register('contacts'); }
+
+function _vcn_get_portal_list_provider () { return _vcn_get_portal_list('providers'); }
+function _vcn_get_portal_list_contact () { return _vcn_get_portal_list('contacts'); }
+function _vcn_get_portal_list_program () { return _vcn_get_portal_list('programs'); }
+function _vcn_get_portal_list_course () { return _vcn_get_portal_list('courses'); }
+
+function _vcn_get_portal_edit_provider () { return _vcn_get_portal_edit('providers'); }
+function _vcn_get_portal_edit_contact () { return _vcn_get_portal_edit('contacts'); }
+function _vcn_get_portal_edit_program () { return _vcn_get_portal_edit('programs'); }
+function _vcn_get_portal_edit_course () { return _vcn_get_portal_edit('courses'); }
+
+function _vcn_get_portal_info($type) 
+{      
+	$includes = drupal_get_path('module','vcn').'/includes';
+	require_once($includes . '/vcn_common.inc');
+	$vars = $errors = $content = $data = false;
+	
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+  	// Set additional vars
+ 	vcn_get_vars_set($vars, $type);
+ 	
+	$content['search']  = _vcn_get_portal_search($type, $vars);
+ 
+	return theme( 'vcn_portal_info_'.$type, $errors, $vars, $content, $data );
+}
+
+function _vcn_get_portal_register($type) 
+{      
+	$includes = drupal_get_path('module','vcn').'/includes';
+	require_once($includes . '/vcn_common.inc');
+	$vars = $errors = $content = $data = false;
+	
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+  	// Set additional vars
+ 	vcn_get_vars_set($vars, $type);
+
+	$content['search']  = _vcn_get_portal_search($type, $vars);
+ 
+	return theme( 'vcn_portal_register_'.$type, $errors, $vars, $content, $data );
+}
+ 
+
+function _vcn_get_portal_list($type) 
+{      
+	$includes = drupal_get_path('module','vcn').'/includes';
+	require_once($includes . '/vcn_common.inc');
+	
+	
+	$vars = $errors = $content = $data = false;
+	
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+ 
+	$vars  = $vars;
+	$valid = vcn_get_valid($type);
+	
+	// get the count
+	$result = vcn_get_data ($errors, $vars, $valid, 'trainingsvc',$type,'count');
+	$count = $vars['count_'.$type] = (string) $result->count ? (string) $result->count : 0;
+ 
+  	$limit     = ( array_key_exists('limit_'.$type, $vars) AND $vars['limit_'.$type] ) ? $vars['limit_'.$type] : 8;
+  	$order     = ( array_key_exists('order_'.$type, $vars) AND $vars['order_'.$type] ) ? $vars['order_'.$type] : false;
+  	$direction = ( array_key_exists('direction_'.$type, $vars) AND $vars['direction_'.$type] ) ? $vars['direction_'.$type] : false;
+  	$pg        = ( array_key_exists('pg_'.$type, $vars) AND $vars['pg_'.$type] ) ? $vars['pg_'.$type] : 1;
+ 
+   
+  	// set page vars  	 	
+  	if ($count > 0 ) $total_pgs = ceil($count / $limit );
+  	if ($pg > $total_pgs) { $pg =$total_pgs; }
+	if ($pg < 1) {$pg = 1; }
+	$offset = ($pg * $limit) - ($limit);	
+	
+	$result = vcn_get_data ($errors,$vars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+ 	$data = $result->$type;
+ 	
+ 	$content['search']  = _vcn_get_portal_search($type, $vars);
+   	$content['pagination']  = include($includes . '/pagination.inc');
+	return theme( 'vcn_portal_list_'.$type, $errors, $vars, $content, $data );
+}
+
+ 
+
+function _vcn_get_portal_edit($type) 
+{      
+	$includes = drupal_get_path('module','vcn').'/includes';
+	require_once($includes . '/vcn_common.inc');
+	$forms = drupal_get_path('module','vcn_portal').'/forms';
+	require_once($forms.'/vcn_portal_edit_'.$type.'.inc');
+	$vars = $errors = $content = $data = false;
+	
+ 	// Get _POST vars
+ 	vcn_get_vars_post($vars, $_POST);
+  
+   	// Get _GET vars which override $_POST 
+  	vcn_get_vars_get($vars, $_GET);
+  
+ 	// Get url vars which override $_POST AND $_GET
+  	vcn_get_vars_arg($vars, $args);
+  	
+  	// Set additional vars
+ 	vcn_get_vars_set($vars, $type);
+
+ 	return drupal_get_form('vcn_portal_edit_'.$type.'_form');
+ 	print $content;exit;
+	return theme( 'vcn_portal_edit_'.$type, $errors, $vars, $content, $data );
+}
+
+
+function _vcn_portal_list_providers($vars = false)
+{
+	$ivars  = $vars;
+	 $valid = vcn_get_valid('providers');
+	$result = vcn_get_data ($errors,$ivars,$valid,'trainingsvc',$type,'list',$limit,$offset,$order,$direction ); 
+	$data = $result->$type; 
+}
+
+

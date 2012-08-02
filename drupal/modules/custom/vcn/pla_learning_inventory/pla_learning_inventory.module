@@ -1,0 +1,988 @@
+<?php
+require_once('../careerladder/tcpdf/config/lang/eng.php');
+require_once('../careerladder/tcpdf/tcpdf.php');
+
+/**
+* Implementation of hook_block
+*/
+function pla_learning_inventory_block($op='list', $delta=0, $edit=array()) {
+	switch ($op) {
+		case "list":
+			// This shows the block name of "VCN O*Net Assessment" when you list blocks in admin mode
+			$blocks[0]['info'] = t('VCN Learning Inventory');
+			return $blocks;
+			break;
+
+		case "view":
+			// block title is "Get Started"
+			$blocks['subject'] = t('Learning Inventory');
+			
+			$cma = vcnCma::getInstance();
+			
+			$allCourseDetailsArr = array();
+			$allCourseDetailsArr['military'] = array();
+			$allCourseDetailsArr['professional'] = array();
+			$allCourseDetailsArr['nationalexams'] = array();
+			
+			/*
+			// uncomment these lines when debugging and comment the line below
+			// them where its does create_pdf_output
+			echo get_page_initial_text();
+			echo get_page_heading_text($cma);
+			echo get_page_college_courses_text($cma);
+			echo get_page_military_training_text($cma, $allCourseDetailsArr);
+			echo get_page_professional_training_text($cma, $allCourseDetailsArr);
+			echo get_page_national_exams_text($cma, $allCourseDetailsArr);
+			echo get_page_all_course_details_table_text($cma, $allCourseDetailsArr);
+			*/
+			
+			create_pdf_output($cma, $allCourseDetailsArr);
+	}
+}
+
+function get_page_initial_text() {
+	
+	$html = "<html>
+			<head>
+			<style>
+			body { font-family:Verdana; font-size:9pt; }
+			.logo { width:50%; }
+			.title { width:50%; font-weight:bold; font-size:16pt; text-align:right; vertical-align:middle; }
+			.usersname { font-weight:bold; font-size:14pt; }
+			.usertable { width:350px; }
+			.userhead { width:100px; font-weight:bold; vertical-align:top; }
+			.userdata { width:200px; }
+			.coursetable { width:100%; border-spacing:5px; }
+			.coursehead { color:#67b2bf; width:50%; font-weight:bold; font-size:12pt; display:table-cell; vertical-align:bottom; }
+			.creditshead { width:50%; font-weight:bold; text-align:right; vertical-align:bottom; }
+			.coursedata { width:85%; }			
+			.creditsdata { width:15%; font-weight:bold; text-align:right; vertical-align:top; padding-right:25px; }
+			</style>
+			</head>
+			<body>";
+
+	return $html;
+	
+}
+function get_page_heading_text($cma) {
+global $user;	
+	//$cmaNotebookResults = $cma->getNotebookTargetList();
+	$targetCareer = '';  //$cmaNotebookResults->cma[1]->occupation->item->displaytitle;
+	$targetProgramName = '';  //$cmaNotebookResults->cma[0]->program->item->programname;
+	$targetProgramAward = '';  //$cmaNotebookResults->cma[0]->program->item->awardsdesc;
+	$targetProgramSchool = '';  //$cmaNotebookResults->cma[0]->program->item->provider->instnm;
+	
+	$conn = vcn_connect_to_db();
+	
+	$sql = " SELECT item_type AS itemtype, 
+	 			    item_id AS itemid,
+	 			    o.onet_title AS onettitle,
+	 			    p.program_name AS programname,
+	 			    p.awards_desc AS programaward,
+	 			    p2.instnm AS school
+				FROM vcn_cma_user_notebook n
+				LEFT OUTER JOIN vcn_cma_occupation o ON ( o.ONETCODE = n.ITEM_ID )
+				LEFT OUTER JOIN vcn_program p ON ( p.PROGRAM_ID = n.ITEM_ID )
+				LEFT OUTER JOIN vcn_provider p2 ON ( p2.UNITID = p.UNITID )
+				WHERE USER_ID = $cma->userid  
+				AND ( ITEM_TYPE = 'PROGRAM' OR ITEM_TYPE = 'OCCUPATION' )
+				AND ITEM_RANK = 1 ";
+	
+	$result = mysql_query($sql) or die("Error getting user info: " . mysql_error());
+	
+	$numRows = mysql_num_rows($result);
+	
+	if ($numRows > 0) {
+		while($rec = mysql_fetch_object($result)) {
+			if (strlen($rec->onettitle)) {
+				$targetCareer = $rec->onettitle;
+			}
+			if (strlen($rec->programname)) {
+				$targetProgramName = $rec->programname;
+			}
+			if (strlen($rec->programaward)) {
+				$targetProgramAward = $rec->programaward;
+			}
+			if (strlen($rec->school)) {
+				$targetProgramSchool = $rec->school;
+			}
+		}
+	}
+	
+	vcn_disconnect_from_db($conn);
+	
+	$name = '';
+	$emailAddress = '';
+	$homePhone = '';
+	$cellPhone = '';
+	
+	if (strlen($cma->firstname) || strlen($cma->lastname)) {
+		$name = $cma->firstname . ' ' . $cma->lastname;
+	}
+	
+	if (strlen($user->mail)) {
+		$emailAddress = $user->mail;
+	}
+	if (strlen($cma->homephone)) {
+		$homePhone = $cma->homephone;
+	}
+	if (strlen($cma->cellphone)) {
+		$cellPhone = $cma->cellphone;
+	}
+	
+	$logo = base_path() . "sites/default/files/images/vcn_logo.png";
+	
+
+	$html = "<table border=\"0\" style=\"width:100%;\">
+				<tr>
+					<td class=\"logo\"><img src=\"$logo\"></td>
+					<td class=\"title\">My Learning Inventory</td>
+				</tr>
+				<tr>
+					<td colspan=\"2\"><br/><br/></td>
+				</tr>
+				<tr>
+					<td colspan=\"2\" class=\"usersname\">$name</td>
+				</tr>
+				<tr>
+					<td colspan=\"2\"><br/></td>
+				</tr>	
+				<tr>
+					<td style=\"width:50%;\">";
+if($user->uid){					
+	$html .= 			"<table border=\"0\" class=\"usertable\">
+							<tr>
+								<td class=\"userhead\">Email Address:</td>
+								<td class=\"userdata\">$emailAddress</td>
+							</tr>
+							<tr>
+								<td class=\"userhead\">Home Phone:</td>
+								<td class=\"userdata\">$homePhone</td>
+							</tr>
+							<tr>
+								<td class=\"userhead\">Cell Phone:</td>
+								<td class=\"userdata\">$cellPhone</td>
+							</tr>
+						</table>
+					</td>
+					<td style=\"width:50%;\">";
+}	
+	$html .= 			"<table border=\"0\" class=\"usertable\">
+							<tr>
+								<td class=\"userhead\">Target Career:</td>
+								<td class=\"userdata\">$targetCareer</td>
+							</tr>
+							<tr>
+								<td class=\"userhead\">Target Program:</td>
+								<td class=\"userdata\">
+									$targetProgramName<br/>
+									$targetProgramAward<br/>
+									$targetProgramSchool
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=\"2\"><br/><br/></td>
+				</tr>
+			</table>";
+	
+	return $html;
+	
+}
+
+function get_page_college_courses_text($cma) {
+	
+	$conn = vcn_connect_to_db();
+	
+	$courseInfo = '';
+	
+	$sql = " SELECT course_code AS code, 
+					course_credit AS credit, 
+					course_name AS name, 
+					institution_name AS school, 
+					date_completed AS completed 
+			 FROM vcn_cma_user_course 
+			 WHERE USER_ID = $cma->userid 
+			 AND MILITARY_YN is NULL 
+			 ORDER BY course_name ";
+	
+	$result = mysql_query($sql) or die("Error getting user college courses: " . mysql_error());
+	
+	$numRows = mysql_num_rows($result);
+	
+	if ($numRows > 0) {
+		while($rec = mysql_fetch_object($result)) {
+			$courseCode = 'No course number';
+			if (strlen($rec->code)) {
+				$courseCode = $rec->code;
+			}
+			$courseCredit = 'None';
+			if (strlen($rec->credit)) {
+				$courseCredit = $rec->credit;
+			}
+			$courseName = 'No course name';
+			if (strlen($rec->name)) {
+				$courseName = ucwords($rec->name);
+			}
+			$schoolName = 'No school name';
+			if (strlen($rec->school)) {
+				$schoolName = ucwords($rec->school);
+			}
+			$yearCompleted = '';
+			if (strlen($rec->completed)) {
+				$yearCompleted = ' - ' .date('Y', strtotime($rec->completed));
+			}
+			
+			$companyName = $schoolName . $yearCompleted;
+			
+			$courseInfo .= get_course_detail_row($courseName, $courseCode, $companyName, '', $courseCredit);
+			
+		}
+		
+		$html = get_course_detail_table($courseInfo, 'college');
+	}
+	
+	vcn_disconnect_from_db($conn);
+	
+	return $html;
+	
+}
+
+function get_page_military_training_text($cma, &$allCourseDetailsArr) {
+
+	$conn = vcn_connect_to_db();
+	
+	$courseInfo = '';
+	
+	$sql = " SELECT SUBSTRING_INDEX(course_code, '|', 1) as code,
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 2), '|', -1) as startdate,
+			        SUBSTRING_INDEX(course_code, '|', -1) as stopdate, 
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1) as acecode,
+			        a.first_title AS name,
+			        a.second_title AS namesecond, 
+			        a.objective AS objective, 
+			        a.instruction AS instruction,
+			        a.credit_info AS additionalcreditinfo,
+			        b.course_credit AS credit,
+			        b.course_subject AS subject,
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1) AS company
+			FROM vcn_cma_user_course c
+			LEFT OUTER JOIN vcn_ace_course a ON (a.ace_id = SUBSTRING_INDEX(c.course_code, '|', 1))
+			LEFT OUTER JOIN vcn_ace_course_credit b ON ( (b.ace_id = a.ace_id) AND (b.start_date = a.start_date) AND (b.end_date = a.end_date) )
+			WHERE user_id = $cma->userid
+			AND military_yn = 'Y'
+			AND a.start_date = SUBSTRING_INDEX(SUBSTRING_INDEX(c.course_code, '|', 2), '|', -1)
+			AND a.end_date = SUBSTRING_INDEX(c.course_code, '|', -1) 
+			ORDER BY a.first_title ";
+	
+	$result = mysql_query($sql) or die("Error getting user military courses: " . mysql_error());
+	
+	$totalRecs = mysql_num_rows($result);
+	
+	$services = array('AF' => 'Air Force', 'AR' => 'Army', 'CG' => 'Coast Guard', 'DD' => 'Department of Defense', 'MC' => 'Marine Corps', 'NV' => 'Navy');
+	
+	$courseCodeId = '';
+	$count = 1;
+
+	if ($totalRecs > 0) {
+		while($rec = mysql_fetch_object($result)) {
+					
+			if ($rec->code != $courseCodeId) {
+				$courseName = '';
+				$companyName = '';
+				$courseDetails = '';
+				$courseCredits = 0;
+				$courseNameSecond = '';
+				$courseObjective = '';
+				$courseInstruction = '';
+				$courseAddCreditInfo = '';
+				$courseDescription = '';
+				$courseGoals = '';
+				
+				if ($count > 1) {
+					array_push( $allCourseDetailsArr['military'], array('name' => $prevCourseName, 'code' => $prevCourseCode, 'company' => $prevCompanyName, 'namesecond' => $prevCourseNameSecond, 'objective' => $prevCourseObjective, 'instruction' => $prevCourseInstruction, 'additionalcreditinfo' => $prevCourseAddCreditInfo, 'description' => $prevCourseDescription, 'goals' => $prevCourseGoals) );
+					$courseInfo .= get_course_detail_row($prevCourseName, $prevCourseCode, $prevCompanyName, $prevCourseDetails, $prevCourseCredits);
+				}
+			}
+	
+			$courseName = 'No course name';
+			if (strlen($rec->name)) {
+				$courseName = ucwords($rec->name);
+			}
+			$companyName = 'No company name';
+			if (strlen($rec->company)) {
+				$companyName = $services[strtoupper($rec->company)];
+			}
+			if (strlen($rec->credit) && is_numeric($rec->credit)) {
+				$courseCredits += (int) $rec->credit;
+			}
+			if(strlen($rec->subject)){
+				$unit = 'hours';
+				if (strlen($rec->credit)) {
+					if (is_numeric($rec->credit) && (int) $rec->credit == 1) {
+						$unit = 'hour';
+					}
+					$creditText = ": " . $rec->credit . " " . $unit;
+				}
+				$courseDetails .= ucwords($rec->subject) . $creditText . "<br/>";
+			}
+			$courseCode = 'No course number';
+			if (strlen($rec->code)) {
+				$courseCode = $rec->code;
+			}
+			if (strlen($rec->code)) {
+				$courseNameSecond = $rec->namesecond;
+			}
+			if (strlen($rec->objective)) {
+				if (!stristr($rec->objective, 'Pending evaluation')) {
+					$courseObjective = $rec->objective;
+				}
+			}
+			if (strlen($rec->instruction)) {
+				if (!stristr($rec->instruction, 'Pending evaluation')) {
+					$courseInstruction = $rec->instruction;
+				}
+			}
+			if (strlen($rec->additionalcreditinfo)) {
+				if (!stristr($rec->additionalcreditinfo, 'Additional Details: P')) {
+					$courseAddCreditInfo = $rec->additionalcreditinfo;
+				}
+			}
+			
+			if ($count == $totalRecs) {
+				array_push( $allCourseDetailsArr['military'], array('name' => $courseName, 'code' => $courseCode, 'company' => $companyName, 'namesecond' => $courseNameSecond, 'objective' => $courseObjective, 'instruction' => $courseInstruction, 'additionalcreditinfo' => $courseAddCreditInfo, 'description' => $courseDescription, 'goals' => $courseGoals) );
+				$courseInfo .= get_course_detail_row($courseName, $courseCode, $companyName, $courseDetails, $courseCredits);
+			}
+			
+			$prevCourseCode = $courseCode;
+			$prevCourseName = $courseName;
+			$prevCompanyName = $companyName;
+			$prevCourseDetails = $courseDetails;
+			$prevCourseCredits = $courseCredits;
+			$prevCourseNameSecond = $courseNameSecond;
+			$prevCourseObjective = $courseObjective;
+			$prevCourseInstruction = $courseInstruction;
+			$prevCourseAddCreditInfo = $courseAddCreditInfo;
+			$prevCourseDescription = $courseDescription;
+			$prevCourseGoals = $courseGoals;
+			
+			$courseCodeId = $rec->code;
+			$count++;
+		}
+		
+		$html = get_course_detail_table($courseInfo, 'military');
+	}
+
+	vcn_disconnect_from_db($conn);
+	
+	return $html;
+	
+}
+
+function get_page_professional_training_text($cma, &$allCourseDetailsArr) {
+	
+	$conn = vcn_connect_to_db();
+	
+	$courseInfo = '';
+	
+	$sql = " SELECT SUBSTRING_INDEX(course_code, '|', 1) as code,
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 2), '|', -1) as startdate,
+			        SUBSTRING_INDEX(course_code, '|', -1) as stopdate, 
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1) as acecode,
+			        a.first_title AS name,
+			        a.second_title AS namesecond, 
+			        a.objective AS objective, 
+			        a.instruction AS instruction,
+			        a.credit_info AS additionalcreditinfo,
+			        a.description AS description,
+			        a.goals AS goals,
+			        b.course_credit AS credit,
+			        b.course_subject AS subject,
+			        d.company_name AS company
+			FROM vcn_cma_user_course c
+			LEFT OUTER JOIN vcn_ace_national_course a ON (a.ace_id = SUBSTRING_INDEX(c.course_code, '|', 1))
+			LEFT OUTER JOIN vcn_ace_national_course_credit b ON ( (b.ace_id = a.ace_id) AND (b.start_date = a.start_date) AND (b.end_date = a.end_date) )
+			LEFT OUTER JOIN vcn_ace_national_course_company d ON ( (d.ace_code = SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1)) AND d.ace_type = 'course' )
+			WHERE user_id = $cma->userid
+			AND military_yn = 'C'
+			AND a.start_date = SUBSTRING_INDEX(SUBSTRING_INDEX(c.course_code, '|', 2), '|', -1)
+			AND a.end_date = SUBSTRING_INDEX(c.course_code, '|', -1) 
+			ORDER BY a.first_title ";
+	
+	$result = mysql_query($sql) or die("Error getting user professional training: " . mysql_error());
+	
+	$totalRecs = mysql_num_rows($result);
+	
+	$courseCodeId = '';
+	$count = 1;
+
+	if ($totalRecs > 0) {
+		while($rec = mysql_fetch_object($result)) {
+			
+			if ($rec->code != $courseCodeId) {
+				$courseName = '';
+				$companyName = '';
+				$courseDetails = '';
+				$courseCredits = 0;
+				$courseNameSecond = '';
+				$courseObjective = '';
+				$courseInstruction = '';
+				$courseAddCreditInfo = '';
+				$courseDescription = '';
+				$courseGoals = '';
+				
+				if ($count > 1) {
+					array_push( $allCourseDetailsArr['professional'], array('name' => $prevCourseName, 'code' => $prevCourseCode, 'company' => $prevCompanyName, 'namesecond' => $prevCourseNameSecond, 'objective' => $prevCourseObjective, 'instruction' => $prevCourseInstruction, 'additionalcreditinfo' => $prevCourseAddCreditInfo, 'description' => $prevCourseDescription, 'goals' => $prevCourseGoals) );
+					$courseInfo .= get_course_detail_row($prevCourseName, $prevCourseCode, $prevCompanyName, $prevCourseDetails, $prevCourseCredits);
+				}
+			}
+	
+			$courseName = 'No course name';
+			if (strlen($rec->name)) {
+				$courseName = ucwords($rec->name);
+			}
+			$companyName = 'No company name';
+			if (strlen($rec->company)) {
+				$companyName = ucwords($rec->company);
+			}
+			if (strlen($rec->credit) && is_numeric($rec->credit)) {
+				$courseCredits += (int) $rec->credit;
+			}
+			if(strlen($rec->subject)){
+				$unit = 'hours';
+				if (strlen($rec->credit)) {
+					if (is_numeric($rec->credit) && (int) $rec->credit == 1) {
+						$unit = 'hour';
+					}
+					$creditText = ": " . $rec->credit . " " . $unit;
+				}
+				$courseDetails .= ucwords($rec->subject) . $creditText . "<br/>";
+			}
+			$courseCode = 'No course number';
+			if (strlen($rec->code)) {
+				$courseCode = $rec->code;
+			}
+			if (strlen($rec->code)) {
+				$courseNameSecond = $rec->namesecond;
+			}
+			if (strlen($rec->objective)) {
+				$courseObjective = $rec->objective;
+			}
+			if (strlen($rec->instruction)) {
+				$courseInstruction = $rec->instruction;
+			}
+			if (strlen($rec->additionalcreditinfo)) {
+				$courseAddCreditInfo = $rec->additionalcreditinfo;
+			}
+			if (strlen($rec->description)) {
+				$courseDescription = $rec->description;
+			}
+			if (strlen($rec->goals)) {
+				$courseGoals = $rec->goals;
+			}
+			
+			if ($count == $totalRecs) {
+				array_push( $allCourseDetailsArr['professional'], array('name' => $courseName, 'code' => $courseCode, 'company' => $companyName, 'namesecond' => $courseNameSecond, 'objective' => $courseObjective, 'instruction' => $courseInstruction, 'additionalcreditinfo' => $courseAddCreditInfo, 'description' => $courseDescription, 'goals' => $courseGoals) );
+				$courseInfo .= get_course_detail_row($courseName, $courseCode, $companyName, $courseDetails, $courseCredits);
+			}
+			
+			$prevCourseCode = $courseCode;
+			$prevCourseName = $courseName;
+			$prevCompanyName = $companyName;
+			$prevCourseDetails = $courseDetails;
+			$prevCourseCredits = $courseCredits;
+			$prevCourseNameSecond = $courseNameSecond;
+			$prevCourseObjective = $courseObjective;
+			$prevCourseInstruction = $courseInstruction;
+			$prevCourseAddCreditInfo = $courseAddCreditInfo;
+			$prevCourseDescription = $courseDescription;
+			$prevCourseGoals = $courseGoals;
+			
+			$courseCodeId = $rec->code;
+			$count++;
+		}
+		
+		$html = get_course_detail_table($courseInfo, 'professional');
+	}
+	vcn_disconnect_from_db($conn);
+	
+	return $html;
+	
+}
+
+function get_page_national_exams_text($cma, &$allCourseDetailsArr) {
+
+	$conn = vcn_connect_to_db();
+	
+	$courseInfo = '';
+	
+	$sql = " SELECT SUBSTRING_INDEX(course_code, '|', 1) as code,
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 2), '|', -1) as startdate,
+			        SUBSTRING_INDEX(course_code, '|', -1) as stopdate, 
+			        SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1) as acecode,
+			        a.first_title AS name,
+			        a.second_title AS namesecond, 
+			        a.objective AS objective, 
+			        a.instruction AS instruction,
+			        a.credit_info AS additionalcreditinfo,
+			        a.description AS description,
+			        a.goals AS goals,
+			        b.credit_info AS credit,
+			        d.company_name AS company
+			FROM vcn_cma_user_course c
+			LEFT OUTER JOIN vcn_ace_national_course a ON (a.ace_id = SUBSTRING_INDEX(c.course_code, '|', 1))
+			LEFT OUTER JOIN vcn_ace_national_exam_credit b ON ( (b.ace_id = a.ace_id) AND (b.start_date = a.start_date) AND (b.end_date = a.end_date) )
+			LEFT OUTER JOIN vcn_ace_national_course_company d ON ( (d.ace_code = SUBSTRING_INDEX(SUBSTRING_INDEX(course_code, '|', 1), '-', 1)) AND d.ace_type = 'exam' )
+			WHERE user_id = $cma->userid
+			AND military_yn = 'E'
+			AND a.start_date = SUBSTRING_INDEX(SUBSTRING_INDEX(c.course_code, '|', 2), '|', -1)
+			AND a.end_date = SUBSTRING_INDEX(c.course_code, '|', -1) 
+			ORDER BY a.first_title ";
+	
+	$result = mysql_query($sql) or die("Error getting user college courses: " . mysql_error());
+	
+	$totalRecs = mysql_num_rows($result);
+	
+	$courseCodeId = '';
+	$count = 1;
+	
+	if ($totalRecs > 0) {
+		while($rec = mysql_fetch_object($result)) {
+		
+			if ($rec->code != $courseCodeId) {
+				$courseName = '';
+				$companyName = '';
+				$courseDetails = '';
+				$courseCredits = '';
+				$courseNameSecond = '';
+				$courseObjective = '';
+				$courseInstruction = '';
+				$courseAddCreditInfo = '';
+				$courseDescription = '';
+				$courseGoals = '';
+				
+				if ($count > 1) {
+					array_push( $allCourseDetailsArr['nationalexams'], array('name' => $prevCourseName, 'code' => $prevCourseCode, 'company' => $prevCompanyName, 'namesecond' => $prevCourseNameSecond, 'objective' => $prevCourseObjective, 'instruction' => $prevCourseInstruction, 'additionalcreditinfo' => $prevCourseAddCreditInfo, 'description' => $prevCourseDescription, 'goals' => $prevCourseGoals) );
+					$courseInfo .= get_course_detail_row($prevCourseName, $prevCourseCode, $prevCompanyName, $prevCourseDetails, $prevCourseCredits);
+				}
+			}
+		
+			$courseName = 'No course name';
+			if (strlen($rec->name)) {
+				$courseName = ucwords($rec->name);
+			}
+			$companyName = 'No company name';
+			if (strlen($rec->company)) {
+				$companyName = ucwords($rec->company);
+			}
+			
+			if(strlen($rec->credit)){
+				$courseDetails .= $rec->credit . "<br/>";
+			}
+			$courseCode = 'No course number';
+			if (strlen($rec->code)) {
+				$courseCode = $rec->code;
+			}
+			if (strlen($rec->code)) {
+				$courseNameSecond = $rec->namesecond;
+			}
+			if (strlen($rec->objective)) {
+				$courseObjective = $rec->objective;
+			}
+			if (strlen($rec->instruction)) {
+				$courseInstruction = $rec->instruction;
+			}
+			if (strlen($rec->additionalcreditinfo)) {
+				$courseAddCreditInfo = $rec->additionalcreditinfo;
+			}
+			if (strlen($rec->description)) {
+				$courseDescription = $rec->description;
+			}
+			if (strlen($rec->goals)) {
+				$courseGoals = $rec->goals;
+			}
+			
+			if ($count == $totalRecs) {
+				array_push( $allCourseDetailsArr['nationalexams'], array('name' => $courseName, 'code' => $courseCode, 'company' => $companyName, 'namesecond' => $courseNameSecond, 'objective' => $courseObjective, 'instruction' => $courseInstruction, 'additionalcreditinfo' => $courseAddCreditInfo, 'description' => $courseDescription, 'goals' => $courseGoals) );
+				$courseInfo .= get_course_detail_row($courseName, $courseCode, $companyName, $courseDetails, $courseCredits);
+			}
+		
+			$prevCourseCode = $courseCode;
+			$prevCourseName = $courseName;
+			$prevCompanyName = $companyName;
+			$prevCourseDetails = $courseDetails;
+			$prevCourseCredits = $courseCredits;
+			$prevCourseNameSecond = $courseNameSecond;
+			$prevCourseObjective = $courseObjective;
+			$prevCourseInstruction = $courseInstruction;
+			$prevCourseAddCreditInfo = $courseAddCreditInfo;
+			$prevCourseDescription = $courseDescription;
+			$prevCourseGoals = $courseGoals;
+			
+			$courseCodeId = $rec->code;
+			$count++;
+		}
+		
+		$html = get_course_detail_table($courseInfo, 'nationalexams');
+	}
+	
+	vcn_disconnect_from_db($conn);
+	
+	return $html;
+	
+}
+
+function get_course_detail_table($courseInfo, $type, $displayCredits = true) {
+	
+	$detailsArr = array( 'college' => array( 'courseheading' => 'College Courses', 'creditheading' => 'Credit Hours Earned' ),
+						 'military' => array( 'courseheading' => 'Military Training', 'creditheading' => 'Credit Hours<br/>Recommended by ACE' ),
+						 'professional' => array( 'courseheading' => 'Professional Training', 'creditheading' => 'Credit Hours<br/>Recommended by ACE' ),
+						 'nationalexams' => array( 'courseheading' => 'National Exams', 'creditheading' => '' ) );
+	
+	$courseHeading = $detailsArr[$type]['courseheading'];
+	
+	if ($displayCredits) {
+		$creditHeading = $detailsArr[$type]['creditheading'];
+	}
+	
+	$html = "<table border=\"0\" style=\"width:100%;\">
+					<tr>
+						<td class=\"coursehead\">$courseHeading</td>
+						<td class=\"creditshead\">$creditHeading</td>
+					</tr>
+					<tr>
+						<td colspan=\"2\" align=\"top\"><hr/></td>
+					</tr>
+					<tr>
+						<td colspan=\"2\">
+							<table border=\"0\" class=\"coursetable\">
+								$courseInfo
+							</table>
+						</td>
+					</tr>	
+					<tr>
+						<td colspan=\"2\"><br/><br/></td>
+					</tr>
+				</table>";
+	
+	return $html;
+
+}
+
+function get_course_detail_row($courseName, $courseCode, $companyName, $courseDetails, $courseCredits) {
+
+	// strip out any html tags
+	$courseName = strip_tags($courseName);
+	$courseCode = strip_tags($courseCode);
+	$companyName = strip_tags($companyName);
+	
+	$courseInfo = "<tr>
+						<td class=\"coursedata\">
+							<table border=\"0\" style=\"width:100%;\">
+								<tr>
+									<td style=\"width:100%;\" colspan=\"3\"><strong>$courseName ($courseCode)</strong></td>
+								</tr>
+								<tr>
+									<td style=\"width:3%;\">&nbsp;</td>
+									<td style=\"width:97%; font-style:italic;\" colspan=\"2\">$companyName</td>
+								</tr>";
+	
+	if (strlen($courseDetails)) {
+		// remove the last <br/> that was added
+		$courseDetails = substr_replace($courseDetails, '', -5);
+		
+		// strip out any html tags except BRs
+		$courseDetails = strip_tags($courseDetails, '<br>');
+		
+		$courseInfo .= "			<tr>
+										<td style=\"width:3%;\">&nbsp;</td>
+										<td style=\"width:3%;\">&nbsp;</td>
+										<td style=\"width:94%;\">$courseDetails</td>
+									</tr>";
+	}
+					
+	$courseInfo .= "		</table>
+						</td>
+						<td class=\"creditsdata\">$courseCredits</td>
+					</tr>";
+
+	return $courseInfo;
+}
+
+function get_page_closing_text() {
+
+	$html = "<br/><br/>
+			</body>
+			</html>";
+	
+	return $html;
+		
+}
+
+function get_page_all_course_details_table_text($cma, $allCourseDetailsArr) {
+	
+	$html = "<table style=\"width:100%;\">
+				<tr>
+					<td><strong style=\"font-size:12pt;\">Addendum: Course Details</strong></td>
+				</tr>
+			 </table><br/><br/>";
+	
+	if (count($allCourseDetailsArr['military']) > 0) {
+		$courseInfo = get_page_all_course_details_text($allCourseDetailsArr, 'military');
+		$html .= get_course_detail_table($courseInfo, 'military', false);
+	}
+	if (count($allCourseDetailsArr['professional']) > 0) {
+		$courseInfo = get_page_all_course_details_text($allCourseDetailsArr, 'professional');
+		$html .= get_course_detail_table($courseInfo, 'professional', false);
+	}
+	if (count($allCourseDetailsArr['nationalexams']) > 0) {
+		$courseInfo = get_page_all_course_details_text($allCourseDetailsArr, 'nationalexams');
+		$html .= get_course_detail_table($courseInfo, 'nationalexams', false);
+	}
+	
+	return $html;
+	
+}
+
+function get_page_all_course_details_text($allCourseDetailsArr, $type) {
+	
+	$courseInfo = '';
+	$additionalData = false;
+	
+	foreach ($allCourseDetailsArr[$type] as $dataArr) {
+		$courseInfo .= '<tr><td style="width:100%;" colspan="3"><strong>' . strip_tags($dataArr['name']) . ' (' . strip_tags($dataArr['code']) .')</strong></td></tr>';
+	
+		if (strlen($dataArr['company'])) {
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:97%; font-style:italic;" colspan="2">' . strip_tags($dataArr['company']) . '</td></tr>';
+		}
+		if (strlen($dataArr['namesecond'])) {
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Alternate Title: ' . strip_tags($dataArr['namesecond']) . '</td></tr>';
+		}
+		if (strlen($dataArr['objective'])) {
+			$additionalData = true;
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Objective: ' . strip_tags($dataArr['objective']) . '</td></tr>';
+		}
+		if (strlen($dataArr['instruction'])) {
+			$additionalData = true;
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Instruction: ' . strip_tags($dataArr['instruction']) . '</td></tr>';
+		}
+		if (strlen($dataArr['description'])) {
+			$additionalData = true;
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Description: ' . strip_tags($dataArr['description']) . '</td></tr>';
+		}
+		if (strlen($dataArr['goals'])) {
+			$additionalData = true;
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Goals: ' . strip_tags($dataArr['goals']) . '</td></tr>';
+		}
+		if (strlen($dataArr['additionalcreditinfo'])) {
+			$additionalData = true;
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">Additional Credit Info: ' . strip_tags($dataArr['additionalcreditinfo']) . '</td></tr>';
+		}
+		if (!$additionalData) {
+			$courseInfo .= '<tr><td style="width:3%;">&nbsp;</td><td style="width:3%;">&nbsp;</td><td style="width:94%;">No Additional Details</td></tr>';
+		}
+	}
+	
+	return $courseInfo;
+}
+
+function get_page_cover_letter_text($cma) {
+	
+	$name = '';
+	if (strlen($cma->firstname) || strlen($cma->lastname)) {
+		$name = $cma->firstname . ' ' . $cma->lastname;
+	}
+	
+	$dateArr = getdate();
+	$currentDate = $dateArr['month'] . ' ' . $dateArr['mday'] . ', ' . $dateArr['year'];
+	
+	$html = "<div style=\"padding-left:10px; padding-right:10px; font-family:verdana; font-size:12px;\"></div>
+				<br/><br/><br/>
+				$currentDate
+				<br/><br/><br/>
+				Dear Academic Advisor:
+				<br/><br/>
+				I am requesting academic credit toward my intended degree program based on my prior learning. 
+				Please find attached my \"Learning Inventory\", a comprehensive list of my prior learning, including:
+				<ul>
+				<li>Military Training</li>
+				<li>Professional Training</li>
+				<li>National Examinations</li>
+				<li>Previously completed college course</li>
+				</ul>
+				The American Council on Education (ACE) has provided credit recommendations for the prior 
+				learning I obtained through military training, national examinations, 
+				and other professional training.  
+				<br/><br/>
+				I would greatly appreciate your review of the enclosed Learning Inventory to determine if my 
+				prior learning might apply toward my intended degree program. I understand this institution 
+				and my degree program will determine how my prior learning can be applied toward a degree.  
+				I will provide additional details and official transcripts as needed.
+				<br><br>
+				I produced this report using the Healthcare Virtual Career Network, www.vcn.org.
+				<br/><br/>
+				Thank you for your time and consideration.
+				<br/><br/><br/>
+				Sincerely,
+				<br/>
+				$name
+				<br/>
+				</div>";
+	
+	return $html;
+	
+}
+function create_pdf_output($cma, &$allCourseDetailsArr) {
+	
+	if (isset($_GET['c']) && strlen($_GET['c'])) {
+		// create new PDF document using standard class
+		$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+		$pdf->setPrintHeader(false);
+		$pdf->setPrintFooter(false);
+	} else {
+		// create new PDF document using custom class
+		$pdf = new CUSTOMPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+	}
+	
+	// set document information
+	$pdf->SetCreator(PDF_CREATOR);
+	$pdf->SetAuthor('VCN.org');
+	$pdf->SetTitle('My Learning Inventory - VCN.org');
+		
+	// set default monospaced font
+	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+		
+	//set margins
+	$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+	$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+		
+	//set auto page breaks
+	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+		
+	//set image scale factor
+	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+		
+	//set some language-dependent strings
+	$pdf->setLanguageArray($l);
+		
+	// add a page
+	$pdf->AddPage();
+		
+	$html = '';
+		
+	if (isset($_GET['c']) && strlen($_GET['c'])) {
+		// build the cover letter
+		$html .= get_page_cover_letter_text($cma);
+		
+		// output the HTML content
+		$pdf->writeHTML($html, true, false, true, false, '');
+	} else {
+		// build the learning inventory report
+		$html .= get_page_initial_text();
+		$html .= get_page_heading_text($cma);
+		$html .= get_page_college_courses_text($cma);
+		$html .= get_page_military_training_text($cma, $allCourseDetailsArr);
+		$html .= get_page_professional_training_text($cma, $allCourseDetailsArr);
+		$html .= get_page_national_exams_text($cma, $allCourseDetailsArr);
+		$html .= get_page_closing_text();			
+	
+		// move the page up 20px
+		$pdf->SetY(15);
+		
+		// output the HTML content
+		$pdf->writeHTML($html, true, false, true, false, '');
+		
+		$html = '';
+		
+		// start a new page for the course details
+		$pdf->AddPage();
+		$html .= get_page_initial_text();
+		$html .= get_page_all_course_details_table_text($cma, $allCourseDetailsArr);
+		$pdf->SetY(13);
+		$pdf->writeHTML($html, true, false, true, false, '');
+	}
+	
+	// reset pointer to the last page
+	$pdf->lastPage();
+	//Close and output PDF document
+	$pdf->Output('mylearninginventory.pdf', 'I');		
+
+//This section is to store the pdf document in the cma document section if the user is logged in. 	
+	if($_POST['cmadoccheck'] == 'Yes'){
+ 		if($_GET['c']==1){ 
+			$getdirloc = sys_get_temp_dir();
+			$date = date_create();
+			// ADD "/" before mylearninginventory TO MAKE SURE THAT directory WILL GO TO :::: "/tmp/"
+			$filelocation = $getdirloc.'/mylearninginventory-'.date_timestamp_get($date).'.pdf';
+			$pdf->Output($filelocation, 'F');
+			$extract = fopen($filelocation, 'r');
+			$content = fread($extract, filesize($filelocation));
+			//$content = str_replace("'","XpandGanappaReston2012",$content);
+			$content = base64_encode($content);
+			$conn = vcn_connect_to_db();
+			$addfile = "INSERT INTO vcn_cma_user_document (DOCUMENT_TITLE, DOCUMENT_TYPE_ID, DOCUMENT_UPLOAD_DATE, DOCUMENT_OBJECT, USER_ID ) ".
+			   "VALUES ('mycoverletter.pdf', '8', NOW(), '$content','$cma->userid')";
+			mysql_query($addfile) or die(mysql_error());
+			vcn_disconnect_from_db($conn);	
+ 		}else{
+			$getdirloc = sys_get_temp_dir();
+			$date = date_create();
+			// ADD "/" before mylearninginventory TO MAKE SURE THAT directory WILL GO TO :::: "/tmp/"
+			$filelocation = $getdirloc.'/mylearninginventory-'.date_timestamp_get($date).'.pdf';
+			$pdf->Output($filelocation, 'F');
+			$extract = fopen($filelocation, 'r');
+			$content = fread($extract, filesize($filelocation));
+			//$content = str_replace("'","XpandGanappaReston2012",$content);
+			$content = base64_encode($content);
+			$conn = vcn_connect_to_db();
+			$addfile = "INSERT INTO vcn_cma_user_document (DOCUMENT_TITLE, DOCUMENT_TYPE_ID, DOCUMENT_UPLOAD_DATE, DOCUMENT_OBJECT, USER_ID ) ".
+			   "VALUES ('mylearninginventory.pdf', '8', NOW(), '$content','$cma->userid')";
+			mysql_query($addfile) or die(mysql_error());
+			vcn_disconnect_from_db($conn);	
+		} 
+	}
+//End : This section is to store the pdf document in the cma document section if the user is logged in. 		
+	
+}
+
+// Extend the TCPDF class to create custom Header and Footer
+class CUSTOMPDF extends TCPDF {
+
+	//Page header
+	public function Header() {
+		
+		$cma = vcnCma::getInstance();
+		
+		$name = '';
+		if ($cma) {
+			$name = $cma->firstname . ' ' . $cma->lastname;
+		}
+		
+		$html = '<table style="width:100%; color:#b2b2b2; font-family:Verdana; font-size:8pt; border-bottom:1px solid #b2b2b2;">
+						<tr>
+							<td style="width:50%;">VCN.org - Summary of Career Learning</td>
+							<td style="width:50%; text-align:right;">' . $name . '</td>
+						</tr>		
+					</table>';
+
+		// Set Footer
+		$this->writeHTML($html, true, false, true, false, '');
+	}
+
+	// Page footer
+	public function Footer() {
+		// Position at 25 mm from bottom
+		$this->SetY(-15);
+
+		// Set text
+		$html = '<span style="color:#000000; font-family:Verdana; font-size:8pt;">NOTE: This Learning Inventory is a resource for you and your admissions
+				officer or academic advisor. The credits listed here will not necessarily transfer as college credit in your degree program. 
+				Each college and university decides how your prior learning might apply to a specific degree program.</span>';
+
+		// Set Footer
+		$this->writeHTML($html, true, false, true, false, '');
+	}
+}

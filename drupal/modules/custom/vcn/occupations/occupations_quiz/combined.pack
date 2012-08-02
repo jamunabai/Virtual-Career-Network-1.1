@@ -1,0 +1,289 @@
+function Exception(name,message)
+{if(name)
+this.name=name;if(message)
+this.message=message;}
+Exception.prototype.setName=function(name)
+{this.name=name;}
+Exception.prototype.getName=function()
+{return this.name;}
+Exception.prototype.setMessage=function(msg)
+{this.message=msg;}
+Exception.prototype.getMessage=function()
+{return this.message;}
+function FlashTag(src,width,height,version)
+{if(arguments.length<4)
+{throw new Exception('RequiredParameterException','You must pass in a src, width, height, and version when creating a FlashTag.');}
+this.src=src;this.width=width;this.height=height;this.version=version;this.id=null;this.flashVars=null;this.flashVarsStr=null;this.genericParam=new Object();this.ie=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}
+FlashTag.prototype.setSource=function(src)
+{this.src=src;}
+FlashTag.prototype.setWidth=function(w)
+{this.width=width;}
+FlashTag.prototype.setHeight=function(h)
+{this.h=height;}
+FlashTag.prototype.setVersion=function(v)
+{this.version=v;}
+FlashTag.prototype.setId=function(id)
+{this.id=id;}
+FlashTag.prototype.setBgcolor=function(bgc)
+{if(bgc.charAt(0)!='#')
+{bgc='#'+bgc;}
+this.genericParam['bgcolor']=bgc;}
+FlashTag.prototype.addFlashVars=function(fvs)
+{this.flashVarsStr=fvs;}
+FlashTag.prototype.addFlashVar=function(n,v)
+{if(this.flashVars==null)
+{this.flashVars=new Object();}
+this.flashVars[n]=v;}
+FlashTag.prototype.removeFlashVar=function(n)
+{if(this.flashVars!=null)
+{this.flashVars[n]=null;}}
+FlashTag.prototype.setSwliveconnect=function(swlc)
+{this.genericParam['swliveconnect']=swlc;}
+FlashTag.prototype.setPlay=function(p)
+{this.genericParam['play']=p;}
+FlashTag.prototype.setLoop=function(l)
+{this.genericParam['loop']=l;}
+FlashTag.prototype.setMenu=function(m)
+{this.genericParam['menu']=m;}
+FlashTag.prototype.setQuality=function(q)
+{if(q!='low'&&q!='high'&&q!='autolow'&&q!='autohigh'&&q!='best')
+{throw new Exception('UnsupportedValueException','Supported values are "low", "high", "autolow", "autohigh", and "best".');}
+this.genericParam['quality']=q;}
+FlashTag.prototype.setScale=function(sc)
+{if(sc!='showall'&&sc!='noborder'&&sc!='exactfit')
+{throw new Exception('UnsupportedValueException','Supported values are "showall", "noborder", and "exactfit".');}
+this.genericParam['scale']=sc;}
+FlashTag.prototype.setAlign=function(a)
+{if(a!='l'&&a!='t'&&a!='r'&&a!='b')
+{throw new Exception('UnsupportedValueException','Supported values are "l", "t", "r" and "b".');}
+this.genericParam['align']=a;}
+FlashTag.prototype.setSalign=function(sa)
+{if(sa!='l'&&sa!='t'&&sa!='r'&&sa!='b'&&sa!='tl'&&sa!='tr'&&sa!='bl'&&sa!='br')
+{throw new Exception('UnsupportedValueException','Supported values are "l", "t", "r", "b", "tl", "tr", "bl" and "br".');}
+this.genericParam['salign']=sa;}
+FlashTag.prototype.setWmode=function(wm)
+{if(wm!='window'&&wm!='opaque'&&wm!='transparent')
+{throw new Exception('UnsupportedValueException','Supported values are "window", "opaque", and "transparent".');}
+this.genericParam['wmode']=wm;}
+FlashTag.prototype.setBase=function(base)
+{this.genericParam['base']=base;}
+FlashTag.prototype.setAllowScriptAccess=function(sa)
+{if(sa!='never'&&sa!='always')
+{throw new Exception('UnsupportedValueException','Supported values are "never" and "always".');}
+this.genericParam['allowScriptAccess']=sa;}
+FlashTag.prototype.toString=function()
+{var flashTag=new String();if(this.ie)
+{flashTag+='<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ';if(this.id!=null)
+{flashTag+='id="'+this.id+'" ';}
+flashTag+='codebase="https://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version='+this.version+'" ';flashTag+='width="'+this.width+'" ';flashTag+='height="'+this.height+'">';flashTag+='<param name="movie" value="'+this.src+'"/>';for(var n in this.genericParam)
+{if(this.genericParam[n]!=null)
+{flashTag+='<param name="'+n+'" value="'+this.genericParam[n]+'"/>';}}
+if(this.flashVars!=null)
+{var fv=this.getFlashVarsAsString();if(fv.length>0)
+{flashTag+='<param name="flashvars" value="'+fv+'"/>';}}
+flashTag+='</object>';}
+else
+{flashTag+='<embed src="'+this.src+'"';flashTag+=' width="'+this.width+'"';flashTag+=' height="'+this.height+'"';flashTag+=' type="application/x-shockwave-flash"';if(this.id!=null)
+{flashTag+=' name="'+this.id+'"';}
+for(var n in this.genericParam)
+{if(this.genericParam[n]!=null)
+{flashTag+=(' '+n+'="'+this.genericParam[n]+'"');}}
+if(this.flashVars!=null)
+{var fv=this.getFlashVarsAsString();if(fv.length>0)
+{flashTag+=' flashvars="'+fv+'"';}}
+flashTag+=' pluginspage="https://www.macromedia.com/go/getflashplayer">';flashTag+='</embed>';}
+return flashTag;}
+FlashTag.prototype.write=function(doc)
+{doc.write(this.toString());}
+FlashTag.prototype.getFlashVarsAsString=function()
+{var qs=new String();for(var n in this.flashVars)
+{if(this.flashVars[n]!=null)
+{qs+=(escape(n)+'='+escape(this.flashVars[n])+'&');}}
+if(this.flashVarsStr!=null)
+{return qs+this.flashVarsStr;}
+return qs.substring(0,qs.length-1);}
+function FlashSerializer(useCdata)
+{this.useCdata=useCdata;}
+FlashSerializer.prototype.serialize=function(args)
+{var qs=new String();for(var i=0;i<args.length;++i)
+{switch(typeof(args[i]))
+{case'undefined':qs+='t'+(i)+'=undf';break;case'string':qs+='t'+(i)+'=str&d'+(i)+'='+escape(args[i]);break;case'number':qs+='t'+(i)+'=num&d'+(i)+'='+escape(args[i]);break;case'boolean':qs+='t'+(i)+'=bool&d'+(i)+'='+escape(args[i]);break;case'object':if(args[i]==null)
+{qs+='t'+(i)+'=null';}
+else if(args[i]instanceof Date)
+{qs+='t'+(i)+'=date&d'+(i)+'='+escape(args[i].getTime());}
+else
+{try
+{qs+='t'+(i)+'=xser&d'+(i)+'='+escape(this._serializeXML(args[i]));}
+catch(exception)
+{throw new Exception("FlashSerializationException","The following error occurred during complex object serialization: "+exception.getMessage());}}
+break;default:throw new Exception("FlashSerializationException","You can only serialize strings, numbers, booleans, dates, objects, arrays, nulls, and undefined.");}
+if(i!=(args.length-1))
+{qs+='&';}}
+return qs;}
+FlashSerializer.prototype._serializeXML=function(obj)
+{var doc=new Object();doc.xml='<fp>';try
+{this._serializeNode(obj,doc,null);}
+catch(exception)
+{if(exception.message)
+{throw new Exception("FlashSerializationException","Unable to serialize object because: "+exception.message);}
+throw exception;}
+doc.xml+='</fp>';return doc.xml;}
+FlashSerializer.prototype._serializeNode=function(obj,doc,name)
+{switch(typeof(obj))
+{case'undefined':doc.xml+='<undf'+this._addName(name)+'/>';break;case'string':doc.xml+='<str'+this._addName(name)+'>'+this._escapeXml(obj)+'</str>';break;case'number':doc.xml+='<num'+this._addName(name)+'>'+obj+'</num>';break;case'boolean':doc.xml+='<bool'+this._addName(name)+' val="'+obj+'"/>';break;case'object':if(obj==null)
+{doc.xml+='<null'+this._addName(name)+'/>';}
+else if(obj instanceof Date)
+{doc.xml+='<date'+this._addName(name)+'>'+obj.getTime()+'</date>';}
+else if(obj instanceof Array)
+{doc.xml+='<array'+this._addName(name)+'>';for(var i=0;i<obj.length;++i)
+{this._serializeNode(obj[i],doc,null);}
+doc.xml+='</array>';}
+else
+{doc.xml+='<obj'+this._addName(name)+'>';for(var n in obj)
+{if(typeof(obj[n])=='function')
+continue;this._serializeNode(obj[n],doc,n);}
+doc.xml+='</obj>';}
+break;default:throw new Exception("FlashSerializationException","You can only serialize strings, numbers, booleans, objects, dates, arrays, nulls and undefined");break;}}
+FlashSerializer.prototype._addName=function(name)
+{if(name!=null)
+{return' name="'+name+'"';}
+return'';}
+FlashSerializer.prototype._escapeXml=function(str)
+{if(this.useCdata)
+return'<![CDATA['+str+']]>';else
+return str.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function FlashProxy(lcId,flashId,proxySwfName,callbackScope)
+{FlashProxy.fpmap[lcId]=this;this.uid=lcId;this.proxySwfName=proxySwfName;this.callbackScope=callbackScope;this.flashSerializer=new FlashSerializer(false);this.q=new Array();if(navigator.appName.indexOf('Internet Explorer')!=-1&&navigator.platform.indexOf('Win')!=-1&&navigator.userAgent.indexOf('Opera')==-1)
+{}}
+FlashProxy.prototype.call=function()
+{if(arguments.length==0)
+{throw new Exception("Flash Proxy Exception","The first argument should be the function name followed by any number of additional arguments.");}
+this.q.push(arguments);if(this.q.length==1)
+{this._execute(arguments);}}
+FlashProxy.prototype._execute=function(args)
+{var ft=new FlashTag(this.proxySwfName,1,1,'6,0,65,0');ft.addFlashVar('lcId',this.uid);ft.addFlashVar('functionName',args[0]);if(args.length>1)
+{var justArgs=new Array();for(var i=1;i<args.length;++i)
+{justArgs.push(args[i]);}
+ft.addFlashVars(this.flashSerializer.serialize(justArgs));}
+var divName='_flash_proxy_'+this.uid;if(!document.getElementById(divName))
+{var newTarget=document.createElement("div");newTarget.id=divName;document.body.appendChild(newTarget);}
+var target=document.getElementById(divName);target.innerHTML=ft.toString();}
+FlashProxy.callJS=function(command,args)
+{var argsArray=eval(args);var scope=FlashProxy.fpmap[argsArray.shift()].callbackScope;if(scope&&(command.indexOf('.')<0))
+{var functionToCall=scope[command];eval("scope."+command+"("+"argsArray[0],"+"argsArray[1],"+"argsArray[2],"+"argsArray[3],"+"argsArray[4],"+"argsArray[5]);");}
+else
+{var functionToCall=eval(command);functionToCall(argsArray[0],argsArray[1],argsArray[2],argsArray[3],argsArray[4],argsArray[5]);}}
+FlashProxy.callComplete=function(uid)
+{var fp=FlashProxy.fpmap[uid];if(fp!=null)
+{fp.q.shift();if(fp.q.length>0)
+{fp._execute(fp.q[0]);}}}
+FlashProxy.fpmap=new Object();CodeBaby=function(){this.listeners=new Array();this.containerEventQueue=new Array();this.isContainerReady=false;this.isPlayerVisible=false;this.isSpeechBubbleVisible=false;this.containerName="CodeBabyContainerMovie";this.speechBubbleName="CodeBabySpeechBubbleMovie";this.debugQuery="debug";this.debugQueryOn="on";this.debugQueryOff="off";this.debugCookie="CodeBabyDebug";this.speechBubbleRepositionBuffer=20;this.containerProxyConnectionString="CodeBabyContainerProxy"+new Date().getTime();this.speechBubbleProxyConnectionString="CodeBabySpeechBubbleProxy"+new Date().getTime();this.containerSpeechConnectionString="CodeBabyContainerSpeech"+new Date().getTime();this.speechContainerConnectionString="CodeBabySpeechContainer"+new Date().getTime();this.addListener(this);}
+CodeBaby.prototype.load=function(){this.containerProxy=new FlashProxy(this.containerProxyConnectionString,this.containerName,this.gatewayMovie,this);this.containerFlashTag=new FlashTag(this.containerPath+this.stageName+"Container.swf",this.containerWidth,this.containerHeight,this.containerFlashVersion);this.containerFlashTag.setId(this.containerName);this.containerFlashTag.setWmode(this.containerWindowMode);this.containerFlashTag.setAllowScriptAccess("always");this.containerFlashTag.addFlashVar("fvProxyConnection",escape(this.containerProxyConnectionString));this.containerFlashTag.addFlashVar("fvSpeechBubbleSendConnection",escape(this.containerSpeechConnectionString));this.containerFlashTag.addFlashVar("fvSpeechBubbleReceiveConnection",escape(this.speechContainerConnectionString));this.containerFlashTag.addFlashVar("fvPublishRoot",escape(this.publishRoot));this.containerFlashTag.addFlashVar("fvProjectXMLURL",escape(this.projectXML));this.containerFlashTag.addFlashVar("fvStageName",escape(this.stageName));this.containerFlashTag.addFlashVar("fvSceneGroupName",escape(this.sceneGroupName));this.containerFlashTag.addFlashVar("fvDebug",escape(this.getDebug()));this.containerFlashTag.addFlashVar("fvDefaultSpeechBubbleFadeSpeed",this.defaultSpeechBubbleFadeSpeed);this.speechBubbleProxy=new FlashProxy(this.speechBubbleProxyConnectionString,this.speechBubbleName,this.gatewayMovie,this);this.speechBubbleFlashTag=new FlashTag(this.speechBubbleMovie,this.speechBubbleWidth,this.speechBubbleHeight,this.speechBubbleFlashVersion);this.speechBubbleFlashTag.setId(this.speechBubbleName);this.speechBubbleFlashTag.setWmode(this.speechBubbleWindowMode);this.speechBubbleFlashTag.setAllowScriptAccess("always");this.speechBubbleFlashTag.addFlashVar("fvProxyConnection",escape(this.speechBubbleProxyConnectionString));this.speechBubbleFlashTag.addFlashVar("fvContainerReceiveConnection",escape(this.containerSpeechConnectionString));this.speechBubbleFlashTag.addFlashVar("fvContainerSendConnection",escape(this.speechContainerConnectionString));this.speechBubbleFlashTag.addFlashVar("fvCloseFadeSpeed",escape(this.defaultSpeechBubbleFadeSpeed));this.writeContainerFlashTag();this.writeSpeechBubbleFlashTag();}
+CodeBaby.prototype.addListener=function(listener){this.listeners.push(listener);}
+CodeBaby.prototype.removeListener=function(listener){for(var i=0;i<listeners.length;i++){if(listeners[i]==listener){listeners.splice(i,1);break;}}}
+CodeBaby.prototype.sendEvents=function(eventType,param1,param2){var eventList=new Array();var messageTypes="";for(var i=0;i<arguments.length;i+=3){var eventObj=new Object();eventObj.type=arguments[i];eventObj.param1=arguments[i+1];eventObj.param2=arguments[i+2];eventList.push(eventObj);messageTypes+=eventObj.type+";";}
+this.containerEventQueue=this.containerEventQueue.concat(eventList);if(eventList.length>0){if(this.isContainerReady){this.isContainerReady=false;this.containerProxy.call("onNewJSEvents",this.containerEventQueue);this.containerEventQueue.splice(0,this.containerEventQueue.length);}}}
+CodeBaby.prototype.fireEvent=function(eventName){var eventParams=new Array();for(var i=1;i<arguments.length;i++){eventParams.push(arguments[i]);}
+for(var i=0;i<this.listeners.length;i++){if(this.listeners[i]["on"+eventName]){this.listeners[i]["on"+eventName](eventParams[0],eventParams[1],eventParams[2],eventParams[3],eventParams[4]);}}}
+CodeBaby.prototype.writeContainerFlashTag=function(){var container=document.getElementById(this.containerId);container.innerHTML=this.containerFlashTag.toString();var topLeft=this.getRelativeTopLeft(container,true);container.style.position="absolute";container.style.left=(1+topLeft.x-this.containerWidth)+"px";container.style.top=(1+topLeft.y-this.containerHeight)+"px";container.style.zIndex=1000;}
+CodeBaby.prototype.writeSpeechBubbleFlashTag=function(){var speechBubble=document.getElementById(this.speechBubbleId);speechBubble.innerHTML=this.speechBubbleFlashTag.toString();var topLeft=this.getRelativeTopLeft(speechBubble,true);speechBubble.style.position="absolute";speechBubble.style.left=(1+topLeft.x-this.speechBubbleWidth)+"px";speechBubble.style.top=(1+topLeft.y-this.speechBubbleHeight)+"px";speechBubble.style.zIndex=1000;}
+CodeBaby.prototype.getQueryArgs=function(){var args=new Object();var query=location.search.substring(1);var pairs=query.split("&");for(var i=0;i<pairs.length;i++){var pos=pairs[i].indexOf('=');if(pos==-1)continue;var argname=pairs[i].substring(0,pos);var value=pairs[i].substring(pos+1);args[argname]=unescape(value);}
+return args;}
+CodeBaby.prototype.getDebug=function(){var args=this.getQueryArgs();if(args[this.debugQuery]){var debugCookie=new CBCookie(document,"CBDebug");if(args[this.debugQuery]=="on"){debugCookie.debugState="on";debugCookie.store();return"true";}else if(args[this.debugQuery]=="off"){debugCookie.debugState="off";debugCookie.store();return"false";}}
+var debugCookie=new CBCookie(document,"CBDebug");debugCookie.load();if(!debugCookie.debugState){return"false";}else{if(debugCookie.debugState=="off"){return"false";}else{return"true";}}}
+CodeBaby.prototype.getRelativeTopLeft=function(element,accountForScrolling){var result=new Object();result.x=0;result.y=0;var level=0;while(element){result.x-=element.offsetLeft;result.y-=element.offsetTop;element=element.offsetParent;}
+if(accountForScrolling){var scrollOffset=this.getScrollOffset();result.x+=scrollOffset.x;result.y+=scrollOffset.y;}
+return result;}
+CodeBaby.prototype.getBrowserType=function(){var ua=navigator.userAgent;var vendor=navigator.vendor;var result="";if(ua.indexOf("MSIE")>=0){result="Explorer";}else if(ua.indexOf("Netscape")>=0){result="Netscape";}else if(ua.indexOf("Gecko")>=0){result="Netscape";}
+if(vendor&&vendor.indexOf("Apple")>=0){result="Safari";}
+return result;}
+CodeBaby.prototype.getScrollOffset=function(){var scrollX,scrollY;switch(this.getBrowserType()){case"Explorer":scrollX=document.documentElement.scrollLeft+
+document.body.scrollLeft;scrollY=document.documentElement.scrollTop+
+document.body.scrollTop;break;default:scrollX=window.scrollX;scrollY=window.scrollY;break;}
+var result=new Object();result.x=scrollX;result.y=scrollY;return result;}
+CodeBaby.prototype.updateSpeechBubblePosition=function(){var clientWidth=isNaN(window.innerWidth)?document.body.clientWidth:window.innerWidth;var speechBubble=document.getElementById(this.speechBubbleId);if(this.isPlayerVisible){if(this.isSpeechBubbleVisible){var relTopLeft=this.getRelativeTopLeft(speechBubble.offsetParent,false);var scrollOffset=this.getScrollOffset();var fitsInNormalPosition=(-relTopLeft.x+this.speechBubbleX-
+scrollOffset.x+this.speechBubbleWidth+
+this.speechBubbleRepositionBuffer)<clientWidth;var fitsInAlternatePosition=(-relTopLeft.x+
+this.speechBubbleAlternateX-scrollOffset.x-
+this.speechBubbleRepositionBuffer)>0;if(fitsInNormalPosition||!fitsInAlternatePosition){speechBubble.style.left=this.speechBubbleX+"px";speechBubble.style.top=this.speechBubbleY+"px";}else{speechBubble.style.left=this.speechBubbleAlternateX+"px";speechBubble.style.top=this.speechBubbleAlternateY+"px";}}else{var relTopLeft=this.getRelativeTopLeft(speechBubble.offsetParent,true);speechBubble.style.left=(relTopLeft.x-this.speechBubbleWidth)+"px";}}else{var relTopLeft=this.getRelativeTopLeft(speechBubble.offsetParent,true);speechBubble.style.left=(relTopLeft.x-this.speechBubbleWidth)+"px";}}
+CodeBaby.prototype.updateContainerPosition=function(){var container=document.getElementById(this.containerId);if(this.isPlayerVisible){container.style.left=this.containerX+"px";container.style.top=this.containerY+"px";}else{var relTopLeft=this.getRelativeTopLeft(container.offsetParent,true);container.style.left=(relTopLeft.x-this.containerWidth)+"px";}}
+CodeBaby.prototype.onFlashEvents=function(eventList){for(var i=0;i<eventList.length;i++){this.fireEvent(eventList[i].type,eventList[i].param1,eventList[i].param2);}}
+CodeBaby.prototype.onContainerReady=function(){this.isContainerReady=true;var args=new Array();while(this.containerEventQueue.length>0){var eventObj=this.containerEventQueue.shift();args.push(eventObj.type);args.push(eventObj.param1);args.push(eventObj.param2);}
+if(args.length>0){this.sendEvents(args[0],args[1],args[2],args[3],args[4],args[5]);}}
+CodeBaby.prototype.onSceneLoad=function(sceneName){this.sceneName=sceneName;}
+CodeBaby.prototype.onPlayStateChange=function(newState){}
+CodeBaby.prototype.onSceneGroupLoad=function(sceneList){this.updateContainerPosition();}
+CodeBaby.prototype.onPlayerShow=function(){if(!this.isPlayerVisible){this.isPlayerVisible=true;this.updateContainerPosition();this.updateSpeechBubblePosition();}}
+CodeBaby.prototype.onPlayerHide=function(){if(this.isPlayerVisible){this.isPlayerVisible=false;this.updateContainerPosition();this.updateSpeechBubblePosition();}}
+CodeBaby.prototype.onSceneClick=function(){}
+CodeBaby.prototype.onConsoleDrag=function(){this.isConsoleDragging=true;}
+CodeBaby.prototype.onConsoleCustomEvent=function(param){}
+CodeBaby.prototype.onExternalAction=function(name,description){}
+CodeBaby.prototype.onGetURL=function(url,target){window.open(url,target);}
+CodeBaby.prototype.onDebugMessage=function(message){if(!this.debugWindowCreated){this.debugWindowCreated=true;this.debugWindow=window.open("","CodeBabyDebugWindow","location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no");this.debugWindow.document.title="CodeBaby Debug";this.debugLog="";window.focus();}
+var date=new Date();var dateString=date.getHours()+"h:"+
+date.getMinutes()+"m:"+
+date.getSeconds()+"s:"+
+date.getMilliseconds()+"ms";this.debugLog+="<table><tr valign='top'><td width='200px'><b>"+dateString+"</b></td><td>"+message+"</td></tr></table>";if(this.debugWindow){this.debugWindow.document.body.innerHTML=this.debugLog;}}
+CodeBaby.prototype.onShowSpeechBubble=function(){if(!this.isSpeechBubbleVisible){this.isSpeechBubbleVisible=true;this.updateSpeechBubblePosition();}}
+CodeBaby.prototype.onHideSpeechBubble=function(){}
+CodeBaby.prototype.onSpeechBubbleHidden=function(){if(this.isSpeechBubbleVisible){this.isSpeechBubbleVisible=false;this.updateSpeechBubblePosition();}}
+CodeBaby.prototype.onResponse=function(speechBubbleName,linkId){}
+CodeBaby.prototype.onDragStop=function(){this.isConsoleDragging=false;}
+function CBCookie(document,name,hours,path,domain,secure){this.$document=document;this.$name=name;if(hours){this.$expiration=new Date((new Date()).getTime()+hours*3600000);}else{this.$expiration=null;}
+this.$path=path?path:null;this.$domain=domain?domain:null;this.$secure=secure?true:false;}
+CBCookie.prototype.store=function(){var cookieval="";for(var prop in this){if((prop.charAt(0)=='$')||((typeof this[prop])=='function')){continue;}
+if(cookieval!="")cookieval+='&';cookieval+=prop+':'+escape(this[prop]);}
+var cookie=this.$name+'='+cookieval;if(this.$expiration){cookie+='; expires='+this.$expiration.toGMTString();}
+if(this.$path){cookie+='; path='+this.$path;}
+if(this.$domain){cookie+='; domain='+this.$domain;}
+if(this.$secure){cookie+='; secure';}
+this.$document.cookie=cookie;}
+CBCookie.prototype.load=function(){var allcookies=this.$document.cookie;if(allcookies=="")return false;var start=allcookies.indexOf(this.$name+'=');if(start==-1)return false;start+=this.$name.length+1;var end=allcookies.indexOf(';',start);if(end==-1)end=allcookies.length;var cookieval=allcookies.substring(start,end);var a=cookieval.split('&');for(var i=0;i<a.length;i++)
+a[i]=a[i].split(':');for(var i=0;i<a.length;i++){this[a[i][0]]=unescape(a[i][1]);}
+return true;}
+CBCookie.prototype.remove=function(){var cookie;cookie=this.$name+'=';if(this.$path)cookie+='; path='+this.$path;if(this.$domain)cookie+='; domain='+this.$domain;cookie+='; expires=Fri, 02-Jan-1970 00:00:00 GMT';this.$document.cookie=cookie;}
+if(typeof deconcept=="undefined"){var deconcept=new Object();}if(typeof deconcept.util=="undefined"){deconcept.util=new Object();}if(typeof deconcept.SWFObjectUtil=="undefined"){deconcept.SWFObjectUtil=new Object();}deconcept.SWFObject=function(_1,id,w,h,_5,c,_7,_8,_9,_a){if(!document.getElementById){return;}this.DETECT_KEY=_a?_a:"detectflash";this.skipDetect=deconcept.util.getRequestParameter(this.DETECT_KEY);this.params=new Object();this.variables=new Object();this.attributes=new Array();if(_1){this.setAttribute("swf",_1);}if(id){this.setAttribute("id",id);}if(w){this.setAttribute("width",w);}if(h){this.setAttribute("height",h);}if(_5){this.setAttribute("version",new deconcept.PlayerVersion(_5.toString().split(".")));}this.installedVer=deconcept.SWFObjectUtil.getPlayerVersion();if(!window.opera&&document.all&&this.installedVer.major>7){deconcept.SWFObject.doPrepUnload=true;}if(c){this.addParam("bgcolor",c);}var q=_7?_7:"high";this.addParam("quality",q);this.setAttribute("useExpressInstall",false);this.setAttribute("doExpressInstall",false);var _c=(_8)?_8:window.location;this.setAttribute("xiRedirectUrl",_c);this.setAttribute("redirectUrl","");if(_9){this.setAttribute("redirectUrl",_9);}};deconcept.SWFObject.prototype={useExpressInstall:function(_d){this.xiSWFPath=!_d?"expressinstall.swf":_d;this.setAttribute("useExpressInstall",true);},setAttribute:function(_e,_f){this.attributes[_e]=_f;},getAttribute:function(_10){return this.attributes[_10];},addParam:function(_11,_12){this.params[_11]=_12;},getParams:function(){return this.params;},addVariable:function(_13,_14){this.variables[_13]=_14;},getVariable:function(_15){return this.variables[_15];},getVariables:function(){return this.variables;},getVariablePairs:function(){var _16=new Array();var key;var _18=this.getVariables();for(key in _18){_16[_16.length]=key+"="+_18[key];}return _16;},getSWFHTML:function(){var _19="";if(navigator.plugins&&navigator.mimeTypes&&navigator.mimeTypes.length){if(this.getAttribute("doExpressInstall")){this.addVariable("MMplayerType","PlugIn");this.setAttribute("swf",this.xiSWFPath);}_19="<embed type=\"application/x-shockwave-flash\" src=\""+this.getAttribute("swf")+"\" width=\""+this.getAttribute("width")+"\" height=\""+this.getAttribute("height")+"\" style=\""+this.getAttribute("style")+"\"";_19+=" id=\""+this.getAttribute("id")+"\" name=\""+this.getAttribute("id")+"\" ";var _1a=this.getParams();for(var key in _1a){_19+=[key]+"=\""+_1a[key]+"\" ";}var _1c=this.getVariablePairs().join("&");if(_1c.length>0){_19+="flashvars=\""+_1c+"\"";}_19+="/>";}else{if(this.getAttribute("doExpressInstall")){this.addVariable("MMplayerType","ActiveX");this.setAttribute("swf",this.xiSWFPath);}_19="<object id=\""+this.getAttribute("id")+"\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" width=\""+this.getAttribute("width")+"\" height=\""+this.getAttribute("height")+"\" style=\""+this.getAttribute("style")+"\">";_19+="<param name=\"movie\" value=\""+this.getAttribute("swf")+"\" />";var _1d=this.getParams();for(var key in _1d){_19+="<param name=\""+key+"\" value=\""+_1d[key]+"\" />";}var _1f=this.getVariablePairs().join("&");if(_1f.length>0){_19+="<param name=\"flashvars\" value=\""+_1f+"\" />";}_19+="</object>";}return _19;},write:function(_20){if(this.getAttribute("useExpressInstall")){var _21=new deconcept.PlayerVersion([6,0,65]);if(this.installedVer.versionIsValid(_21)&&!this.installedVer.versionIsValid(this.getAttribute("version"))){this.setAttribute("doExpressInstall",true);this.addVariable("MMredirectURL",escape(this.getAttribute("xiRedirectUrl")));document.title=document.title.slice(0,47)+" - Flash Player Installation";this.addVariable("MMdoctitle",document.title);}}if(this.skipDetect||this.getAttribute("doExpressInstall")||this.installedVer.versionIsValid(this.getAttribute("version"))){var n=(typeof _20=="string")?document.getElementById(_20):_20;n.innerHTML=this.getSWFHTML();return true;}else{if(this.getAttribute("redirectUrl")!=""){document.location.replace(this.getAttribute("redirectUrl"));}}return false;}};deconcept.SWFObjectUtil.getPlayerVersion=function(){var _23=new deconcept.PlayerVersion([0,0,0]);if(navigator.plugins&&navigator.mimeTypes.length){var x=navigator.plugins["Shockwave Flash"];if(x&&x.description){_23=new deconcept.PlayerVersion(x.description.replace(/([a-zA-Z]|\s)+/,"").replace(/(\s+r|\s+b[0-9]+)/,".").split("."));}}else{if(navigator.userAgent&&navigator.userAgent.indexOf("Windows CE")>=0){var axo=1;var _26=3;while(axo){try{_26++;axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash."+_26);_23=new deconcept.PlayerVersion([_26,0,0]);}catch(e){axo=null;}}}else{try{var axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.7");}catch(e){try{var axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.6");_23=new deconcept.PlayerVersion([6,0,21]);axo.AllowScriptAccess="always";}catch(e){if(_23.major==6){return _23;}}try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash");}catch(e){}}if(axo!=null){_23=new deconcept.PlayerVersion(axo.GetVariable("$version").split(" ")[1].split(","));}}}return _23;};deconcept.PlayerVersion=function(_29){this.major=_29[0]!=null?parseInt(_29[0]):0;this.minor=_29[1]!=null?parseInt(_29[1]):0;this.rev=_29[2]!=null?parseInt(_29[2]):0;};deconcept.PlayerVersion.prototype.versionIsValid=function(fv){if(this.major<fv.major){return false;}if(this.major>fv.major){return true;}if(this.minor<fv.minor){return false;}if(this.minor>fv.minor){return true;}if(this.rev<fv.rev){return false;}return true;};deconcept.util={getRequestParameter:function(_2b){var q=document.location.search||document.location.hash;if(_2b==null){return q;}if(q){var _2d=q.substring(1).split("&");for(var i=0;i<_2d.length;i++){if(_2d[i].substring(0,_2d[i].indexOf("="))==_2b){return _2d[i].substring((_2d[i].indexOf("=")+1));}}}return"";}};deconcept.SWFObjectUtil.cleanupSWFs=function(){var _2f=document.getElementsByTagName("OBJECT");for(var i=_2f.length-1;i>=0;i--){_2f[i].style.display="none";for(var x in _2f[i]){if(typeof _2f[i][x]=="function"){_2f[i][x]=function(){};}}}};if(deconcept.SWFObject.doPrepUnload){if(!deconcept.unloadSet){deconcept.SWFObjectUtil.prepUnload=function(){__flash_unloadHandler=function(){};__flash_savedUnloadHandler=function(){};window.attachEvent("onunload",deconcept.SWFObjectUtil.cleanupSWFs);};window.attachEvent("onbeforeunload",deconcept.SWFObjectUtil.prepUnload);deconcept.unloadSet=true;}}if(!document.getElementById&&document.all){document.getElementById=function(id){return document.all[id];};}var getQueryParamValue=deconcept.util.getRequestParameter;var FlashObject=deconcept.SWFObject;var SWFObject=deconcept.SWFObject;var isIE=(navigator.appVersion.indexOf("MSIE")!=-1)?true:false;var isWin=(navigator.appVersion.toLowerCase().indexOf("win")!=-1)?true:false;var isOpera=(navigator.userAgent.indexOf("Opera")!=-1)?true:false;function ControlVersion()
+{var version;var axo;var e;try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.7");version=axo.GetVariable("$version");}catch(e){}
+if(!version)
+{try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.6");version="WIN 6,0,21,0";axo.AllowScriptAccess="always";version=axo.GetVariable("$version");}catch(e){}}
+if(!version)
+{try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.3");version=axo.GetVariable("$version");}catch(e){}}
+if(!version)
+{try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash.3");version="WIN 3,0,18,0";}catch(e){}}
+if(!version)
+{try{axo=new ActiveXObject("ShockwaveFlash.ShockwaveFlash");version="WIN 2,0,0,11";}catch(e){version=-1;}}
+return version;}
+function GetSwfVer(){var flashVer=-1;if(navigator.plugins!=null&&navigator.plugins.length>0){if(navigator.plugins["Shockwave Flash 2.0"]||navigator.plugins["Shockwave Flash"]){var swVer2=navigator.plugins["Shockwave Flash 2.0"]?" 2.0":"";var flashDescription=navigator.plugins["Shockwave Flash"+swVer2].description;var descArray=flashDescription.split(" ");var tempArrayMajor=descArray[2].split(".");var versionMajor=tempArrayMajor[0];var versionMinor=tempArrayMajor[1];var versionRevision=descArray[3];if(versionRevision==""){versionRevision=descArray[4];}
+if(versionRevision[0]=="d"){versionRevision=versionRevision.substring(1);}else if(versionRevision[0]=="r"){versionRevision=versionRevision.substring(1);if(versionRevision.indexOf("d")>0){versionRevision=versionRevision.substring(0,versionRevision.indexOf("d"));}}
+var flashVer=versionMajor+"."+versionMinor+"."+versionRevision;}}
+else if(navigator.userAgent.toLowerCase().indexOf("webtv/2.6")!=-1)flashVer=4;else if(navigator.userAgent.toLowerCase().indexOf("webtv/2.5")!=-1)flashVer=3;else if(navigator.userAgent.toLowerCase().indexOf("webtv")!=-1)flashVer=2;else if(isIE&&isWin&&!isOpera){flashVer=ControlVersion();}
+return flashVer;}
+function DetectFlashVer(reqMajorVer,reqMinorVer,reqRevision)
+{versionStr=GetSwfVer();if(versionStr==-1){return false;}else if(versionStr!=0){if(isIE&&isWin&&!isOpera){tempArray=versionStr.split(" ");tempString=tempArray[1];versionArray=tempString.split(",");}else{versionArray=versionStr.split(".");}
+var versionMajor=versionArray[0];var versionMinor=versionArray[1];var versionRevision=versionArray[2];if(versionMajor>parseFloat(reqMajorVer)){return true;}else if(versionMajor==parseFloat(reqMajorVer)){if(versionMinor>parseFloat(reqMinorVer))
+return true;else if(versionMinor==parseFloat(reqMinorVer)){if(versionRevision>=parseFloat(reqRevision))
+return true;}}
+return false;}}
+function AC_AddExtension(src,ext)
+{if(src.indexOf('?')!=-1)
+return src.replace(/\?/,ext+'?');else
+return src+ext;}
+function AC_Generateobj(objAttrs,params,embedAttrs)
+{var str='';if(isIE&&isWin&&!isOpera)
+{str+='<object ';for(var i in objAttrs)
+{str+=i+'="'+objAttrs[i]+'" ';}
+str+='>';for(var i in params)
+{str+='<param name="'+i+'" value="'+params[i]+'" /> ';}
+str+='</object>';}
+else
+{str+='<embed ';for(var i in embedAttrs)
+{str+=i+'="'+embedAttrs[i]+'" ';}
+str+='> </embed>';}
+document.write(str);}
+function AC_FL_RunContent(){var ret=AC_GetArgs
+(arguments,".swf","movie","clsid:d27cdb6e-ae6d-11cf-96b8-444553540000","application/x-shockwave-flash");AC_Generateobj(ret.objAttrs,ret.params,ret.embedAttrs);}
+function AC_SW_RunContent(){var ret=AC_GetArgs
+(arguments,".dcr","src","clsid:166B1BCA-3F9C-11CF-8075-444553540000",null);AC_Generateobj(ret.objAttrs,ret.params,ret.embedAttrs);}
+function AC_GetArgs(args,ext,srcParamName,classid,mimeType){var ret=new Object();ret.embedAttrs=new Object();ret.params=new Object();ret.objAttrs=new Object();for(var i=0;i<args.length;i=i+2){var currArg=args[i].toLowerCase();switch(currArg){case"classid":break;case"pluginspage":ret.embedAttrs[args[i]]=args[i+1];break;case"src":case"movie":args[i+1]=AC_AddExtension(args[i+1],ext);ret.embedAttrs["src"]=args[i+1];ret.params[srcParamName]=args[i+1];break;case"onafterupdate":case"onbeforeupdate":case"onblur":case"oncellchange":case"onclick":case"ondblClick":case"ondrag":case"ondragend":case"ondragenter":case"ondragleave":case"ondragover":case"ondrop":case"onfinish":case"onfocus":case"onhelp":case"onmousedown":case"onmouseup":case"onmouseover":case"onmousemove":case"onmouseout":case"onkeypress":case"onkeydown":case"onkeyup":case"onload":case"onlosecapture":case"onpropertychange":case"onreadystatechange":case"onrowsdelete":case"onrowenter":case"onrowexit":case"onrowsinserted":case"onstart":case"onscroll":case"onbeforeeditfocus":case"onactivate":case"onbeforedeactivate":case"ondeactivate":case"type":case"codebase":case"id":ret.objAttrs[args[i]]=args[i+1];break;case"width":case"height":case"align":case"vspace":case"hspace":case"class":case"title":case"accesskey":case"name":case"tabindex":ret.embedAttrs[args[i]]=ret.objAttrs[args[i]]=args[i+1];break;default:ret.embedAttrs[args[i]]=ret.params[args[i]]=args[i+1];}}
+ret.objAttrs["classid"]=classid;if(mimeType)ret.embedAttrs["type"]=mimeType;return ret;}

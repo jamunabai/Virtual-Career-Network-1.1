@@ -1,0 +1,17 @@
+function CBProjectListener(){};CBProjectListener.prototype.onContainerReady=function(){}
+CBProjectListener.prototype.onSceneLoad=function(sceneName){}
+CBProjectListener.prototype.onPlayStateChange=function(newState){}
+CBProjectListener.prototype.onSceneGroupLoad=function(sceneList){}
+CBProjectListener.prototype.onPlayerShow=function(){}
+CBProjectListener.prototype.onPlayerHide=function(){}
+CBProjectListener.prototype.onSceneClick=function(){codebaby.sendEvents("stop");codebaby.sendEvents("play");}
+CBProjectListener.prototype.onConsoleDrag=function(){}
+CBProjectListener.prototype.onConsoleCustomEvent=function(param){}
+CBProjectListener.prototype.onExternalAction=function(name,description){}
+CBProjectListener.prototype.onGetURL=function(url,target){}
+CBProjectListener.prototype.onNavigateToSceneGroup=function(sceneGroupName){window.open(sceneGroupName+".html","_self");}
+CBProjectListener.prototype.onDebugMessage=function(message){}
+CBProjectListener.prototype.onShowSpeechBubble=function(){}
+CBProjectListener.prototype.onHideSpeechBubble=function(){}
+CBProjectListener.prototype.onSpeechBubbleHidden=function(){}
+CBProjectListener.prototype.onResponse=function(speechBubbleName,linkId){}

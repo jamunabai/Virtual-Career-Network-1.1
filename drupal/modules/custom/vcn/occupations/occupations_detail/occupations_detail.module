@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * Implementation of hook_block().
+ */
+function occupations_detail_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Occupations Detail');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_occupations_detail();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function occupations_detail_theme() {
+  return array(
+           'occupations_detail' => array (
+                             'template' => 'occupations_detail',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+function _get_occupations_detail() {
+  $css_path = drupal_get_path('module', 'occupations_detail') . "/occupations_detail.css";
+  drupal_add_css($css_path);
+  $includes = drupal_get_path('module','vcn').'/includes';
+  require_once($includes . '/vcn_common.inc');
+
+  return theme('occupations_detail');
+}
+

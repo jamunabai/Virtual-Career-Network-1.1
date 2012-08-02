@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implementation of hook_block().
+ */
+function occupations_ladderjs_block($op='list', $delta=0, $edit=array()) {
+  switch ($op) {
+    case 'list' :
+      $blocks[0]['info'] = t('VCN Occupations ladder JS');
+      return $blocks;
+      break;
+    case 'view' :
+      $block = array();
+      $block['content'] = _get_occupations_ladderjs();
+      return $block;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function occupations_ladderjs_theme() {
+  return array(
+           'occupations_ladderjs' => array (
+                             'template' => 'occupations_ladderjs',
+                             'arguments' => array(),
+                           ),
+         );
+}
+
+function _get_occupations_ladderjs() {
+  $css_path = drupal_get_path('module', 'occupations_ladderjs') . "/occupations_ladderjs.css";
+  drupal_add_css($css_path);
+
+  return theme('occupations_ladderjs');
+}
+

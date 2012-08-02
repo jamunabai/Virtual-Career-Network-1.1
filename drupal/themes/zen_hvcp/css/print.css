@@ -1,0 +1,88 @@
+/*
+The Virtual Career Network (VCN) is an "open source, open content" workforce services and online learning delivery platform built and operated by the American Association of Community Colleges (AACC) under a grant from the Employment and Training Administration (ETA) of the United States Department of Labor (DOL).
+
+Copyright (C) 2012 American Association of Community Colleges
+
+This file is part of the source code for the Virtual Career Network.
+
+The Virtual Career Network is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Virtual Career Network is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see http://www.gnu.org/licenses/.
+*/ 
+
+/* $Id: print.css,v 1.8.2.1 2010/06/26 15:36:04 johnalbin Exp $ */
+
+/**
+ * @file
+ * Print styling
+ *
+ * We provide some sane print styling for Drupal using Zen's layout method.
+ */
+
+
+/* underline all links */
+a:link,
+a:visited {
+  text-decoration: underline !important;
+}
+
+/* Don't underline header */
+#site-name a:link,
+#site-name a:visited {
+  text-decoration: none !important;
+}
+
+/* CSS2 selector to add visible href after links */
+#content a:link:after,
+#content a:visited:after {
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
+/* Un-float the content */
+#content,
+#content .section {
+  float: none;
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Turn off any background colors or images */
+body,
+#page-wrapper,
+#page,
+#main-wrapper,
+#main,
+#content,
+#content .section {
+  color: #000;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Hide sidebars and nav elements */
+#skip-link,
+#navigation,
+.region-sidebar-first,
+.region-sidebar-second,
+#footer,
+.breadcrumb,
+div.tabs,
+.links,
+.taxonomy,
+.book-navigation,
+.forum-topic-navigation,
+.pager,
+.feed-icons {
+  visibility: hidden;
+  display: none;
+}
+
+/* If you un-comment the "page { overflow-y: hidden; }" ruleset, Firefox clips
+   the content after the first page. */
+#page-wrapper {
+  overflow-y: visible;
+}
